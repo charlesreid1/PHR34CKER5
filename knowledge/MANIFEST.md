@@ -80,6 +80,10 @@ text. See [`records/README.md`](records/README.md).
   and `records/network_elements.json`
 - **cellular/**     — AMPS, GSM, CDPD, POCSAG/FLEX paging; the handset NAM
   key sequences live in `records/cellular.json`
+- **signaling/**    — the taxonomy of subscriber-loop, in-band trunk, and
+  out-of-band signaling systems; typed records in
+  `records/signaling_systems.json` and (for coin phones)
+  `records/payphone_systems.json`
 
 ## Conventions
 

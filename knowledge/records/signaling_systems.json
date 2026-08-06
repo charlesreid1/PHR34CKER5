@@ -1,0 +1,342 @@
+[
+  {
+    "id": "sig_sf",
+    "name": "SF (Single-Frequency) supervision",
+    "aliases": ["SF", "single-frequency", "in-band supervision"],
+    "category": "signaling_system",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1954-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Indicate trunk idle/busy state on a 4-wire analog interoffice trunk (Bell system).",
+      "carrier_tone": 2600,
+      "carrier_tone_tolerance": "±15 Hz",
+      "level_idle_dBm0": -20,
+      "level_pulsing_dBm0": -8,
+      "semantics": {
+        "tone_present": "trunk idle (on-hook)",
+        "tone_absent": "trunk seized (off-hook)",
+        "seizure": "far-end CO drops tone -> seizure detected",
+        "disconnect": "near-end reapplies tone after answer -> disconnect signaled"
+      },
+      "attack_surface": "The blue-box seizure attack. Play 2600 Hz into the audio path after answer supervision for ~400-1000 ms depending on the far-end switch; the originating tandem interprets this as far-end on-hook, drops the trunk to a wink/idle while the near-end loop stays up, letting the phreak MF-pulse a fresh destination.",
+      "carries_addressing_via": "mf_r1",
+      "died_because": "Migration to CCIS (No.6) and then SS7 moved trunk supervision out-of-band. AT&T Long Lines completed CCIS on major routes by early 1980s; SF/MF ran on independents into the mid-1990s.",
+      "detection": "1AESS generic 1AE7+ and 4ESS added '2600 Hz hold time exceeded' alarms. AT&T greenstar/blueflag programs logged suspicious patterns from the 1970s."
+    },
+    "citations": ["bstj-1960-11"],
+    "see_also": ["sig_mf_r1", "sig_ccis_no6", "sig_ss7_no7", "sf_2600", "box_blue", "technique_blue_box_domestic"]
+  },
+  {
+    "id": "sig_mf_r1",
+    "name": "MF R1 (Multi-Frequency, North American)",
+    "aliases": ["MF R1", "R1 MF", "MF pulsing", "NANP MF"],
+    "category": "signaling_system",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1954-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Address (inter-register) signaling on 4-wire analog interoffice trunks — the digits that follow SF seizure.",
+      "frequencies_hz": [700, 900, 1100, 1300, 1500, 1700],
+      "encoding": "two-of-six frequency pairs; six tones total",
+      "digits_expressed": "0-9, KP (start of address), ST (end of address), plus control codes at 700+1700 / 900+1700 / 1300+1700",
+      "tolerance": "±1.5%",
+      "level_per_freq_dBm0": -7,
+      "level_pair_total_dBm0": -4,
+      "timing": {"kp_ms": 100, "digit_on_ms": "60-75", "digit_off_ms": "60-75", "st_ms": "60-75"},
+      "address_format": "KP + [nature-of-address digits] + 7-or-10-digit called number + ST",
+      "international_address_format": "KP + 011 + CC + national_number + ST (on international-capable trunks)",
+      "died_because": "Same reason as SF — CCIS/SS7 moved signaling out-of-band.",
+      "distinguish_from": [
+        "DTMF (Q.23) — subscriber-loop only, different frequency set (697-1633 Hz)",
+        "MF R2 / MFC (Q.441) — used in LATAM/Europe/Asia, different frequencies (1140-1980 Hz)",
+        "CCITT No.5 inter-register — reuses the same R1 frequencies, but different line-signaling tones (2400+2600)"
+      ]
+    },
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["sig_sf", "sig_ccitt5", "sig_r2", "mf_kp", "mf_st", "mf_kp2_intl", "sig_dtmf"]
+  },
+  {
+    "id": "sig_ccitt5",
+    "name": "CCITT No.5 (international MF)",
+    "aliases": ["C5", "No.5", "CCITT No.5", "international MF"],
+    "category": "signaling_system",
+    "region": "CCITT-No5",
+    "signaling_layer": "co_to_co_inband_trunk_international",
+    "era_bounds": ["1964-01-01", "1995-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "International in-band trunk signaling on TAT and similar cables between national gateways.",
+      "line_signaling": {
+        "tones_hz": [2400, 2600],
+        "seizure": "2400 Hz",
+        "proceed_to_send": "2600 Hz",
+        "answer_clear_back_clear_forward": "encoded as pulse patterns of 2400 and 2600 used singly and combined"
+      },
+      "inter_register_signaling": "Same MF frequency set as R1 (700-1700 Hz); same KP + digits + ST format.",
+      "attack_surface": "The 'international blue box' story ('Chevy Chase, Maryland' TAT-6/TAT-7 ops late 70s/early 80s). Crucially: a device that emits ONLY 2600 Hz will NOT seize a No.5 trunk — the seizure signal is 2400 Hz. This is a common DEFCON trap.",
+      "died_because": "No.5 trunks converted to No.6 (CCIS) and No.7 (SS7) in the 1980s. Persisted on some third-world routes into the mid-1990s (community reports; primary confirmation weak)."
+    },
+    "disputed": {
+      "persistence": "Community memory reports vulnerable No.5 gateways on Caribbean and West African routes into the mid-1990s; ITU switching-plan reports do not confirm this cleanly. Mark community-provenance."
+    },
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["sig_sf", "sig_mf_r1", "ccitt5_line_seize"]
+  },
+  {
+    "id": "sig_r2",
+    "name": "MF R2 / MFC (ITU-T Q.400 / Q.441)",
+    "aliases": ["R2", "MFC-R2", "MF R2", "compelled signaling"],
+    "category": "signaling_system",
+    "region": "ITU-R2",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1964-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "In-band trunk signaling widely deployed in LATAM, Iberia, parts of Asia and Africa. NOT compatible with R1.",
+      "variants": ["R2 analog (tones)", "R2-D digital (over PCM)"],
+      "line_signaling_analog": "Compelled tones at 3825 Hz (forward and backward). NOT 2600 Hz — a common confusion.",
+      "inter_register_signaling_mfc": {
+        "encoding": "compelled MF: forward tone stays on until backward tone acknowledges, then both cease",
+        "forward_tones_hz": [1380, 1500, 1620, 1740, 1860, 1980],
+        "backward_tones_hz": [1140, 1020, 900, 780, 660, 540],
+        "two_of_six_pair": true,
+        "group_context": "Meaning of each combination is context-dependent — Group I / II forward, Group A / B backward. Any R2 record must specify the group.",
+        "notes": "Backward tones are LOWER than forward tones (opposite convention from R1)."
+      },
+      "used_by_regions": ["Mexico", "Brazil", "Argentina", "China (variant)", "Philippines", "Spain (until digital)", "Malaysia"],
+      "died_because": "Digital signaling (SS7/C7) rollouts in each country. Persisted longer in LATAM than R1 did in NANP — into the late 1990s in some operators."
+    },
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["sig_mf_r1", "sig_ccitt5"]
+  },
+  {
+    "id": "sig_ccis_no6",
+    "name": "CCIS / CCITT No.6",
+    "aliases": ["CCIS", "No.6", "CCITT No.6", "SS6"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "co_to_co_outofband_trunk",
+    "era_bounds": ["1976-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "First out-of-band inter-office signaling system — separate data channel between switches for call setup, teardown, and management.",
+      "carrier": "dedicated 2.4-4.8 kbps data channel between offices, later 56/64 kbps",
+      "topology": "point-to-point predecessor to the fully-associated STP mesh of SS7",
+      "impact": "The change that killed classical blue boxing. Once signaling moved off the voice band, a 2600 Hz tone injected into the audio path became just audio — the far end no longer read it as supervision.",
+      "rollout": "AT&T Long Lines began CCIS deployment 1976; major routes completed by early 1980s. Transitioned to No.7 in the mid-1980s.",
+      "died_because": "Superseded by SS7 (No.7) starting 1980; last CCIS links replaced by mid-1980s in AT&T. Independents lagged."
+    },
+    "citations": ["ccitt-q-140", "ccitt-q-blue-1988"],
+    "see_also": ["sig_sf", "sig_ss7_no7"]
+  },
+  {
+    "id": "sig_ss7_no7",
+    "name": "SS7 / CCITT No.7 (Signaling System No. 7)",
+    "aliases": ["SS7", "No.7", "CCITT No.7", "C7", "ANSI SS7"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "co_to_co_outofband_trunk",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Universal out-of-band signaling protocol. Runs between STPs (Signaling Transfer Points) on 56/64 kbps links (classical) or SIGTRAN (M3UA/SUA over SCTP over IP) in modern deployments.",
+      "protocol_stack": ["MTP-1/2/3 (transport)", "SCCP (routing)", "TUP / ISUP (call control)", "TCAP (transaction)", "MAP / CAMEL / IN (application)"],
+      "point_code_format_ansi": "24-bit N-C-M (Network-Cluster-Member, 8-8-8)",
+      "point_code_format_itu": "14-bit Z-A-M (3-8-3)",
+      "rollout": "Introduced 1980 (CCIS/No.6 -> No.7); ANSI SS7 standardized 1988; ubiquitous on North American interoffice trunks by ~1992.",
+      "phreak_relevance_era": "Out-of-scope for classic-phreak (in-band) attacks — SS7 introduces its own attack class (SCCP/TCAP/MAP abuse, Global Title spoofing, MAP-AnyTimeInterrogation, SMS home-routing bypass) that became public research 2008+ (Tobias Engel, Karsten Nohl, Sergey Puzankov). Modern SS7 attacks are a separate, post-era volume.",
+      "still_effective_2026": true
+    },
+    "citations": ["ccitt-q-700", "ansi-t1-113"],
+    "see_also": ["sig_ccis_no6", "sig_sf"]
+  },
+  {
+    "id": "sig_dtmf",
+    "name": "DTMF (Q.23) — subscriber-loop tone dialing",
+    "aliases": ["DTMF", "touch-tone", "Q.23"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1963-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Subscriber-to-CO address signaling — the tones a phone sends when you press keys.",
+      "low_frequencies_hz": [697, 770, 852, 941],
+      "high_frequencies_hz": [1209, 1336, 1477, 1633],
+      "encoding": "one low + one high frequency per key",
+      "keys": "0-9, *, #, plus A/B/C/D on the 1633 Hz column (military/AUTOVON)",
+      "tolerance": "±1.5%",
+      "twist_db_max": 4,
+      "timing_per_q24": {"minimum_on_ms": 40, "minimum_off_ms": 40, "receiver_accepts_on_up_to_ms": 100},
+      "distinguish_from": [
+        "MF R1 — inter-office, six-tone set (700-1700), CO-to-CO only",
+        "AUTOVON — same DTMF frequencies plus the 1633 Hz column keys for precedence"
+      ]
+    },
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["sig_mf_r1", "sig_autovon", "dtmf_1", "dtmf_5", "dtmf_a_autovon"]
+  },
+  {
+    "id": "sig_autovon",
+    "name": "AUTOVON — the Autovon military dial plan",
+    "aliases": ["AUTOVON", "military dial plan"],
+    "category": "signaling_system",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "DoD Automatic Voice Network — DTMF-plus-precedence military dial plan on dedicated switches (Class-A) with off-net access to civilian PSTN.",
+      "precedence_column_hz": 1633,
+      "precedence_keys": {"A": "Flash Override (highest)", "B": "Flash", "C": "Immediate", "D": "Priority (LOWEST of the four)"},
+      "preemption_semantics": "Pressing a precedence key before dialing causes the switch to preempt any lower-precedence traffic on shared trunks.",
+      "successor": "DSN (Defense Switched Network) inherited the precedence concept but replaced the DTMF-key mechanism with ISDN precedence and, later, IP-based Assured Services (AS-SIP RPH, ETS).",
+      "died_because": "AUTOVON decommissioned ~1990 in favor of DSN."
+    },
+    "disputed": {
+      "cd_reversal": "Community sources sometimes reverse C and D (calling D=Immediate and C=Priority). MIL-STD-187-100 is authoritative: A=FO, B=F, C=I, D=P."
+    },
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["sig_dtmf", "dtmf_a_autovon", "dtmf_b_autovon", "dtmf_c_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "sig_loop_start",
+    "name": "Loop-start (subscriber-loop supervision)",
+    "aliases": ["loop-start", "loop start"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1900-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "The default subscriber-loop supervision on POTS. The subscriber's phone signals off-hook by closing a DC loop across the tip-and-ring pair to the CO's battery feed.",
+      "signaling": "tip-and-ring DC loop closure = off-hook. CO applies 48V battery with ~-48V on ring and ground on tip when idle; loop current flows when the subscriber lifts the handset.",
+      "ring": "CO superimposes ~90V RMS 20 Hz AC ring voltage on the loop",
+      "distinguish_from": ["ground-start (uses ground signal on the ring lead)", "reverse-battery (CO reverses tip/ring polarity for answer supervision)"],
+      "quirks": [
+        "Glare — race condition where both ends seize simultaneously; more common on loop-start PBX trunks than ground-start",
+        "No CO -> subscriber disconnect signal — the subscriber can hold the loop indefinitely after the far end hangs up"
+      ],
+      "still_effective_2026": true
+    },
+    "citations": ["gr-317-core-cas"],
+    "see_also": ["sig_ground_start", "sig_reverse_battery"]
+  },
+  {
+    "id": "sig_ground_start",
+    "name": "Ground-start (subscriber-loop supervision)",
+    "aliases": ["ground-start", "ground start"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1920-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Alternative to loop-start on PBX trunks. Reduces glare — one end grounds the tip lead to seize, the other end recognizes and grounds ring in response.",
+      "signaling": "PBX side grounds tip; CO recognizes and grounds ring after ~100 ms. Both ends then know a call is in progress before ring voltage is applied.",
+      "typical_use": "PBX-to-CO trunks, especially DID trunks. Rarely on single-line residential POTS."
+    },
+    "citations": ["gr-317-core-cas"],
+    "see_also": ["sig_loop_start", "sig_reverse_battery"]
+  },
+  {
+    "id": "sig_reverse_battery",
+    "name": "Reverse-battery answer supervision",
+    "aliases": ["reverse-battery", "loop-reversal", "answer supervision"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1900-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Signal from the terminating CO back to the originating CO that the far party has answered — reverses the polarity of battery on the tip/ring pair.",
+      "attack_surface": "The black-box attack. A resistor/capacitor circuit across the called party's loop prevents polarity reversal from being detected, so the originating CO believes the call was never answered and does not bill.",
+      "died_because": "Answer supervision moved out-of-band once CCIS/SS7 delivered it as an ISUP ANM message; keeping the local loop off-hook no longer masks answer."
+    },
+    "citations": ["gr-317-core-cas"],
+    "see_also": ["sig_loop_start", "box_black"]
+  },
+  {
+    "id": "sig_em_trunk",
+    "name": "E&M trunk signaling (types I-V)",
+    "aliases": ["E&M", "ear-and-mouth", "receive-and-transmit"],
+    "category": "signaling_system",
+    "region": "universal",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1950-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "DC-signaled trunk interfaces between switches or between a switch and a channel bank. E-lead ('Ear', receive) and M-lead ('Mouth', transmit) carry the supervision state.",
+      "types": {
+        "Type I": "M-lead source of battery, E-lead source of ground. Common in North America.",
+        "Type II": "Symmetric; both leads referenced through a common signal battery/ground",
+        "Type III": "M-lead: battery+ground; E-lead: ground when on-hook, open when off-hook. Rare.",
+        "Type IV": "Fully symmetric double-battery arrangement — used for long haul with intermediate repeaters",
+        "Type V": "Common in Europe; both leads switched-ground"
+      },
+      "usage": "Interconnects between colocated switches / PBX to channel bank. Rarely seen by end users but critical for how a PBX exchanges answer supervision with an old CO trunk."
+    },
+    "citations": ["gr-317-core-cas"],
+    "see_also": ["sig_t1_cas", "sig_mf_r1"]
+  },
+  {
+    "id": "sig_t1_cas",
+    "name": "T-1 robbed-bit signaling (CAS)",
+    "aliases": ["robbed-bit", "CAS", "T1 CAS", "channel-associated signaling"],
+    "category": "signaling_system",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_digital_trunk",
+    "era_bounds": ["1962-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "In-band supervision on a digital T-1 trunk. Steals the least-significant bit of every 6th frame of each channel for signaling bits (A/B/C/D in Extended Superframe format).",
+      "carrier": "1.544 Mbps DS1 — 24 DS0 x 64 kbps + 8 kbps framing",
+      "signaling_state_encoding": "A/B/C/D bits map to loop-start / ground-start / E&M supervision states depending on trunk type",
+      "clear_data_rate_per_ds0": 56000,
+      "impact": "Because the LSB is stolen, each DS0 delivers 56 kbps clear data instead of 64 kbps — the reason dial-up modems topped out at 56 k on TDM channels.",
+      "still_effective_2026": true,
+      "distinguish_from": "ISDN PRI (23B+D or 30B+D) — signaling on the D channel means full 64 kbps per B channel with no robbed bits"
+    },
+    "citations": ["ansi-t1-403"],
+    "see_also": ["sig_ss7_no7", "sig_em_trunk"]
+  },
+  {
+    "id": "sig_ani_wink_spill",
+    "name": "ANI wink-start / spill (Feature Group D)",
+    "aliases": ["ANI wink", "wink-start", "FGD ANI spill", "II digits spill"],
+    "category": "signaling_system",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1984-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "In-band delivery of Automatic Number Identification (ANI) and info-digit prefix on Feature Group D trunks — the mechanism that lets a downstream IXC or 8YY termination know who called.",
+      "sequence": "originating CO seizes trunk -> far end returns a 150-200 ms 'wink' (off-hook, on-hook) as go-ahead -> originating CO spills 'KP + II + KP + ANI + ST' in MF, where II is the 2-digit info-digit prefix (see ani_ii_00 through ani_ii_reserved_range) and ANI is 10 digits.",
+      "successor": "SS7 ISUP OLI parameter (hex 00-63) + CgPN (calling party number)",
+      "phreak_relevance": "Injecting your own II bits at the right moment lets you impersonate a class (fake AIOD, hide payphone origin). Early PC-based tools like 'ANI II Sniffer' sat on 8YY terminations logging the info-digit byte for every inbound call."
+    },
+    "citations": ["gr-317-core", "sr-tsv-002275"],
+    "see_also": ["sig_mf_r1", "ani_ii_00", "ani_ii_delivery_note"]
+  },
+  {
+    "id": "sig_slc96",
+    "name": "SLC-96 / SLC-2000 digital loop carrier",
+    "aliases": ["SLC-96", "SLC-2000", "SLC", "digital loop carrier", "DLC"],
+    "category": "signaling_system",
+    "region": "NANP",
+    "signaling_layer": "subscriber_loop_concentrator",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Concentrates up to 96 (later 2000+) subscriber lines onto a small number of digital trunks back to the CO — the green cabinet on the sidewalk.",
+      "impact_on_signaling": "Once a subscriber is served by an SLC, their loop no longer directly reaches the CO switch's line card. Loop signaling terminates at the SLC's remote terminal (RT), which then hauls audio + signaling back to the central office terminal (COT) over T1 or GR-303 fiber. Some in-band tricks (e.g. blue-box seizure against a distant far-end CO) still work; others (like reading local loop-current signaling directly) don't — you're now talking to a concentrator, not the switch.",
+      "prevalence": "By 1995, ~40% of US access lines were behind some form of SLC. By 2010, ~70%.",
+      "still_effective_2026": true
+    },
+    "citations": ["gr-303-core"],
+    "see_also": ["sig_loop_start", "sig_t1_cas"]
+  }
+]

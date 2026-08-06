@@ -395,6 +395,57 @@ _CLAIM_TRAPS = [
         ),
         "cite": ["dtmf_a_autovon"],
     },
+    {
+        "match": [r"red.?box(ing)?", r"(cocot|customer.owned)"],
+        "verdict": "false",
+        "because": (
+            "Red-boxing never worked against COCOTs. A COCOT validates "
+            "coins LOCALLY on the phone's own electronics; the CO sees a "
+            "plain subscriber loop with no ACTS supervision. Red-boxing "
+            "worked against Bell 1C/1D single-slot fortress phones because "
+            "coin tones were reported to the toll switch — a different "
+            "signaling path COCOTs do not use."
+        ),
+        "cite": ["pay_cocot", "pay_bell_1c_1d", "pay_acts"],
+    },
+    {
+        "match": [r"(blue.?box|2600)", r"(subscriber|local\s+loop|residential|inside\s+wire)"],
+        "verdict": "false",
+        "because": (
+            "Blue-boxing attacks SF supervision on CO-to-CO inter-office "
+            "trunks (sig_sf). It does NOT attack the subscriber loop. A "
+            "2600 Hz tone on a customer's local loop is just audio — the "
+            "subscriber loop uses loop-start supervision (DC loop closure), "
+            "not tone signaling. This is the #1 cross-layer confusion."
+        ),
+        "cite": ["sig_sf", "sig_loop_start", "sig_mf_r1"],
+    },
+    {
+        "match": [r"(blue.?box|mf|r1).*r2|r2.*(blue.?box|mf|r1|compatible)"],
+        "verdict": "false",
+        "because": (
+            "R1 MF (NANP, 700-1700 Hz two-of-six) and R2 MFC (ITU, forward "
+            "1140-1980 Hz / backward 540-1140 Hz, compelled) are different "
+            "signaling systems. A US blue box does NOT work on an R2 trunk. "
+            "R2 also uses different line-signaling tones (3825 Hz, not "
+            "2400/2600 Hz), and R2's inter-register signaling is compelled "
+            "with group-dependent semantics that R1 doesn't have."
+        ),
+        "cite": ["sig_mf_r1", "sig_r2"],
+    },
+    {
+        "match": [r"(a5[/_.\-]?1|gsm.*encryption).*(broken|cracked|practical).*(1998|1999|200[0-4])"],
+        "verdict": "false",
+        "because": (
+            "A5/1 was NOT practically broken by 2003. The Biryukov/Shamir/"
+            "Wagner 2000 attack required precomputation few had done in the "
+            "wild. Practical rainbow-table attacks (Karsten Nohl et al.) "
+            "landed 2008-2010. COMP128-1 (the SIM authentication algorithm) "
+            "WAS broken in 1998 (Wagner/Goldberg/Briceno), but that's a "
+            "different primitive — cloning a SIM, not decrypting over-the-air."
+        ),
+        "cite": ["cellular_gsm"],
+    },
 ]
 
 

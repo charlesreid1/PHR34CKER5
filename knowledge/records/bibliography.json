@@ -293,6 +293,97 @@
     "confidence": "community"
   },
   {
+    "id": "ansi-t1-113",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ANSI T1.113 — Signalling System No. 7 (SS7) ISDN User Part",
+    "author": "ANSI T1 Committee",
+    "publication": "ANSI T1.113 (1988, revised 1995 and later)",
+    "note": "North American ISUP profile; the '1988' date is when ANSI SS7 was standardized. Companion to ITU Q.767 for international interworking.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ansi-t1-403",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ANSI T1.403 — Network and Customer Installation Interfaces — DS1 Metallic Interface",
+    "author": "ANSI T1 Committee",
+    "publication": "ANSI T1.403 (multiple revisions 1989-1999)",
+    "note": "The DS1 (T-carrier / T1) spec: 1.544 Mbps, 24 DS0 x 64 kbps + 8 kbps framing. Robbed-bit signaling steals the LSB of every 6th frame per channel for CAS (Channel-Associated Signaling), yielding 56 kbps clear data per DS0.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-317-core-cas",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Bellcore GR-506-CORE — LSSGR: Signaling for Analog Interfaces (E&M types)",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-506-CORE, Section 12 (Trunk Signaling)",
+    "note": "Documents E&M types I-V trunk-signaling arrangements: DC E-lead / M-lead states across the interface with battery/ground/loop options.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-700",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT / ITU-T Q.700 series — Specifications of Signalling System No. 7",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT Q.700 series (1988 Blue Book; ITU-T revisions through Q.700 series 1993+)",
+    "note": "The SS7 protocol stack: Q.700 overview, Q.701-Q.709 MTP, Q.711-Q.716 SCCP, Q.721-Q.725 TUP, Q.761-Q.766 ISUP, Q.771-Q.775 TCAP, Q.781-Q.782 test specs.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-140",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Q.140/Q.180 — Signalling System No. 6 (CCIS)",
+    "author": "CCITT",
+    "publication": "CCITT Q.140 / Q.180 series (Yellow/Red/Blue Books)",
+    "note": "CCIS = Common Channel Interoffice Signalling. The out-of-band predecessor to SS7. Deployed by AT&T on major routes starting 1976; the transition from CCIS to No.7 (SS7) began 1980 and completed on interoffice trunks by ~1992.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-303-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Bellcore GR-303-CORE — Integrated Digital Loop Carrier System Generic Requirements",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-303-CORE",
+    "note": "SLC (Subscriber Loop Carrier) generic requirements. Governed how digital SLC-96 / SLC-2000 terminals interworked with the CO switch — relevant because SLC concentrated subscribers onto a T1 back to the CO, changing what signaling the phreak's local loop actually spoke.",
+    "confidence": "primary"
+  },
+  {
+    "id": "bell-labs-record-fortress",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "The Fortress Phone and Coin Toll Service (Bell Labs Record + Bellcore Technical Publication series)",
+    "author": "Bell Labs / Bellcore",
+    "publication": "Bell Labs Record, various issues 1970-1985; Bellcore Technical Publication SR-TSV-000318 (Coin Telephone Signaling)",
+    "note": "Describes the 1C/1D single-slot ('fortress') payphone hardware and the ACTS coin-supervision protocol. Companion documentation to GR-506-CORE.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-millennium-manual",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Nortel Millennium Payphone Reference Manual",
+    "author": "Northern Telecom",
+    "publication": "Northern Telecom Millennium Payphone documentation set (1990s)",
+    "note": "Vendor documentation for the Millennium 'smart' payphone: local coin validation via optical/mass sensor, DTMF/DSP-generated ACTS-look-alike tones for backward compatibility, modem-based management link back to a central Millennium Manager server.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-48-cocot",
+    "category": "bibliography",
+    "type": "community",
+    "title": "COCOT Frequencies and Info",
+    "author": "community (Phrack 48)",
+    "publication": "Phrack Inc. Issue 48 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "COCOT service-mode entry (dial the phone's own number + 4-digit password) and default passwords for Elcotel, Protel, Intellicall boards. Companion piece: 2600 Magazine Spring 1994 'The COCOT Files'.",
+    "confidence": "community"
+  },
+  {
     "id": "itu-t-o-series",
     "category": "bibliography",
     "type": "primary",

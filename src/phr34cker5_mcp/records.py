@@ -33,6 +33,8 @@ RECORD_FILES = (
     "pbx_overlays",
     "cellular",
     "fingerprints",
+    "signaling_systems",
+    "payphone_systems",
 )
 
 # Envelope fields every retrieval-tool response carries so the assistant can
