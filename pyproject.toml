@@ -1,0 +1,44 @@
+[project]
+name = "phr34cker5-mcp"
+version = "0.0.1"
+description = "PHR34CKER5 — an MCP server that serves phreaking lore, zines, and skills. A time machine to DEFCON 5, 1997."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "PHR34CKER5" }]
+keywords = ["mcp", "phreaking", "2600", "ctf", "lore", "bluebox", "defcon"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Topic :: Communications :: Telephony",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "mcp>=1.2.0",
+]
+
+[project.scripts]
+phr34cker5-mcp = "phr34cker5_mcp.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/phr34cker5/phr34cker5"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/phr34cker5_mcp"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"knowledge" = "phr34cker5_mcp/_knowledge"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/phr34cker5_mcp",
+    "knowledge",
+    "skills",
+    "README.md",
+    "pyproject.toml",
+]
