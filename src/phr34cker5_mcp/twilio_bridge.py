@@ -71,6 +71,22 @@ class CallState:
 
     ws_connected: bool = False
 
+    # Ordered timeline of notable moments (registered, twiml_hit, ws_connect,
+    # tones injected, marks acked, stop) for post-mortem via call_log().
+    events: list[dict] = field(default_factory=list)
+    events_lock: threading.Lock = field(default_factory=threading.Lock)
+
+    # ---- event log ----
+
+    def add_event(self, kind: str, **detail) -> None:
+        """Append a timestamped event to the call timeline. Never raises."""
+        with self.events_lock:
+            self.events.append({"t": time.time(), "kind": kind, **detail})
+
+    def get_events(self) -> list[dict]:
+        with self.events_lock:
+            return list(self.events)
+
     # ---- inbound API (called by WS, read by tools) ----
 
     def push_inbound_pcm(self, pcm: bytes) -> None:
@@ -195,6 +211,7 @@ def create_app(runtime) -> FastAPI:  # runtime: TwilioRuntime, avoids import cyc
                     state.stream_sid = stream_sid
                     state.ws_connected = True
                     state.connected_at = time.time()
+                    state.add_event("ws_connect", stream_sid=stream_sid)
                     log.info("media WS start call_sid=%s stream=%s", call_sid, stream_sid)
                     # Start the outbound pump.
                     send_task = asyncio.create_task(
@@ -213,11 +230,13 @@ def create_app(runtime) -> FastAPI:  # runtime: TwilioRuntime, avoids import cyc
                     name = msg.get("mark", {}).get("name", "")
                     if name:
                         state.ack_mark(name)
+                        state.add_event("mark_acked", name=name)
                     continue
 
                 if event == "stop" and state is not None:
                     state.ws_connected = False
                     state.ended_at = time.time()
+                    state.add_event("ws_stop")
                     log.info("media WS stop call_sid=%s", state.call_sid)
                     break
 
@@ -225,6 +244,7 @@ def create_app(runtime) -> FastAPI:  # runtime: TwilioRuntime, avoids import cyc
             if state:
                 state.ws_connected = False
                 state.ended_at = time.time()
+                state.add_event("ws_disconnect")
         except Exception:
             log.exception("media WS error")
         finally:

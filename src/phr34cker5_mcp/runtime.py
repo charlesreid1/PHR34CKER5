@@ -190,6 +190,7 @@ class TwilioRuntime:
                 cs = snapshot.get(sid)
                 if cs is not None:
                     cs.ended_at = time.time()
+                    cs.add_event("auto_hangup", reason="MAX_CALL_MINUTES", limit_s=max_seconds)
                 log.warning("watchdog auto-hung-up call %s (exceeded %.0fs)", sid, max_seconds)
             except Exception:  # noqa: BLE001 — call may already be gone
                 self.auto_hung_up[sid] = time.time()
@@ -306,6 +307,7 @@ class TwilioRuntime:
             if cs is None:
                 cs = CallState(call_sid=call_sid, **kwargs)
                 self.calls[call_sid] = cs
+                cs.add_event("registered", **{k: v for k, v in kwargs.items() if k in ("direction", "to_number", "from_number")})
             else:
                 for k, v in kwargs.items():
                     setattr(cs, k, v)
@@ -325,6 +327,7 @@ class TwilioRuntime:
         cs = self.register_call(call_sid, direction=direction)
         cs.to_number = form.get("To") or cs.to_number
         cs.from_number = form.get("From") or cs.from_number
+        cs.add_event("twiml_hit", direction=direction, call_status=form.get("CallStatus"))
 
 
 def _http_to_ws(url: str) -> str:

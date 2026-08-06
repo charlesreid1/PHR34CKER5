@@ -869,6 +869,47 @@ def call_status(call_sid: str) -> dict:
     return _call_summary(rt, call_sid)
 
 
+def _call_log(rt, call_sid: str) -> dict:
+    """Assemble the full local timeline for a call (helper; used by tool + resource)."""
+    cs = rt.get_call(call_sid)  # raises KeyError if unknown
+    events = cs.get_events()
+    t0 = cs.started_at
+    timeline = [
+        {
+            "offset_ms": int((e["t"] - t0) * 1000),
+            "kind": e["kind"],
+            **{k: v for k, v in e.items() if k not in ("t", "kind")},
+        }
+        for e in events
+    ]
+    return {
+        "call_sid": call_sid,
+        "direction": cs.direction,
+        "to": cs.to_number,
+        "from": cs.from_number,
+        "started_at": cs.started_at,
+        "connected_at": cs.connected_at,
+        "ended_at": cs.ended_at,
+        "ws_connected": cs.ws_connected,
+        "auto_hung_up": call_sid in rt.auto_hung_up,
+        "event_count": len(timeline),
+        "timeline": timeline,
+    }
+
+
+@mcp.tool()
+def call_log(call_sid: str) -> dict:
+    """
+    Full local timeline for a call — for post-mortem after a puzzle.
+
+    Every notable moment we recorded, with millisecond offsets from call
+    start: registered, twiml_hit, ws_connect, each tone/audio injection,
+    marks acked, ws_stop, and any MAX_CALL_MINUTES auto-hangup. Complements
+    Twilio-side data (recordings, status) with what *we* did and when.
+    """
+    return _call_log(_rt(), call_sid)
+
+
 @mcp.tool()
 def wait_for_answer(call_sid: str, timeout_s: int = 60) -> dict:
     """
@@ -901,6 +942,73 @@ def wait(seconds: float) -> dict:
     return {"waited_s": seconds}
 
 
+@mcp.tool()
+def wait_for_inbound(timeout_s: int = 120, since_sid: str | None = None) -> dict:
+    """
+    Block until an inbound call arrives and its media WebSocket connects.
+
+    For CTFs where the target calls *you*. Point your Twilio number's "A Call
+    Comes In" webhook at `<PUBLIC_URL>/twiml/inbound` (see docs/twilio_setup);
+    when a call hits it, this returns that call's summary. Then drive it with
+    listen / detect_tone / play_*_into_call / play_sequence just like an
+    outbound call.
+
+    `since_sid`: ignore a specific already-seen call (pass the last one you
+    handled) so you catch the *next* arrival, not the current one.
+    """
+    import time as _t
+
+    rt = _rt()
+    deadline = _t.time() + timeout_s
+    while _t.time() < deadline:
+        with rt._calls_lock:
+            candidates = [
+                sid for sid, cs in rt.calls.items()
+                if cs.direction == "inbound" and cs.ws_connected and sid != since_sid
+            ]
+        if candidates:
+            return _call_summary(rt, candidates[-1])
+        _t.sleep(0.5)
+    return {"error": "timeout", "waited_s": timeout_s,
+            "hint": "Is the number's inbound webhook pointed at <PUBLIC_URL>/twiml/inbound?"}
+
+
+@mcp.tool()
+def multi_call_bridge(call_sids: list[str], announce: str | None = None) -> dict:
+    """
+    Bridge two or more live calls into one conference (Twilio-native).
+
+    Redirects each call to TwiML that joins a shared `<Conference>` room, so
+    the parties hear each other — a loop-around, a conference-bridge puzzle, or
+    just patching two legs together. This ends each call's Media Stream (they
+    move into the conference), so inject/listen won't work on them afterward;
+    use start_recording on a leg first if you want the audio.
+
+    `announce`: optional text spoken into the room on join (via <Say>).
+    """
+    rt = _rt()
+    room = f"phr34-{call_sids[0][-8:]}" if call_sids else "phr34-bridge"
+    say = f"<Say>{announce}</Say>" if announce else ""
+    twiml = (
+        f'<?xml version="1.0" encoding="UTF-8"?><Response>{say}'
+        f'<Dial><Conference startConferenceOnEnter="true" '
+        f'endConferenceOnExit="false">{room}</Conference></Dial></Response>'
+    )
+    joined, errors = [], []
+    for sid in call_sids:
+        try:
+            rt.client.calls(sid).update(twiml=twiml)
+            joined.append(sid)
+            try:
+                rt.get_call(sid).add_event("bridged", room=room)
+            except KeyError:
+                pass
+        except Exception as e:  # noqa: BLE001
+            errors.append({"call_sid": sid, "error": f"{e.__class__.__name__}: {e}"})
+    return {"conference": room, "joined": joined, "errors": errors,
+            "note": "Bridged legs left our Media Stream for the conference; inject/listen no longer apply to them."}
+
+
 # ---- audio injection ----
 
 
@@ -908,9 +1016,11 @@ def _inject(call_sid: str, pcm: bytes, label: str) -> dict:
     rt = _rt()
     cs = rt.get_call(call_sid)
     cs.enqueue_outbound_pcm(pcm)
+    queued_ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+    cs.add_event("inject", label=label, queued_ms=queued_ms)
     return {
         "call_sid": call_sid,
-        "queued_ms": (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE,
+        "queued_ms": queued_ms,
         "backlog_ms": cs.outbound_backlog_ms(),
         "kind": label,
     }
@@ -1202,6 +1312,53 @@ def play_modem_carrier_into_call(
     return _inject(call_sid, tones.modem_carrier_bytes(rate, answer_ms, carrier_ms), f"modem:{rate}")
 
 
+@mcp.tool()
+def send_dtmf_via_twilio(call_sid: str, digits: str) -> dict:
+    """
+    Send DTMF digits using Twilio's native `<Play digits="...">` TwiML.
+
+    Unlike play_dtmf_into_call (which injects synthesized tone audio over the
+    media stream), this asks Twilio to generate clean, spec-perfect DTMF on
+    the far side — the better choice for a picky IVR that rejects our audio.
+
+    `digits` accepts 0-9, *, #, w (0.5s pause). Note: this redirects the call
+    to fresh TwiML, which tears down the current Media Stream; use it when you
+    don't need the live WS during the send. Returns the new call status.
+    """
+    rt = _rt()
+    safe = "".join(ch for ch in digits if ch in "0123456789*#w")
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play digits="{safe}"/></Response>'
+    call = rt.client.calls(call_sid).update(twiml=twiml)
+    try:
+        rt.get_call(call_sid).add_event("send_dtmf_twilio", digits=safe)
+    except KeyError:
+        pass
+    return {"call_sid": call_sid, "digits_sent": safe, "status": call.status,
+            "note": "Twilio-generated DTMF; the live Media Stream was torn down by the TwiML redirect."}
+
+
+@mcp.tool()
+def play_recording_into_call(call_sid: str, recording_url: str) -> dict:
+    """
+    Play a previously-captured Twilio recording (or any public audio URL) into
+    a live call via `<Play>` TwiML.
+
+    Great for reverse-engineering an IVR: capture its menu with
+    start_recording, get the URL from get_recording_url, then replay it into a
+    fresh call. Like send_dtmf_via_twilio, the TwiML redirect ends the current
+    Media Stream. Pass a `.wav`/`.mp3` URL Twilio can reach.
+    """
+    rt = _rt()
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play>{recording_url}</Play></Response>'
+    call = rt.client.calls(call_sid).update(twiml=twiml)
+    try:
+        rt.get_call(call_sid).add_event("play_recording", url=recording_url)
+    except KeyError:
+        pass
+    return {"call_sid": call_sid, "played": recording_url, "status": call.status,
+            "note": "TwiML redirect ended the live Media Stream for the duration of playback."}
+
+
 # ---- listening ----
 
 
@@ -1396,6 +1553,23 @@ def _index() -> str:
             lines.append(f"- [{lf.name}]({lf.uri})")
         lines.append("")
     return "\n".join(lines)
+
+
+@mcp.resource(f"{URI_SCHEME}://calls/{{call_sid}}/events")
+def _call_events_resource(call_sid: str) -> str:
+    """
+    Serve a call's event timeline as a subscribable JSON resource.
+
+    An alternative to polling call_log(): the assistant can read (and, in
+    clients that support it, subscribe to) phr34cker5://calls/<sid>/events.
+    """
+    import json as _json
+
+    rt = _rt()
+    try:
+        return _json.dumps(_call_log(rt, call_sid), indent=2)
+    except KeyError:
+        return _json.dumps({"call_sid": call_sid, "error": "unknown call_sid"})
 
 
 @mcp.resource(URI_SCHEME + "://{topic}/{name}")
