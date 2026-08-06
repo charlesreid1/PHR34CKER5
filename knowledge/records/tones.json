@@ -254,7 +254,52 @@
     "technical_body": {"frequencies_hz": [697, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz). A/B/C/D = precedence: A=Flash Override, B=Flash, C=Immediate, D=Priority"},
     "disputed": {"precedence_order": "MIL-STD-187-100 is authoritative (A=FO, B=F, C=I, D=P); some community sources reverse C and D."},
     "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
-    "see_also": ["dtmf_1"]
+    "see_also": ["dtmf_1", "dtmf_b_autovon", "dtmf_c_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_b_autovon",
+    "name": "DTMF B (AUTOVON Flash)",
+    "aliases": ["DTMF B", "F", "Flash", "AUTOVON Flash"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [770, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), second row. AUTOVON precedence 'Flash' — three-star / high-priority military; preempts Immediate and Priority calls on shared trunks."},
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_c_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_c_autovon",
+    "name": "DTMF C (AUTOVON Immediate)",
+    "aliases": ["DTMF C", "I", "Immediate", "AUTOVON Immediate"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [852, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), third row. AUTOVON precedence 'Immediate' — preempts Priority and Routine calls."},
+    "disputed": {
+      "precedence_order": "MIL-STD-187-100 assigns C=Immediate, D=Priority. Some community sources (and a few tutorials) reverse C and D. Answer per MIL-STD-187-100 unless the questioner explicitly cites the reversed source."
+    },
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_d_autovon",
+    "name": "DTMF D (AUTOVON Priority)",
+    "aliases": ["DTMF D", "P", "Priority", "AUTOVON Priority"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [941, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), fourth row. AUTOVON precedence 'Priority' — the LOWEST of the four precedence keys; preempts only Routine (unmarked)."},
+    "disputed": {
+      "precedence_order": "D is Priority per MIL-STD-187-100 — NOT Flash Override. A claim that 'D = Flash Override' is a common DEFCON trap; the authoritative mapping is A=FO, B=F, C=I, D=P."
+    },
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_c_autovon", "technique_autovon_precedence"]
   },
   {
     "id": "acts_nickel",

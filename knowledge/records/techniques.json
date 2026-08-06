@@ -22,6 +22,82 @@
     "see_also": ["box_blue", "sf_2600", "ccitt5_line_seize"]
   },
   {
+    "id": "technique_autovon_precedence",
+    "name": "AUTOVON precedence preemption",
+    "aliases": ["AUTOVON precedence", "Flash Override dialing", "precedence keys"],
+    "category": "technique",
+    "region": "AUTOVON",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "preconditions": [
+      "line originating on an AUTOVON subscriber station (silver-box or AUTOVON-capable Class-A phone)",
+      "shared AUTOVON trunk with lower-precedence traffic to preempt",
+      "authorization to use the requested precedence level (military rank / role determined dial-plan authorization on Class-A stations)"
+    ],
+    "composes": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_c_autovon", "dtmf_d_autovon"],
+    "steps": [
+      "Off-hook the AUTOVON station; hear AUTOVON dial tone.",
+      "Optionally press ONE precedence key BEFORE dialing: A=Flash Override, B=Flash, C=Immediate, D=Priority. No key = Routine.",
+      "Dial the 3-digit AUTOVON theater prefix + 7-digit off-net address (or a fully-off-net 800/civilian-gateway number).",
+      "If the trunks between the origin and destination are congested, the switch preempts the LOWEST-precedence call currently on a trunk that would otherwise carry your call — Flash Override displaces everyone up to and including three-star Flash traffic.",
+      "The preempted party hears a preemption tone and their call is dropped."
+    ],
+    "vulnerability_window": "Effective on AUTOVON (1966 through DoD's shift to DSN, ~1990). DSN retained the precedence concept but the fourth-column DTMF-key mechanism was superseded by ISDN precedence and, later, IP-based Assured Services (AS-SIP RPH headers, ETS).",
+    "retirement_cause": "AUTOVON decommissioned ~1990 in favor of DSN; A/B/C/D keys were removed from most successor phones. Modern MLPP uses ISDN or SIP RPH.",
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_c_autovon", "dtmf_d_autovon"]
+  },
+  {
+    "id": "technique_meridian_disa_abuse",
+    "name": "Meridian / SL-1 DISA abuse via craft-interface access",
+    "aliases": ["SL-1 DISA fraud", "Meridian PBX toll fraud", "authcode injection"],
+    "category": "technique",
+    "region": "universal",
+    "era_bounds": ["1985-01-01", null],
+    "confidence": "primary",
+    "preconditions": [
+      "TTY/modem access to the target SL-1 / Meridian 1 SDI or MSDL port",
+      "Default admin login accepted (ADMIN1/0000, ADMIN2/0000, PWD1/0000, MAINT/0000) OR a captured admin credential",
+      "Package 26 (DISA) licensed on the switch (verifiable via LD 22 PRT PKG)"
+    ],
+    "composes": [
+      "netel_sl1",
+      "ld_22_packages",
+      "ld_15_customer",
+      "ld_16_route",
+      "ld_70_cos",
+      "ld_88_authcodes",
+      "ld_91_ncos_frl",
+      "ld_40_cdr"
+    ],
+    "steps": [
+      "Scan an unpublished DID range with a war-dialer; identify a modem answering with an SL-1 login prompt (see 'Enter Login:' or attention-getting banner).",
+      "Log in with era-typical defaults (ADMIN1/0000 etc.). LD 22, then PRT PKG — confirm DISA (26) and check for MCT (107).",
+      "LD 15 — enable DISA on the customer: set DISA=YES, define the DISA DN, set required auth-code length (often 4-6 digits).",
+      "LD 88 — add a fresh authorization code with NEW; pick a CODE, set COS = permissive, set NCOS pointing to an FRL-0 network CoS.",
+      "LD 91 — verify (or set) NCOS with FRL 0 so the code can traverse international routes.",
+      "LD 16 — verify (or add) a route to the target destination with liberal FRL and no digit stripping.",
+      "LD 40 — optionally disable or redirect CDR so the fraudulent call doesn't land in the customer's monthly detail report.",
+      "END out of each overlay to commit. From any outside line, dial the DISA DN, hear second dial tone, enter the auth code, then dial internationally as if from the enterprise.",
+      "Cleanup: LD 40 restore CDR, LD 88 OUT the added code (or leave it if the target isn't watching)."
+    ],
+    "vulnerability_window": "Effective 1985 through today on unpatched, default-credentialed Meridian / CS1000 systems. Modern deployments enforce credential rotation and CDR alerting, but abandoned or acquisition-orphaned PBXs (small hotels, warehouses, medical offices) remain vulnerable.",
+    "retirement_cause": "Not retired — the SL-1 / Meridian / CS1000 family is still installed, though shrinking as Avaya and Cisco IP-PBX successors displace them.",
+    "still_effective_2026": true,
+    "citations": ["nortel-ntp-553-3001-311", "phrack-44-19", "phrack-47-15"],
+    "see_also": [
+      "netel_sl1",
+      "ld_15_customer",
+      "ld_16_route",
+      "ld_22_packages",
+      "ld_40_cdr",
+      "ld_70_cos",
+      "ld_88_authcodes",
+      "ld_91_ncos_frl",
+      "vmb_meridian_mail"
+    ]
+  },
+  {
     "id": "technique_red_box_fortress",
     "name": "Red-box a fortress phone at an ACTS prompt",
     "aliases": ["redboxing", "coin-tone simulation"],

@@ -71,6 +71,15 @@ text. See [`records/README.md`](records/README.md).
 - **ctf/**          — CTF-facing puzzle genres (IVR mazes, DISA, voicemail,
   modem carriers, fax flags, conference bridges, ANAC/CN·A, milliwatt lines)
   and how to probe each with the MCP tools
+- **numbering/**    — NANP structure, N11 codes, dialing plans, ANI-II info
+  digits (100-code table lives in `records/operator_service_codes.json`)
+- **x25/**          — public packet-switched data networks, DNICs, PADs, and
+  scanning; DNIC records live in `records/data_networks.json`
+- **pbx/**          — corporate PBX + voicemail; the SL-1 / Meridian LD
+  overlay table + voicemail defaults live in `records/pbx_overlays.json`
+  and `records/network_elements.json`
+- **cellular/**     — AMPS, GSM, CDPD, POCSAG/FLEX paging; the handset NAM
+  key sequences live in `records/cellular.json`
 
 ## Conventions
 

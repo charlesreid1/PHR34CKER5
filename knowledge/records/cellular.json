@@ -1,0 +1,297 @@
+[
+  {
+    "id": "cellular_amps",
+    "name": "AMPS (Advanced Mobile Phone System)",
+    "aliases": ["AMPS", "IS-3", "IS-553", "analog cellular"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "cellular_control_channel",
+    "era_bounds": ["1983-01-01", "2008-02-18"],
+    "confidence": "primary",
+    "technical_body": {
+      "band": "850 MHz (824-849 MHz uplink, 869-894 MHz downlink)",
+      "channels": "30 kHz FM, 832 channels per operator across the A/B (non-wireline/wireline) bands",
+      "control_channel": {
+        "focc": "Forward Control Channel — CO to handset, 10 kbps Manchester-encoded data",
+        "recc": "Reverse Control Channel — handset to CO, 10 kbps Manchester",
+        "sat_tones": [5970, 6000, 6030],
+        "signaling_tone": 10000
+      },
+      "identity": {
+        "min": "Mobile ID Number — 34 bits, derived from the 10-digit MDN",
+        "esn": "Electronic Serial Number — 32 bits, 8-bit manufacturer + 24-bit serial. Programmed at manufacture; supposed to be immutable."
+      },
+      "cleartext_leak": "On registration, the handset sends MIN + ESN in the clear over the RECC. Anyone with a scanner and decoder could capture and clone.",
+      "defenses_added": "IS-54B / IS-136 (TDMA) and PCS operators added the 'A-Key' authentication starting 1996-1998, which effectively killed pure clone fraud on properly-provisioned lines.",
+      "shutoff": "FCC-authorized AMPS sunset Feb 18, 2008 in the US. Analog was largely obsolete in urban markets by 2003."
+    },
+    "citations": ["is-553-amps", "phrack-38-9", "phrack-40-6-cellular"],
+    "see_also": ["cellular_gsm", "cellular_cdpd", "nam_motorola_startac", "nam_oki_900"]
+  },
+  {
+    "id": "cellular_gsm",
+    "name": "GSM (in North America, PCS 1900)",
+    "aliases": ["GSM", "PCS", "1900 MHz GSM"],
+    "category": "cellular_system",
+    "region": "universal",
+    "signaling_layer": "cellular_control_channel",
+    "era_bounds": ["1996-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "identity": {
+        "imsi": "International Mobile Subscriber Identity — stored on the SIM",
+        "ki": "128-bit secret key on the SIM; never transmitted",
+        "imei": "International Mobile Equipment Identity — the phone hardware ID"
+      },
+      "authentication": {
+        "a3_a8": "Operator-defined; most used COMP128-1, broken by Wagner/Goldberg/Briceno 1998. A physical clone required ~150k challenges but was tractable. COMP128-2 and COMP128-3 followed.",
+        "a5_1": "Western Europe and US encryption. Practical rainbow-table attack landed 2008-2010 (Karsten Nohl). PRE-2004 A5/1 was still considered 'hard' outside academia.",
+        "a5_2": "Weakened export version. Ciphertext-only attack by Barkan/Biham/Keller in 2003.",
+        "a5_0": "Encryption off — used in some jurisdictions for lawful intercept simplification."
+      }
+    },
+    "disputed": {
+      "a5_1_break_date": "The corpus MUST NOT claim A5/1 was practically broken by 2003. Biryukov/Shamir/Wagner 2000 needed precomputation few had done in the wild. Practical break arrived 2008-2010."
+    },
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["cellular_amps", "nam_nokia_5100_gsm"]
+  },
+  {
+    "id": "cellular_cdpd",
+    "name": "CDPD (Cellular Digital Packet Data)",
+    "aliases": ["CDPD"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "cellular_control_channel",
+    "era_bounds": ["1993-01-01", "2005-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "rate": "19.2 kbps packet data",
+      "overlay_on": "AMPS — used unused voice channels (CDPD 'channel hopping' avoided interference with active voice calls)",
+      "encryption": "RC4 with a session key derived from a shared secret",
+      "notable_attacks": "MDBS (Mobile Data Base Station) spoofing was documented; the shared-secret handshake was replayable in some deployments.",
+      "used_for": "PocketNet, early wireless credit-card readers, dispatch data terminals, first-gen wireless PDAs (Palm VII on OmniSky)."
+    },
+    "citations": ["phrack-38-9"],
+    "see_also": ["cellular_amps"]
+  },
+  {
+    "id": "cellular_pagers_flex",
+    "name": "FLEX / ReFLEX two-way paging (Motorola)",
+    "aliases": ["FLEX", "ReFLEX", "Motorola paging"],
+    "category": "cellular_system",
+    "region": "universal",
+    "signaling_layer": "paging",
+    "era_bounds": ["1993-01-01", "2010-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "band": "900 MHz (US pager band)",
+      "rates": {"flex_1600": "1600 bps FSK", "flex_3200": "3200 bps 4-level FSK", "flex_6400": "6400 bps 4-level FSK", "reflex_25": "9600 bps ReFLEX 25"},
+      "encryption": "None — cap codes and message bodies broadcast in the clear.",
+      "eavesdrop_stack": [
+        "ICOM PCR-1000 or Radio Shack Pro-2006 scanner",
+        "PDW or POC32 PC-based decoder software",
+        "Tens of thousands of messages/day passively logged from one metro"
+      ],
+      "sensitive_traffic": [
+        "Hospital pages (patient info)",
+        "On-call SRE / NOC alerts (server hostnames, sometimes credentials)",
+        "Bank alarm-panel notifications",
+        "White House Communications Agency (WHCA) traffic — WikiLeaks published 9/11-era WHCA pages in 2009"
+      ]
+    },
+    "citations": ["phrack-38-9"],
+    "see_also": ["cellular_pagers_pocsag"]
+  },
+  {
+    "id": "cellular_pagers_pocsag",
+    "name": "POCSAG (Post Office Code Standardization Advisory Group)",
+    "aliases": ["POCSAG"],
+    "category": "cellular_system",
+    "region": "universal",
+    "signaling_layer": "paging",
+    "era_bounds": ["1982-01-01", "2010-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "rates": [512, 1200, 2400],
+      "modulation": "FSK (frequency-shift keying)",
+      "band": "925-940 MHz commercial paging in North America",
+      "encryption": "None",
+      "notable": "The older, slower predecessor to FLEX. Coexisted through the late 1990s; many low-end alphanumeric pagers stayed on POCSAG."
+    },
+    "citations": ["phrack-38-9"],
+    "see_also": ["cellular_pagers_flex"]
+  },
+  {
+    "id": "nam_motorola_startac",
+    "name": "Motorola MicroTAC / StarTAC (AMPS) — test mode",
+    "aliases": ["MicroTAC test mode", "StarTAC test mode"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1989-01-01", "2003-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Motorola MicroTAC (1989-1996) and StarTAC (1996+)",
+      "entry_sequence": "FCN + 0 0 * * 8 3 7 8 6 6 + STO",
+      "exposes": ["NAM edit (MIN/ESN, SID, home system)", "field-service menu (RSSI, cell ID, active channel)", "phone-lock override on some firmware"],
+      "notes": "The '837866' digits spell 'TEST-MOTO' on a phone keypad."
+    },
+    "citations": ["phrack-45-26", "phrack-48-6"],
+    "see_also": ["nam_motorola_bag", "cellular_amps"]
+  },
+  {
+    "id": "nam_motorola_bag",
+    "name": "Motorola bag phone (2000-XL) — test mode",
+    "aliases": ["2000-XL test mode", "bag phone service menu"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1985-01-01", "1998-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Motorola 2000-XL and related transportable bag phones",
+      "entry_sequence": "FCN 0 * * 8 3 7 8 6 6 STO"
+    },
+    "citations": ["phrack-45-26", "phrack-48-6"],
+    "see_also": ["nam_motorola_startac"]
+  },
+  {
+    "id": "nam_oki_900",
+    "name": "OKI 900 / 1150 (AMPS) — test mode",
+    "aliases": ["OKI 900", "OKI 900 test mode", "OKI 1150"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1990-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "OKI 900 and OKI 1150 (Tandy/Radio Shack rebadges: CT-300/CT-500)",
+      "entry_sequence": "# 6 2 3 8 8 8",
+      "notable": "The most-hackable AMPS phone of its generation. Firmware was extractable; community loaders 'Roger-Wilco' and 'N0kIA loader' let you flash custom firmware that logged every MIN/ESN pair broadcast on the RECC in listening range.",
+      "phreak_relevance": "OKI 900s became the de-facto AMPS scanner platform of the mid-90s. A modded OKI 900 in a car could clone every phone that registered in a given cell overnight."
+    },
+    "citations": ["phrack-45-26", "phrack-48-7"],
+    "see_also": ["cellular_amps"]
+  },
+  {
+    "id": "nam_nokia_100_amps",
+    "name": "Nokia 100 / 232 / 636 (AMPS) — NAM edit",
+    "aliases": ["Nokia 100 NAM", "Nokia 232 NAM", "Nokia 636 NAM"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1992-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Nokia 100 / 232 / 636 AMPS series",
+      "entry_sequence": "Menu 3-1-4-1-4-1 Menu",
+      "exposes": ["NAM edit (MIN/ESN, home SID)", "SW version", "field test"]
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": ["nam_nokia_5100_gsm"]
+  },
+  {
+    "id": "nam_nokia_5100_gsm",
+    "name": "Nokia 5100 / 6100 (TDMA/GSM) — engineering menu",
+    "aliases": ["Nokia 5110 engineering", "Nokia 6110 test"],
+    "category": "cellular_system",
+    "region": "universal",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1998-01-01", "2005-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Nokia 5100 / 6100 / 7100 series (TDMA and GSM)",
+      "sequences": {
+        "*#3001#12345#": "NAM edit + field test (TDMA variants)",
+        "*#06#": "Display IMEI",
+        "*#92702689#": "Life-timer / total-airtime menu",
+        "*#3110#": "Software version",
+        "*#7780#": "Factory reset (destructive)"
+      }
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": ["cellular_gsm", "nam_nokia_100_amps"]
+  },
+  {
+    "id": "nam_ericsson_788",
+    "name": "Ericsson 788 / KF-388 (AMPS) — test mode",
+    "aliases": ["Ericsson 788 test"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1993-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Ericsson 788 and KF-388",
+      "entry_sequence": "> * < < * < * on the joystick",
+      "notes": "The joystick-based entry sequence is why third-hand tutorials often transcribed this wrong."
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": ["cellular_amps"]
+  },
+  {
+    "id": "nam_qualcomm_qcp",
+    "name": "Qualcomm QCP-800 / 860 (CDMA/AMPS) — NAM prompt",
+    "aliases": ["QCP-800", "QCP-860"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1996-01-01", "2003-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Qualcomm QCP-800 and QCP-860 (dual-mode CDMA/AMPS)",
+      "entry_sequence": "Fcn 0, then 111111 at the NAM prompt"
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": ["cellular_amps"]
+  },
+  {
+    "id": "nam_audiovox_mvx500",
+    "name": "Audiovox MVX-500 — test mode",
+    "aliases": ["Audiovox MVX-500"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1993-01-01", "1999-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Audiovox MVX-500",
+      "entry_sequence": "Fcn 0 # # # * *"
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": []
+  },
+  {
+    "id": "nam_sony_cmrx100",
+    "name": "Sony CM-Rx100 (AMPS) — NAM edit",
+    "aliases": ["Sony CM-Rx100"],
+    "category": "cellular_system",
+    "region": "NANP",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1993-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Sony CM-Rx100 AMPS series",
+      "entry_sequence": "Fcn * * 8 3 7 8 6 6 Sto"
+    },
+    "citations": ["phrack-45-26"],
+    "see_also": ["nam_motorola_startac"]
+  },
+  {
+    "id": "nam_motorola_startac_gsm",
+    "name": "Motorola StarTAC GSM — engineering menu",
+    "aliases": ["StarTAC GSM engineering"],
+    "category": "cellular_system",
+    "region": "universal",
+    "signaling_layer": "handset_service_menu",
+    "era_bounds": ["1998-01-01", "2004-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "handset_family": "Motorola StarTAC GSM variants (D-series)",
+      "entry_sequence": "[MENU] 048263 [*]"
+    },
+    "citations": ["phrack-45-26", "phrack-48-6"],
+    "see_also": ["cellular_gsm"]
+  }
+]

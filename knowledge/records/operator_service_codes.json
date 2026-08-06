@@ -1,0 +1,449 @@
+[
+  {
+    "id": "ani_ii_00",
+    "name": "ANI-II 00 — Identified line, no special treatment",
+    "aliases": ["ANI II 00", "info digit 00", "POTS"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "00",
+      "meaning": "Identified line — no special treatment",
+      "notes": "Ordinary POTS residence or single-line business. The 'null' info-digit prefix; anything that is not one of the special classes below defaults to 00."
+    },
+    "citations": ["nanpa-ani-ii", "gr-317-core"],
+    "see_also": ["ani_ii_27_coin"]
+  },
+  {
+    "id": "ani_ii_01",
+    "name": "ANI-II 01 — Multiparty line (ONI required)",
+    "aliases": ["ANI II 01", "ONI", "party line"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", "2005-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "01",
+      "meaning": "Multiparty line — Operator Number Identification required",
+      "notes": "The originating switch cannot uniquely identify which subscriber on the multiparty (2-, 4-, 8-party) line placed the call. An operator must intercept and key-pulse the calling number. Effectively retired with the last multiparty loops (rural, ~2005)."
+    },
+    "citations": ["nanpa-ani-ii", "gr-317-core"],
+    "see_also": ["ani_ii_02"]
+  },
+  {
+    "id": "ani_ii_02",
+    "name": "ANI-II 02 — ANI failure",
+    "aliases": ["ANI II 02", "ANI failure"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "02",
+      "meaning": "ANI failure — originating switch could not deliver a calling number",
+      "notes": "A soft failure code the far end interprets as 'no calling number available'. Historic reasons: switch software fault, translation table miss, tandem hop that stripped ANI. On SS7 today, delivered as OLI 02 alongside a CgPN parameter that may or may not be present."
+    },
+    "citations": ["nanpa-ani-ii", "gr-317-core"],
+    "see_also": ["ani_ii_00"]
+  },
+  {
+    "id": "ani_ii_06_hotel_no_cdr",
+    "name": "ANI-II 06 — Hotel/motel guest station without CDR",
+    "aliases": ["ANI II 06", "hotel guest"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "06",
+      "meaning": "Hotel/motel guest station without call-detail recording — station follows the hotel PBX billing",
+      "notes": "Distinguishes a room extension from the hotel's main published DID. Terminating carrier uses this to route to a hotel-billing pipeline instead of the calling party's LEC bill."
+    },
+    "citations": ["nanpa-ani-ii", "sr-tsv-002275"],
+    "see_also": ["ani_ii_23_coin_historic", "ani_ii_29_prison"]
+  },
+  {
+    "id": "ani_ii_07_special_operator",
+    "name": "ANI-II 07 — Special operator handling required",
+    "aliases": ["ANI II 07"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "07",
+      "meaning": "Special operator handling required",
+      "notes": "Flags calls that must be intercepted by an operator regardless of routing — e.g., certain restricted-CoS station types."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": []
+  },
+  {
+    "id": "ani_ii_10_test",
+    "name": "ANI-II 10 — Test call",
+    "aliases": ["ANI II 10"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "10",
+      "meaning": "Test call from a network test facility",
+      "notes": "Sent by CO/tandem test lines and cross-connect test panels. Terminating switch treats as maintenance traffic (does not bill, may skip announcement replacements)."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": []
+  },
+  {
+    "id": "ani_ii_20_aiod",
+    "name": "ANI-II 20 — AIOD (Automatic Identified Outward Dialing)",
+    "aliases": ["ANI II 20", "AIOD"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "20",
+      "meaning": "AIOD — listed DN from a PBX with Automatic Identified Outward Dialing",
+      "notes": "The PBX sends the specific station's number as ANI instead of the trunk group's billing number, so long-distance calls can be billed per extension. Common on old Centrex."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_93_vpn"]
+  },
+  {
+    "id": "ani_ii_23_coin_historic",
+    "name": "ANI-II 23 — Coin or coinless payphone (pre-1988)",
+    "aliases": ["ANI II 23", "coin historic"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", "1988-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "23",
+      "meaning": "Coin or coinless payphone (historic combined class)",
+      "notes": "Original combined class. Split circa 1988: coin-supervised ACTS phones -> 27; coinless private paystations -> 70."
+    },
+    "disputed": {
+      "split_effective_date": "The 23 -> 27/70 split is documented as a late-1980s NANPA action; exact effective date varied by LEC. Some independents kept using 23 into the early 1990s."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_27_coin", "ani_ii_70_private_paystation"]
+  },
+  {
+    "id": "ani_ii_24_toll_free",
+    "name": "ANI-II 24 — 800/toll-free service call",
+    "aliases": ["ANI II 24", "8YY inbound"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "24",
+      "meaning": "Inbound to an 800/toll-free number",
+      "notes": "Marks the leg as toll-free-terminated so the RESPORG's IXC pays and the calling party isn't charged. Sent alongside the actual ANI so the 8YY subscriber can screen or route by origin."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_25_premium"]
+  },
+  {
+    "id": "ani_ii_25_premium",
+    "name": "ANI-II 25 — 900 service call",
+    "aliases": ["ANI II 25", "900 inbound"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "25",
+      "meaning": "Inbound to a 900 premium number",
+      "notes": "Marks the leg as premium-billed so the LEC applies the per-minute charge to the calling party's bill on behalf of the 900 information provider."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_24_toll_free"]
+  },
+  {
+    "id": "ani_ii_27_coin",
+    "name": "ANI-II 27 — Coin payphone (ACTS)",
+    "aliases": ["ANI II 27", "coin phone", "ACTS payphone"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "27",
+      "meaning": "Coin payphone — ACTS-equipped, coin-supervised",
+      "notes": "Post-1988 split from 23. Downstream carriers use it to enforce coin-call restrictions and coin-return semantics. Not delivered by locally-validating COCOTs on residential POTS (those look like 00)."
+    },
+    "citations": ["nanpa-ani-ii", "sr-tsv-002275"],
+    "see_also": ["ani_ii_23_coin_historic", "ani_ii_70_private_paystation", "acts_quarter"]
+  },
+  {
+    "id": "ani_ii_29_prison",
+    "name": "ANI-II 29 — Prison/inmate service line",
+    "aliases": ["ANI II 29", "inmate call"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1990-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "29",
+      "meaning": "Call originated from an ITS (Inmate Telephone System)",
+      "notes": "Signals that the calling party is an incarcerated person on a facility-restricted line. Terminating carriers use it to block collect-refusal loopholes and to enforce facility screening."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_67_trs_restricted"]
+  },
+  {
+    "id": "ani_ii_30_intercept_blank",
+    "name": "ANI-II 30 — Intercept: blank/non-working number",
+    "aliases": ["ANI II 30"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "30", "meaning": "Intercept — call reached a blank/non-working number"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_31_intercept_trouble", "ani_ii_32_intercept_regular"]
+  },
+  {
+    "id": "ani_ii_31_intercept_trouble",
+    "name": "ANI-II 31 — Intercept: trouble (line out of service)",
+    "aliases": ["ANI II 31"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "31", "meaning": "Intercept — trouble condition"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_30_intercept_blank"]
+  },
+  {
+    "id": "ani_ii_32_intercept_regular",
+    "name": "ANI-II 32 — Intercept: regular (referral/changed number)",
+    "aliases": ["ANI II 32"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "32", "meaning": "Intercept — regular (referral or changed-number treatment)"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_30_intercept_blank"]
+  },
+  {
+    "id": "ani_ii_34_operator_handled",
+    "name": "ANI-II 34 — Telco-operator-handled call",
+    "aliases": ["ANI II 34"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "34", "meaning": "Call already handled by a telco operator (assistance operator)", "notes": "Prevents double-operator loops on collect and third-party billed calls."},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": []
+  },
+  {
+    "id": "ani_ii_52_outwats",
+    "name": "ANI-II 52 — OUTWATS",
+    "aliases": ["ANI II 52", "OUTWATS"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "52",
+      "meaning": "Outward Wide-Area Telephone Service — bulk-billed outbound",
+      "notes": "OUTWATS trunks let large customers make unlimited outbound calls in a defined band for a flat rate. Largely retired as long-distance minutes commoditized in the late 1990s."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": []
+  },
+  {
+    "id": "ani_ii_60_trs",
+    "name": "ANI-II 60 — TRS (Telecommunications Relay Service), unrestricted",
+    "aliases": ["ANI II 60", "TRS"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1993-07-26", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "60",
+      "meaning": "TRS — unrestricted origin (Title IV ADA relay service)",
+      "notes": "Assigned in the wake of the ADA (effective July 26, 1993). Signals that the call is being placed via a TRS operator for a deaf/HoH caller."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_66_trs_hotel", "ani_ii_67_trs_restricted"]
+  },
+  {
+    "id": "ani_ii_61_cellular_type1",
+    "name": "ANI-II 61 — Cellular/wireless, Type 1 interconnection",
+    "aliases": ["ANI II 61", "cellular Type 1"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "61",
+      "meaning": "Cellular / wireless PCS — Type 1 interconnection (wireline-format ANI, no ESRD)",
+      "notes": "Wireless carrier connects to the wireline network like a Class-5 subscriber; ANI is the caller's MDN in wireline format. Historically the majority of AMPS/TDMA cellular traffic delivered to landline destinations."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_62_cellular_type2a", "ani_ii_63_cellular_type2b"]
+  },
+  {
+    "id": "ani_ii_62_cellular_type2a",
+    "name": "ANI-II 62 — Cellular/wireless, Type 2 interconnection (roamer default)",
+    "aliases": ["ANI II 62", "cellular Type 2"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "62", "meaning": "Cellular / wireless PCS — Type 2 interconnection (roamer default)"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_61_cellular_type1", "ani_ii_63_cellular_type2b"]
+  },
+  {
+    "id": "ani_ii_63_cellular_type2b",
+    "name": "ANI-II 63 — Cellular/wireless, Type 2 (roamer, alternate)",
+    "aliases": ["ANI II 63"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"code": "63", "meaning": "Cellular / wireless PCS — Type 2 (roamer, alternate)"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_62_cellular_type2a"]
+  },
+  {
+    "id": "ani_ii_66_trs_hotel",
+    "name": "ANI-II 66 — TRS from hotel/motel origin",
+    "aliases": ["ANI II 66"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1993-07-26", null],
+    "confidence": "primary",
+    "technical_body": {"code": "66", "meaning": "TRS call originating from a hotel/motel guest line"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_60_trs", "ani_ii_06_hotel_no_cdr"]
+  },
+  {
+    "id": "ani_ii_67_trs_restricted",
+    "name": "ANI-II 67 — TRS from restricted origin (prison/inmate)",
+    "aliases": ["ANI II 67"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1993-07-26", null],
+    "confidence": "primary",
+    "technical_body": {"code": "67", "meaning": "TRS call originating from a restricted line (prison/inmate + TRS)"},
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_60_trs", "ani_ii_29_prison"]
+  },
+  {
+    "id": "ani_ii_70_private_paystation",
+    "name": "ANI-II 70 — Private paystation (coinless)",
+    "aliases": ["ANI II 70", "private paystation", "coinless payphone"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "70",
+      "meaning": "Line connected to a private paystation (coinless payphone; charge-a-call, hospital, hotel-lobby, coinless inmate)",
+      "notes": "The post-1988 split-mate of code 27. Signals a customer-owned coinless phone that bills the coinless service subscriber rather than the caller-per-call."
+    },
+    "citations": ["nanpa-ani-ii", "sr-tsv-002275"],
+    "see_also": ["ani_ii_23_coin_historic", "ani_ii_27_coin"]
+  },
+  {
+    "id": "ani_ii_93_vpn",
+    "name": "ANI-II 93 — Access for private virtual network (VPN)",
+    "aliases": ["ANI II 93", "VPN access", "off-net enterprise"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1988-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "code": "93",
+      "meaning": "Access for private virtual network (VPN, off-net access) — enterprise trunk",
+      "notes": "Marks calls that entered the public network from an enterprise VPN. Distinguished from AIOD (20) — AIOD is per-station billing on a listed Centrex; 93 is a VPN trunk carrying multiple sites."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_20_aiod"]
+  },
+  {
+    "id": "ani_ii_reserved_range",
+    "name": "ANI-II reserved codes (03-05, 08-09, 11-19, 21-22, 26, 28, 33, 35-51, 53-59, 64-65, 68-69, 71-92, 94-99)",
+    "aliases": ["ANI II reserved"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "codes": [
+        "03", "04", "05", "08", "09",
+        "11", "12", "13", "14", "15", "16", "17", "18", "19",
+        "21", "22", "26", "28", "33",
+        "35", "36", "37", "38", "39",
+        "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+        "50", "51",
+        "53", "54", "55", "56", "57", "58", "59",
+        "64", "65", "68", "69",
+        "71", "72", "73", "74", "75", "76", "77", "78", "79",
+        "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+        "90", "91", "92",
+        "94", "95", "96", "97", "98", "99"
+      ],
+      "meaning": "Reserved for future assignment (per era)",
+      "notes": "Reserved on a period-1998-authoritative NANPA letter. Some entries (78 for VoIP originations; 21/22 for AIOD-related sub-classes; certain 08 historical 'InterLATA restricted' notes) have been reassigned or proposed on later letters. A record for the era's ANI-II set should query BY YEAR — a 2026 answer may differ from a 1998 answer."
+    },
+    "disputed": {
+      "later_assignments": "Post-2003 NANPA letters have reassigned some of the previously-reserved codes (notably 78 in some carrier profiles for VoIP originations). Always cite the letter version by date when returning a value."
+    },
+    "citations": ["nanpa-ani-ii"],
+    "see_also": ["ani_ii_00"]
+  },
+  {
+    "id": "ani_ii_delivery_note",
+    "name": "ANI-II — delivery mechanics",
+    "aliases": ["ANI II delivery", "OLI parameter", "FGD ANI spill"],
+    "category": "operator_and_service_code",
+    "region": "NANP",
+    "signaling_layer": "fgd_ani_spill",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "meaning": "How the 2-digit info-digit prefix reaches the terminating switch",
+      "delivery_mf": "On Feature Group D MF trunks, delivered inband as KP + II + KP + ANI + ST — the FIRST KP is the info-digit start, II is the 2-digit prefix, the second KP delimits from the calling-number spill, ANI is 10 digits, ST terminates.",
+      "delivery_ss7": "On SS7 ISUP, delivered as the OLI (Originating Line Information) parameter — 1 octet, hex 00-63, mapping to decimal 00-99.",
+      "notes": "Early PC-based scanners like 'ANI II Sniffer' (~1995) sat on 800 terminations and logged the II byte for every inbound call. This is how phreaks catalogued which lines were payphones vs. hotels vs. cellular in the wild."
+    },
+    "citations": ["gr-317-core", "sr-tsv-002275"],
+    "see_also": ["ani_ii_00", "ani_ii_27_coin"]
+  }
+]

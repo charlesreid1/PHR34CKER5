@@ -81,6 +81,218 @@
     "confidence": "primary"
   },
   {
+    "id": "ccitt-x121",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Recommendation X.121 — International numbering plan for public data networks",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT X.121 (1980, revised 1988 Blue Book, 1996)",
+    "note": "Assigns 4-digit Data Network Identification Codes (DNICs). Format ZZZZ, where the first digit gives the zone and the remaining three identify the network within it. Full 14-digit NUA = DNIC(4) + Network Terminal Number(up to 10).",
+    "confidence": "primary"
+  },
+  {
+    "id": "sprintnet-directory",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Sprintnet / Telenet PC Pursuit Outdial + Public Dialup Directory",
+    "author": "Amadeus (transcription), various",
+    "publication": "Phrack Inc. Issue 35, File 4 (1991); GTE/Sprint operator handbooks; Phrack 42 Files 8-10 (Skylar, Sprintnet Directory Parts I-III)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK35",
+    "note": "Consolidated Sprintnet/Telenet PAD dial-ups, area-code-mapped local PADs, and outdial hosts. Post-CONNECT: <CR><CR>, then @ prompt; TERM=D1 to set VT100; C <NUA> to connect.",
+    "confidence": "community"
+  },
+  {
+    "id": "tymnet-directory",
+    "category": "bibliography",
+    "type": "community",
+    "title": "BT Tymnet directory + diagnostic tools",
+    "author": "Toucan Jones (BT Tymnet 1-3); Professor Falken (Tymnet Diagnostic Tools)",
+    "publication": "Phrack Inc. Issue 40 Files 8-10 (Jan 1993); Issue 42 File 5",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "Tymnet PAD dial-ups, login banner, 'please log in:' NUI prompt. Post-CONNECT single letter 'a' triggers banner. NUA form differs from Sprintnet: 5-digit host address after login.",
+    "confidence": "community"
+  },
+  {
+    "id": "gr-317-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "GR-317-CORE, Switching System Requirements for Call Control Using the Integrated Services Digital Network User Part (ISDNUP)",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-317-CORE",
+    "note": "Feature Group D signaling including the KP + II + KP + ANI + ST inband ANI spill format used to deliver ANI-II 'info digits' to 8YY and IXC terminations. SS7 OLI (Originating Line Information) parameter, hex 00-63.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nanpa-ani-ii",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "NANPA ANI II Digits Assignments",
+    "author": "North American Numbering Plan Administration (NANPA) / ATIS INC",
+    "publication": "NANPA ANI-II Assignments Letter (living document)",
+    "mirror_url": "https://www.nationalnanpa.com/number_resource_info/ani_ii_assignments.html",
+    "note": "Authoritative assignment table for the 100 two-digit ANI info digit codes 00-99. Original assignments 1980s; splits (23 -> 27/70) and additions (60-63, 66-67, 78, 93) tracked by NANPA letter with effective dates.",
+    "confidence": "primary"
+  },
+  {
+    "id": "sr-tsv-002275",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "SR-TSV-002275, BOC Notes on the LEC Networks",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore SR-TSV-002275 (BOC Notes on LATA Switching Systems Generic Requirements)",
+    "note": "Cross-reference for ANI-II delivery on Feature Group D and 8YY, and for CO subscriber-line classes (coin, cellular, prison, hotel, TRS, VPN) that map to the two-digit info-digit prefix.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-ntp-553-3001-311",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Northern Telecom NTP 553-3001-311 — Meridian 1 / SL-1 X11 Input/Output Reference (Administration)",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 553-3001-311 (X11 releases 15-25)",
+    "note": "The authoritative overlay-by-overlay reference for the SL-1 / Meridian 1 / CS1000 family. Documents every LD (Load) program with its prompts, defaults, and side-effects. Later editions superseded by the CS1000 R4/R5/R6 Software Input/Output Guide.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-ntp-553-3001-365",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Northern Telecom NTP 553-3001-365 — Meridian 1 / SL-1 Features and Services",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 553-3001-365",
+    "note": "Feature-package inventory. Cross-references LD 22 PKG output — tells you what packages a target PBX has enabled (DISA = pkg 26, ISDN, MCT = pkg 107, CDR = pkg 51, etc.).",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-40-6",
+    "category": "bibliography",
+    "type": "community",
+    "title": "The Nortel SL-1 Overview",
+    "author": "unknown (community)",
+    "publication": "Phrack Inc. Issue 40, File 6 (Jan 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "Community walkthrough of SL-1 craft-interface access. First widely-mirrored phreak-scene reference for the LD overlay language.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-44-19",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Northern Telecom's SL-1",
+    "author": "Iceman",
+    "publication": "Phrack Inc. Issue 44, File 19 (Nov 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK44",
+    "note": "The canonical mid-90s community reference for SL-1 abuse. Documents LD 88 (auth codes), LD 15 (customer DISA), LD 16 (route), LD 40 (CDR turn-off), and the SDI modem entry point.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-47-15",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Complete Guide to Hacking Meridian Voice Mail",
+    "author": "Substance",
+    "publication": "Phrack Inc. Issue 47, File 15 (Apr 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK47",
+    "note": "Meridian Mail admin mailbox 999999 / password 0000, greeting-record abuse, DISA-out via voicemail 'outcall notification'. Companion to Phrack 44.19.",
+    "confidence": "community"
+  },
+  {
+    "id": "2600-autumn-1997-meridian",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Inside a Meridian",
+    "author": "unknown",
+    "publication": "2600 Magazine, Vol. 14 No. 3 (Autumn 1997)",
+    "note": "Zine-level walkthrough of a live SL-1 craft session — LD numbers referenced by task, not by number. Useful pairing with NTP 553-3001-311.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-43-16",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Guide to the 5ESS",
+    "author": "Firm G.R.A.S.P.",
+    "publication": "Phrack Inc. Issue 43, File 16 (July 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK43",
+    "note": "The canonical community reference for AT&T 5ESS RCV (Recent Change / Verify) craft interface. Documents the menu tree, common login banners, and the trap/trace surface.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-45-26",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Debug Mode Commands",
+    "author": "various (Phrack compilation)",
+    "publication": "Phrack Inc. Issue 45, File 26 (Mar 1994)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK45",
+    "note": "Canonical community catalog of AMPS/TDMA handset test-mode entry sequences (Motorola, Nokia, OKI, Ericsson).",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-48-6",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Motorola Command Mode Information",
+    "author": "Cherokee",
+    "publication": "Phrack Inc. Issue 48, File 6 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "Motorola AMPS/TDMA handset service-menu entry sequences and command syntax.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-48-7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Tandy / Radio Shack Cellular Phones",
+    "author": "Damien Thorn",
+    "publication": "Phrack Inc. Issue 48, File 7 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "Companion to Phrack 48.6 — Tandy-branded (OKI 900 series and rebrands) NAM programming.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-38-9",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Telephony",
+    "author": "Brian Oblivion",
+    "publication": "Phrack Inc. Issue 38, File 9 (Nov 1991)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK38",
+    "note": "Foundational AMPS overview: FOCC/RECC framing, MIN/ESN registration, cloning economics.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-40-6-cellular",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Telephony, Part II",
+    "author": "Brian Oblivion",
+    "publication": "Phrack Inc. Issue 40, File 6 (Jan 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "AMPS follow-up. Note: same file number as 'The Nortel SL-1 Overview' — Phrack issues sometimes recycled the number after re-releases; verify via mirror.",
+    "confidence": "community"
+  },
+  {
+    "id": "is-553-amps",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "EIA/TIA IS-553 — Mobile Station-Land Station Compatibility Specification (AMPS)",
+    "author": "EIA/TIA (Electronic Industries Alliance / Telecommunications Industry Association)",
+    "publication": "IS-553 (later ANSI/TIA/EIA-553)",
+    "note": "Authoritative spec for AMPS control-channel signaling: FOCC / RECC Manchester encoding at 10 kbps, SAT tones (5970/6000/6030 Hz), signaling tone (10 kHz), MIN encoding.",
+    "confidence": "primary"
+  },
+  {
+    "id": "wardial-community-fingerprints",
+    "category": "bibliography",
+    "type": "community",
+    "title": "War-dial banner fingerprints (aggregate community folklore)",
+    "author": "aggregate — Phrack 16 (BBS lists), Phrack 18.3 (Packet Switched Networks, Epsilon), Phrack 42.4 (PSN Security, Goggans), Phrack 43.16 (5ESS Guide), Phrack 44.19 (SL-1), ToneLoc/THC-Scan/PhoneSweep result-classification manuals",
+    "publication": "Distributed across Phrack issues 1985-1998 and scanner-tool documentation",
+    "note": "The set of 'if a war-dialer hit shows banner X, it is system Y' mappings that circulated in the phreak scene from the mid-1980s onward. No single canonical source; assembled from operator experience across dozens of scans.",
+    "confidence": "community"
+  },
+  {
     "id": "itu-t-o-series",
     "category": "bibliography",
     "type": "primary",

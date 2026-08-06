@@ -22,7 +22,18 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-RECORD_FILES = ("bibliography", "tones", "boxes", "techniques")
+RECORD_FILES = (
+    "bibliography",
+    "tones",
+    "boxes",
+    "techniques",
+    "operator_service_codes",
+    "data_networks",
+    "network_elements",
+    "pbx_overlays",
+    "cellular",
+    "fingerprints",
+)
 
 # Envelope fields every retrieval-tool response carries so the assistant can
 # weight its answer at the con.
