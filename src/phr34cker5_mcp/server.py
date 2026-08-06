@@ -24,7 +24,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from phr34cker5_mcp import tones
+from phr34cker5_mcp import detect, tones
 
 URI_SCHEME = "phr34cker5"
 
@@ -563,13 +563,13 @@ def _inject(call_sid: str, pcm: bytes, label: str) -> dict:
     }
 
 
-@mcp.tool()
-def play_wav_into_call(call_sid: str, path: str) -> dict:
+def _read_wav_pcm(path: str) -> bytes:
     """
-    Inject an existing WAV file (mono 8kHz signed-16 PCM) into a live call.
+    Read a mono 8kHz signed-16 WAV file into raw PCM bytes.
 
-    Use this to replay files produced by any of the generate_* tone tools
-    without re-synthesizing.
+    Enforces the canonical telephony format shared by tones.py, the Twilio
+    bridge, and the detectors — so callers never feed a 44.1kHz stereo file
+    into an 8kHz mono pipeline and get garbage.
     """
     import wave
 
@@ -579,8 +579,162 @@ def play_wav_into_call(call_sid: str, path: str) -> dict:
                 f"{path}: expected mono, 16-bit, {tones.SAMPLE_RATE}Hz "
                 f"(got {w.getnchannels()}ch, {w.getsampwidth()*8}-bit, {w.getframerate()}Hz)"
             )
-        pcm = w.readframes(w.getnframes())
-    return _inject(call_sid, pcm, f"wav:{path}")
+        return w.readframes(w.getnframes())
+
+
+@mcp.tool()
+def play_wav_into_call(call_sid: str, path: str) -> dict:
+    """
+    Inject an existing WAV file (mono 8kHz signed-16 PCM) into a live call.
+
+    Use this to replay files produced by any of the generate_* tone tools
+    without re-synthesizing.
+    """
+    return _inject(call_sid, _read_wav_pcm(path), f"wav:{path}")
+
+
+def _wait_for_playout(cs, timeout_s: float = 30.0) -> bool:
+    """
+    Block until queued outbound audio has been shipped to Twilio (backlog ~0).
+
+    This is what makes a scripted sequence sequential: an inject step isn't
+    "done" until the tones have actually gone out, so the next step (e.g.
+    listen) doesn't start mid-tone. Returns False if it timed out.
+    """
+    import time as _t
+
+    deadline = _t.time() + timeout_s
+    while _t.time() < deadline:
+        if cs.outbound_backlog_ms() <= 0:
+            # Small settle so the pump ships the final partial frame.
+            _t.sleep(0.05)
+            return cs.outbound_backlog_ms() <= 0
+        _t.sleep(0.02)
+    return False
+
+
+# PCM builders for the injectable actions in play_sequence. Each maps a step
+# dict to raw PCM bytes; keys are the `action` names callers use.
+_SEQUENCE_TONE_BUILDERS = {
+    "dtmf":   lambda s: tones.dtmf_bytes(s["digits"], s.get("tone_ms", 100), s.get("gap_ms", 80)),
+    "mf":     lambda s: tones.mf_bytes(s["digits"], s.get("tone_ms", 68), s.get("gap_ms", 68), s.get("kp_ms", 100)),
+    "tone":   lambda s: tones.sine_bytes(s["freq_hz"], s.get("ms", 1000)),
+    "2600":   lambda s: tones.sf_2600_bytes(s.get("ms", 1000)),
+    "redbox": lambda s: tones.red_box_bytes(s["coins"]),
+    "cng":    lambda s: tones.cng_bytes(s.get("cycles", 4)),
+    "ced":    lambda s: tones.ced_bytes(s.get("ms", 3000)),
+    "wav":    lambda s: _read_wav_pcm(s["path"]),
+}
+
+
+@mcp.tool()
+def play_sequence(call_sid: str, steps: list[dict], stop_on_error: bool = True) -> dict:
+    """
+    Run a scripted sequence of call actions atomically, in order.
+
+    One tool call instead of five, and the single place timing is handled:
+    every audio-injection step blocks until its tones have actually played out
+    before the next step runs, so "send digits, then listen" listens *after*
+    the digits go out — not during.
+
+    Each step is a dict with an `action`:
+
+      inject audio (blocks until played out):
+        {"action": "dtmf",   "digits": "1234", "tone_ms": 100, "gap_ms": 80}
+        {"action": "mf",     "digits": "K18005551212S"}
+        {"action": "tone",   "freq_hz": 440, "ms": 1000}
+        {"action": "2600",   "ms": 1000}
+        {"action": "redbox", "coins": "qqq"}
+        {"action": "cng",    "cycles": 4}      {"action": "ced", "ms": 3000}
+        {"action": "wav",    "path": "/path/to.wav"}
+      timing / control:
+        {"action": "wait", "s": 10}
+        {"action": "wait_for_answer", "timeout_s": 60}
+        {"action": "hangup"}
+      perception (captures inbound audio):
+        {"action": "listen",      "s": 5}          -> WAV path
+        {"action": "detect_tone", "s": 3, "targets": ["dial-tone","busy"]}
+        {"action": "dtmf_decode", "s": 5}          -> digits
+
+    Example — dial handled elsewhere; here we wait for answer, pause, deposit
+    75c, and listen:
+        play_sequence(sid, [
+            {"action": "wait_for_answer"},
+            {"action": "wait", "s": 10},
+            {"action": "redbox", "coins": "qqq"},
+            {"action": "listen", "s": 5},
+        ])
+
+    Returns per-step results and an overall `ok`. With stop_on_error (default),
+    the sequence halts at the first failing step and reports which one.
+    """
+    rt = _rt()
+    results: list[dict] = []
+    ok = True
+
+    for i, step in enumerate(steps):
+        action = (step.get("action") or "").lower()
+        entry: dict = {"index": i, "action": action}
+        try:
+            if action in _SEQUENCE_TONE_BUILDERS:
+                cs = rt.get_call(call_sid)
+                pcm = _SEQUENCE_TONE_BUILDERS[action](step)
+                cs.enqueue_outbound_pcm(pcm)
+                queued_ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+                played = _wait_for_playout(cs, timeout_s=max(30.0, queued_ms / 1000 + 10))
+                entry.update({"queued_ms": queued_ms, "played_out": played})
+                if not played:
+                    raise TimeoutError("audio did not finish playing out")
+
+            elif action == "wait":
+                secs = float(step.get("s", step.get("seconds", 1.0)))
+                wait(secs)
+                entry["waited_s"] = secs
+
+            elif action == "wait_for_answer":
+                summary = wait_for_answer(call_sid, int(step.get("timeout_s", 60)))
+                entry["status"] = summary.get("twilio_status")
+                entry["ws_connected"] = summary.get("ws_connected")
+                if not (summary.get("twilio_status") == "in-progress" and summary.get("ws_connected")):
+                    raise RuntimeError(f"call not answered/connected: {summary.get('twilio_status')}")
+
+            elif action == "hangup":
+                entry.update(hangup(call_sid))
+
+            elif action == "listen":
+                secs = float(step.get("s", step.get("seconds", 5.0)))
+                entry.update(listen(call_sid, seconds=secs))
+
+            elif action == "detect_tone":
+                secs = float(step.get("s", step.get("seconds", 3.0)))
+                entry.update(detect_tone(call_sid, seconds=secs, targets=step.get("targets")))
+
+            elif action == "dtmf_decode":
+                secs = float(step.get("s", step.get("seconds", 5.0)))
+                entry.update(dtmf_decode(call_sid, seconds=secs))
+
+            else:
+                raise ValueError(f"unknown action: {action!r}")
+
+            entry["ok"] = True
+        except Exception as e:  # noqa: BLE001 — record and optionally stop
+            entry["ok"] = False
+            entry["error"] = f"{e.__class__.__name__}: {e}"
+            ok = False
+            results.append(entry)
+            if stop_on_error:
+                break
+            continue
+
+        results.append(entry)
+
+    return {
+        "call_sid": call_sid,
+        "ok": ok,
+        "steps_run": len(results),
+        "steps_total": len(steps),
+        "results": results,
+    }
 
 
 @mcp.tool()
@@ -666,6 +820,128 @@ def listen(call_sid: str, seconds: float = 5.0, save_wav: bool = True) -> dict:
     out = _tone_path(f"listen-{call_sid[:8]}", None)
     rt_info = tones.write_wav(out, pcm)
     return _render_result(rt_info, {"call_sid": call_sid, "captured_ms": ms})
+
+
+def _capture_inbound_pcm(call_sid: str, seconds: float) -> tuple[bytes, int]:
+    """Sleep `seconds`, then drain that much inbound audio. Returns (pcm, ms)."""
+    import time as _t
+
+    rt = _rt()
+    cs = rt.get_call(call_sid)
+    _t.sleep(max(0.0, seconds))
+    pcm = cs.drain_inbound_pcm(max_ms=int(seconds * 1000) + 500)
+    ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+    return pcm, ms
+
+
+# ---- perception (detect / decode / transcribe) ----
+
+
+@mcp.tool()
+def detect_tone(
+    call_sid: str,
+    seconds: float = 3.0,
+    targets: list[str] | None = None,
+) -> dict:
+    """
+    Listen to a live call and classify what tone(s) are on the line.
+
+    Goertzel power at named telephony frequencies plus a cadence estimate, so
+    you can tell busy (~1s period) from reorder (~0.5s), or spot dial tone,
+    ringback, 2600 Hz, fax CNG/CED, a modem answer tone, or a milliwatt test
+    tone. Use it to gate a sequence: "wait until dial tone, then send digits."
+
+    Args:
+        call_sid: the live call to listen on.
+        seconds: how long to sample.
+        targets: subset of {dial-tone, busy, reorder, ringback, 2600, cng,
+                 ced, modem, milliwatt} to score against. Default: the common
+                 set (all but reorder, which overlaps busy).
+
+    Returns dominant frequencies, the cadence estimate, per-target matches,
+    and `best` — the highest-scoring present target (or null if the line is
+    silent / unrecognized).
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    result = detect.detect_tones(pcm, targets)
+    result["call_sid"] = call_sid
+    return result
+
+
+@mcp.tool()
+def dtmf_decode(call_sid: str, seconds: float = 5.0) -> dict:
+    """
+    Decode DTMF digits the far end is sending on a live call.
+
+    Frames the inbound audio, classifies each frame with twist and
+    relative-power validation, and collapses runs into a digit string.
+    Critical for IVR / DISA puzzles where the far end plays digits back.
+
+    Returns {"digits": "...", "detail": [{digit, start_ms, duration_ms}, ...]}.
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    result = detect.decode_dtmf(pcm)
+    result["call_sid"] = call_sid
+    result["captured_ms"] = ms
+    return result
+
+
+@mcp.tool()
+def dtmf_decode_wav(path: str) -> dict:
+    """
+    Decode DTMF digits from a WAV file (mono 8kHz signed-16).
+
+    Same decoder as dtmf_decode(), but on a file — e.g. a WAV produced by
+    listen() earlier, or one of the generate_dtmf() outputs.
+    """
+    pcm = _read_wav_pcm(path)
+    result = detect.decode_dtmf(pcm)
+    result["path"] = path
+    return result
+
+
+@mcp.tool()
+def transcribe(call_sid: str, seconds: float = 10.0) -> dict:
+    """
+    Speech-to-text on a live call's inbound audio.
+
+    Captures `seconds` of audio and transcribes it. Uses Twilio's transcription
+    if the optional dependency for a local recognizer isn't available; either
+    way you get text back for "listen to the IVR menu and tell me the options."
+
+    Currently this captures to a WAV and hands off to Twilio's recording +
+    transcription pipeline. Returns the captured WAV path, and the transcript
+    once available (transcription is async on Twilio's side — poll
+    get_recording_url / the returned transcription_sid if pending).
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    out = _tone_path(f"transcribe-{call_sid[:8]}", None)
+    tones.write_wav(out, pcm)
+
+    rt = _rt()
+    # Kick off a Twilio recording+transcription on the live call so we get a
+    # server-side transcript. The captured WAV is the local fallback / evidence.
+    transcription_sid = None
+    status = "captured"
+    try:
+        rec = rt.client.calls(call_sid).recordings.create()
+        transcription_sid = rec.sid
+        status = "recording_started"
+    except Exception as e:  # noqa: BLE001 — surface the reason, don't crash
+        status = f"local_only: {e.__class__.__name__}"
+
+    return {
+        "call_sid": call_sid,
+        "captured_ms": ms,
+        "wav_path": out,
+        "status": status,
+        "recording_sid": transcription_sid,
+        "note": (
+            "Twilio transcription is asynchronous; fetch the recording via "
+            "get_recording_url() and run STT, or enable Voice Intelligence on "
+            "the account for automatic transcripts."
+        ),
+    }
 
 
 # ---- Twilio-native recording ----

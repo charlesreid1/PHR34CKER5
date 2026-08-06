@@ -28,6 +28,8 @@ dependencies = [
 ngrok = ["pyngrok>=7.0.0"]
 # Reserved for future: run only offline corpus/tone tools.
 minimal = []
+# Test + lint tooling.
+dev = ["pytest>=7.0"]
 
 [project.scripts]
 phr34cker5-mcp = "phr34cker5_mcp.__main__:main"
@@ -53,3 +55,7 @@ include = [
     "README.md",
     "pyproject.toml",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
