@@ -9,6 +9,17 @@ what the digits *meant*, per era.
   Feature Group D trunks and SS7 OLI. 100-code table lives in the
   typed records ([`records/operator_service_codes.json`](../records/operator_service_codes.json)).
 
+## Typed records
+
+Full NANP structure, N11 assignments, NPA reservations (500 / 600 /
+700 / 800-833 toll-free evolution / 900 / 976), Feature Group A/B/C/D,
+10-XXX / 101-XXXX CIC dialaround (with the FCC 97-402 1998-07-01
+transition), 555 sub-block reservations, LATA structure — all in typed
+records at [`records/numbering_plan.json`](../records/numbering_plan.json).
+
+Query with `search_records category=numbering_plan year=1998` to get
+the set of assignments live on a specific date.
+
 ## Structure at a glance (1995-2003 era)
 
 - **NANP number:** NPA-NXX-XXXX.

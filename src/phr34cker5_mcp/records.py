@@ -36,6 +36,8 @@ RECORD_FILES = (
     "signaling_systems",
     "payphone_systems",
     "switch_commands",
+    "numbering_plan",
+    "defense_and_detection",
 )
 
 # Envelope fields every retrieval-tool response carries so the assistant can

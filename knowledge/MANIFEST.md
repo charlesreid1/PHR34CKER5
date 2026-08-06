@@ -84,6 +84,9 @@ text. See [`records/README.md`](records/README.md).
   out-of-band signaling systems; typed records in
   `records/signaling_systems.json` and (for coin phones)
   `records/payphone_systems.json`
+- **defense/**      — Bell/Telcordia defensive infrastructure: AMA, CAMA,
+  greenstar/blueflag, MCT, LMOS, COSMOS, REMOBS; typed records in
+  `records/defense_and_detection.json`
 
 ## Conventions
 

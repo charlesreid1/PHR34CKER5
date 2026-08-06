@@ -426,6 +426,70 @@
     "confidence": "primary"
   },
   {
+    "id": "fcc-97-402",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "FCC Order 97-402 — Carrier Identification Code Expansion",
+    "author": "US Federal Communications Commission",
+    "publication": "FCC Order 97-402, released Dec 1997; effective July 1, 1998",
+    "note": "Expanded the CIC (Carrier Identification Code) from 3 to 4 digits, changing subscriber-dialed carrier-access format from '10-XXX' to '101-XXXX'.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nanpa-inc-guidelines",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "NANPA / ATIS Industry Numbering Committee Guidelines",
+    "author": "North American Numbering Plan Administration + ATIS INC",
+    "publication": "NANPA guideline series (living documents)",
+    "mirror_url": "https://www.nationalnanpa.com/",
+    "note": "Authoritative source for N11 assignments, NPA opening dates (500/888/877/866/855/844/833), 555 sub-block assignments, and the 1995 interchangeable-NPA transition.",
+    "confidence": "primary"
+  },
+  {
+    "id": "att-greenstar",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "AT&T greenstar / blueflag toll-fraud detection program",
+    "author": "AT&T Long Lines / Bell Labs",
+    "publication": "Internal AT&T documents 1970-1985; referenced in BSTJ articles on 4ESS and 1AESS",
+    "note": "AT&T's toll-fraud detection program. Greenstar (later blueflag) logged suspicious 2600 Hz hold-time patterns on interoffice trunks from the 1970s onward. Not publicly documented in a single primary source — referenced in Bell Labs Record trunk-signaling articles.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-9-9-lmos",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Loop Maintenance Operations System (LMOS)",
+    "author": "Phantom Phreaker & Doom Prophet",
+    "publication": "Phrack Inc. Issue 9, File 9 (Feb 1987)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK-9",
+    "note": "Foundational community reference for LMOS — the Bell system for tracking loop-plant trouble tickets. Extended in Phrack 18.8 (Control C).",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-51-15-ccs7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "A Brief Introduction to CCS7",
+    "author": "Narbo",
+    "publication": "Phrack Inc. Issue 51, File 15 (Sept 1997)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK51",
+    "note": "Community-era introduction to Common Channel Signaling No. 7 (SS7). Bridges classic in-band phreaking with the modern SS7 attack surface.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-14-4-remobs",
+    "category": "bibliography",
+    "type": "community",
+    "title": "The Reality of the Myth: REMOBS",
+    "author": "Taran King",
+    "publication": "Phrack Inc. Issue 14, File 4 (Aug 1987)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK14",
+    "note": "Community documentation of Remote Observation System — Bell's remote line-monitoring capability. The article that anchored the phreak-scene understanding of what wiretap-adjacent tooling actually existed inside Ma Bell.",
+    "confidence": "community"
+  },
+  {
     "id": "itu-t-o-series",
     "category": "bibliography",
     "type": "primary",

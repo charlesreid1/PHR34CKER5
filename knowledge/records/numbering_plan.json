@@ -1,0 +1,287 @@
+[
+  {
+    "id": "nanp_structure",
+    "name": "NANP number structure — NPA-NXX-XXXX",
+    "aliases": ["NANP", "NPA-NXX-XXXX", "North American Numbering Plan"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1947-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "format": "NPA-NXX-XXXX",
+      "npa_role": "3-digit area code",
+      "nxx_role": "3-digit central-office prefix",
+      "line_number_role": "4-digit line number",
+      "digit_constraints_pre_1995": {
+        "npa_first_digit": "2-9",
+        "npa_second_digit": "0 or 1",
+        "nxx_first_digit": "2-9",
+        "nxx_second_digit": "2-9"
+      },
+      "digit_constraints_post_1995": {
+        "npa_first_digit": "2-9",
+        "npa_second_digit": "0-9",
+        "nxx_first_digit": "2-9",
+        "nxx_second_digit": "0-9",
+        "notes": "Interchangeable-NPA opening. See nanp_1995_transition."
+      }
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_1995_transition", "npl_n11_codes", "npl_555", "npl_toll_free_evolution"]
+  },
+  {
+    "id": "nanp_1995_transition",
+    "name": "1995-01-15 interchangeable NPA transition",
+    "aliases": ["interchangeable NPA", "January 1995 NPA opening"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1995-01-15", null],
+    "confidence": "primary",
+    "technical_body": {
+      "effective_date": "1995-01-15",
+      "meaning": "Second digit of NPA opened from {0, 1} to {0-9}. Pre-1995 area codes were N0X or N1X only. Post-1995, codes like 334, 360, 520 appeared.",
+      "first_new_codes": ["334 (Alabama)", "360 (Washington)", "520 (Arizona)"],
+      "impact": "Ended the pre-1995 rule that let phones distinguish area code from prefix by second-digit alone — now 10-digit dialing became necessary in more places."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_structure"]
+  },
+  {
+    "id": "npl_n11_codes",
+    "name": "N11 service codes",
+    "aliases": ["N11", "N-1-1 codes", "911", "411", "611", "711", "811", "911 emergency"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1968-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "codes": {
+        "211": {"meaning": "Community information / social services", "effective": "2000-07-21"},
+        "311": {"meaning": "Non-emergency municipal services", "effective": "1997-02-14"},
+        "411": {"meaning": "Directory assistance", "effective": "historic (pre-NANPA-era)"},
+        "511": {"meaning": "Traveler information", "effective": "2000-07-21"},
+        "611": {"meaning": "Repair / telco customer service", "effective": "historic"},
+        "711": {"meaning": "Telecommunications Relay Service (TRS)", "effective": "2000-07-21"},
+        "811": {"meaning": "Call before you dig (utility locate)", "effective": "2005-03-01"},
+        "911": {"meaning": "Emergency", "effective": "1968-02-16 (national); state-by-state deployment through 1980s"}
+      },
+      "notes": "N11 codes are always three digits, never precede an NPA. They are consumed by the local switch's translation table."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_structure"]
+  },
+  {
+    "id": "npl_555",
+    "name": "555 prefix — reserved / fictional / directory",
+    "aliases": ["555 prefix", "555-1212"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1947-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "block_1212": {"assignment": "555-1212 = directory assistance across every NPA", "effective": "since NANP inception"},
+      "block_0100_to_0199": {"assignment": "reserved for fictional use (movies/TV)", "effective": "1994", "actor": "Industry Numbering Committee"},
+      "other_555_XXXX": "Allocatable by NANPA for actual services (few in practice; some are used by transportation-info lines).",
+      "phreak_relevance": "555-1212 was the historic reference number for verifying you had reached a specific NPA — dial NPA-555-1212 from any tandem and hear that NPA's local directory-assistance answer."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_structure"]
+  },
+  {
+    "id": "npl_toll_free_evolution",
+    "name": "Toll-free NPA evolution (800 → 888 → 877 → 866 → 855 → 844 → 833 → 822)",
+    "aliases": ["toll-free evolution", "800 888 877 866 855 844 833", "toll-free", "toll free", "800 numbers", "888 numbers", "877 numbers", "866 numbers", "SMS/800"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1966-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "history": {
+        "800": {"effective": "1966-01-01", "notes": "Original toll-free NPA. Reachable by dialing without a leading 1 in most territories."},
+        "888": {"effective": "1996-03-01"},
+        "877": {"effective": "1998-04-04"},
+        "866": {"effective": "2000-07-29"},
+        "855": {"effective": "2010-10-09"},
+        "844": {"effective": "2013-12-07"},
+        "833": {"effective": "2017-04-22"},
+        "822": {"effective": "reserved (not in service as of 2026)"}
+      },
+      "sms800_launch": "1993-05-01",
+      "sms800_meaning": "SMS/800 database + RESPORG portability launched. Before this, toll-free numbers were owned by the terminating carrier ('800 number lock-in'). After: any RESPORG could move an 8YY number between carriers.",
+      "phreak_relevance": "Compromised RESPORG credentials meant you could hijack an 8YY number — the era-authentic version of what SS7 STPs later did to SMS termination."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["ani_ii_24_toll_free", "nanp_structure"]
+  },
+  {
+    "id": "npl_npa_500",
+    "name": "NPA 500 — personal communication service",
+    "aliases": ["NPA 500", "500 area code", "follow-me numbers"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1994-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "effective": "1994",
+      "meaning": "Personal Communication Service (PCS) — 'follow-me' numbers. A single 500-NXX-XXXX number routed to a user's currently-active phone (home, cell, hotel).",
+      "notes": "Mostly a marketing failure; adoption never matched projections."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_structure"]
+  },
+  {
+    "id": "npl_npa_600",
+    "name": "NPA 600 — Canadian non-geographic",
+    "aliases": ["NPA 600", "600 area code"],
+    "category": "numbering_plan",
+    "region": "Canada",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1994-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "meaning": "Canadian non-geographic numbering used for services (call-forwarding aggregation, some paging).",
+      "notes": "Rarely seen from US originations. A US caller dialing 1-600-XXX-XXXX will usually get an intercept unless their IXC has a Canadian gateway."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["nanp_structure"]
+  },
+  {
+    "id": "npl_npa_700",
+    "name": "NPA 700 — carrier-specific services",
+    "aliases": ["NPA 700", "700 area code"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "meaning": "Feature Group D carrier-specific services. Dialing 1-700-NXX-XXXX reaches the caller's presubscribed IXC's info line for that number.",
+      "notable_verification_number": {
+        "number": "1-700-555-4141",
+        "att_response": "'You have reached AT&T Long Distance' or similar",
+        "purpose": "Verify which IXC the calling line is presubscribed to."
+      }
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["npl_10xxx_101xxxx_cic", "nanp_structure"]
+  },
+  {
+    "id": "npl_npa_900",
+    "name": "NPA 900 — premium services",
+    "aliases": ["NPA 900", "900 numbers"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "meaning": "Premium (caller-billed) service. Downstream LEC applies a per-minute charge to the caller's bill on behalf of the 900 information provider.",
+      "phreak_relevance": "900 numbers were a common vector for social-engineering / call-diverting fraud — divert a business PBX to dial a 900 number in a foreign country and profit-share with the 900 operator."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["ani_ii_25_premium", "npl_npa_976"]
+  },
+  {
+    "id": "npl_npa_976",
+    "name": "976 prefix — legacy per-NPA local premium",
+    "aliases": ["976 prefix", "976 numbers"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1970-01-01", "2005-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "meaning": "Local premium prefix — NPA-976-XXXX within a single NPA charged per-minute like 900 but stayed within the LEC. Not a national NPA (976 is a prefix within existing NPAs).",
+      "phreak_relevance": "Same fraud vector as 900 but per-NPA. Blocked by many businesses and residential customers via CLASS features.",
+      "died_because": "Superseded by 900 (national) and then by internet-hosted premium services."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["npl_npa_900"]
+  },
+  {
+    "id": "npl_10xxx_101xxxx_cic",
+    "name": "CIC dialaround — 10-XXX / 101-XXXX",
+    "aliases": ["10-XXX", "10-10-XXX", "101-XXXX", "CIC dialaround", "Feature Group D dialaround", "CIC", "Carrier Identification Code"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Subscriber-dialable carrier-access code. Dial 10XXX (pre-1998) or 101XXXX (post-1998) before 1+NPA+NXX+XXXX to route the call over a specific IXC's network, bypassing the caller's presubscribed carrier.",
+      "pre_1998_format": "10-XXX (3-digit CIC)",
+      "post_1998_format": "101-XXXX (4-digit CIC, informally '10-10-XXX')",
+      "transition_date": "1998-07-01",
+      "transition_authority": "FCC Order 97-402",
+      "well_known_cics": {
+        "0288": "AT&T (101-0288, historically also 10-288)",
+        "0222": "MCI",
+        "0333": "Sprint",
+        "0811": "Cable & Wireless",
+        "0555": "Wiltel"
+      },
+      "phreak_relevance": "10-XXX dialaround was heavily marketed for consumer 'flat-rate' dialing during the 1996-2003 era. Sometimes used to bypass toll restrictions on a hotel PBX by dialing 101-XXXX-1-NPA-NXX-XXXX where the hotel had only blocked '1-'-prefixed dialing."
+    },
+    "citations": ["fcc-97-402", "nanpa-inc-guidelines"],
+    "see_also": ["npl_feature_groups", "nanp_structure"]
+  },
+  {
+    "id": "npl_feature_groups",
+    "name": "Feature Groups A / B / C / D (carrier access)",
+    "aliases": ["FGA", "FGB", "FGC", "FGD", "Feature Group A", "Feature Group B", "Feature Group C", "Feature Group D"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "FGA": {"meaning": "Local dial-up to an alternate long-distance carrier via a 7-digit local number. Pre-divestiture; largely obsolete post-1984."},
+      "FGB": {"meaning": "Subscriber-dialable via 950-XXXX. Rotary/pulse-compatible. Popular 1984-late-90s.", "format": "950-XXXX", "era": "1984-2000"},
+      "FGC": {"meaning": "Access for AT&T's presubscribed customers (pre-divestiture routing). Historical."},
+      "FGD": {"meaning": "Full equal-access — 10XXX/101XXXX CIC dialaround, ANI II delivery, presubscription. The dominant post-1984 format.", "format": "10-XXX or 101-XXXX"}
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["npl_10xxx_101xxxx_cic", "npl_950_xxxx", "sig_ani_wink_spill"]
+  },
+  {
+    "id": "npl_950_xxxx",
+    "name": "950-XXXX Feature Group B carrier access",
+    "aliases": ["950-XXXX", "950 access"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1984-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Subscriber-dialable Feature Group B access. Dial 950-XXXX to reach an alternate long-distance carrier's Point of Presence (POP) at no local charge.",
+      "post_connect": "Carrier tone (typically a beep or short prompt); enter card number + destination.",
+      "died_because": "10XXX / 101XXXX dialaround (FGD) generalized carrier-selection and largely displaced 950-XXXX by 2000."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["npl_feature_groups", "npl_10xxx_101xxxx_cic"]
+  },
+  {
+    "id": "npl_lata_structure",
+    "name": "LATA structure (Local Access and Transport Area)",
+    "aliases": ["LATA", "Local Access and Transport Area"],
+    "category": "numbering_plan",
+    "region": "NANP",
+    "signaling_layer": "dialing_plan",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Post-divestiture (1984) geographic-and-regulatory zone. Calls within a LATA were LEC (local exchange carrier) territory; calls between LATAs required an IXC (inter-exchange carrier) to bridge.",
+      "count": "Approximately 200 LATAs in the US at divestiture.",
+      "phreak_relevance": "LATA boundaries defined where the 'presubscribed carrier' choice mattered. In-LATA calls were free (or LEC-billed); inter-LATA calls were IXC-billed and thus the dial-around fraud target.",
+      "died_because": "Slowly obsoleting since the Telecommunications Act of 1996 opened LATA boundaries; still a concept in tariffs but less operationally meaningful."
+    },
+    "citations": ["nanpa-inc-guidelines"],
+    "see_also": ["npl_feature_groups", "npl_10xxx_101xxxx_cic"]
+  }
+]
