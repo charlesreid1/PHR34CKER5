@@ -40,6 +40,7 @@ Three tiers, from knowing to acting:
 - **Know** — corpus tools: `list_topics`, `search_lore`, `read_lore`, `random_lore`
 - **Synthesize** — tone generators: DTMF, R1 MF, red box, fax CNG/CED, 2600 Hz
 - **Act** — live-call tools: `dial`, `wait_for_answer`, `play_*_into_call`, `listen`, `record`
+- **Perceive** — read the line back: `detect_tone`, `dtmf_decode`, `transcribe`, and `play_sequence` to script a whole call plan
 
 The canonical move is to script all three together — "dial X, wait for
 answer, wait 10s, deposit 75¢, listen for 5s, hang up":
@@ -139,7 +140,35 @@ opens an ngrok tunnel so Twilio can reach it.
 | `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
 | `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
 
-(For the canonical scripted sequence that ties these together, see
+#### Perceive & orchestrate
+
+The tools above are primitives. These compose and interpret them — script a
+whole call plan, or figure out what's on the line.
+
+| tool | what it does |
+|---|---|
+| `play_sequence(call_sid, steps)` | run a scripted call plan atomically; injection steps block until played out, so "send digits then listen" listens *after* the digits |
+| `detect_tone(call_sid, seconds=3, targets=None)` | Goertzel classifier: dial-tone, busy, reorder, ringback, 2600, cng, ced, modem, milliwatt — with a cadence estimate to split busy from reorder |
+| `dtmf_decode(call_sid, seconds=5)` | pull DTMF digits out of inbound audio (IVR / DISA playback) |
+| `dtmf_decode_wav(path)` | same decoder, on a WAV file |
+| `transcribe(call_sid, seconds=10)` | capture audio + start a Twilio recording/transcription for speech-to-text |
+
+`play_sequence` steps are dicts keyed by `action` — `dtmf`, `mf`, `tone`,
+`2600`, `redbox`, `cng`, `ced`, `wav`, `wait`, `wait_for_answer`, `hangup`,
+`listen`, `detect_tone`, `dtmf_decode`. The canonical "deposit 75¢" flow as
+one call:
+
+```
+play_sequence(sid, [
+    {"action": "wait_for_answer"},
+    {"action": "wait", "s": 10},
+    {"action": "redbox", "coins": "qqq"},
+    {"action": "listen", "s": 5},
+    {"action": "hangup"},
+])
+```
+
+(For the primitive-by-primitive version of that sequence, see
 [What can it do?](#what-can-it-do) at the top.)
 
 #### Env vars
