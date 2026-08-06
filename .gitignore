@@ -24,3 +24,8 @@ venv/
 
 # uv
 uv.lock
+
+# Generated tone fixtures — regenerate with scripts/generate-tone-fixtures.py.
+# Checksums (tests/fixtures/tones.sha256) are tracked so we can verify
+# determinism, but the WAV files themselves are not.
+tests/fixtures/tones/*.wav

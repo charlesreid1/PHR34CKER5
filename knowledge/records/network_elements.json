@@ -30,7 +30,7 @@
       ],
       "notes": "Newer generics forced password change on first login but many sites did not. LD 22 dumps installed packages so an attacker knows which features are licensed."
     },
-    "citations": ["nortel-ntp-553-3001-311", "phrack-40-6", "phrack-44-19"],
+    "citations": ["nortel-ntp-553-3001-311", "phrack-40-6", "phrack-44-19", "2600-autumn-1997-meridian"],
     "see_also": [
       "ld_15_customer",
       "ld_16_route",
