@@ -148,6 +148,122 @@ def test_unmatched_claim_is_unverified_not_bluffed(store):
     assert v["records"] == []
 
 
+# --- expanded adversarial catalog --------------------------------------------
+#
+# Each row: (claim, expected_verdict, description). Claims come in pairs — an
+# adversarial claim the KR should recognize as wrong, and a truthful control
+# that must NOT be misclassified (usually "unverified" — no matching trap).
+
+
+_EXPANDED_TRAPS = [
+    # crystal-swap direction (which crystal is the stock part vs. the mod)
+    ("The Radio Shack tone dialer red-box mod replaces the colorburst crystal.",
+     "false", "crystal-swap direction"),
+    # Cap'n Crunch qualifier — always needs region+layer+frequency framing
+    ("Captain Crunch whistled his phone into free calls.",
+     "needs_qualification", "cap n crunch qualifier"),
+    # DTMF vs MF R1 cross-layer confusion
+    ("A DTMF phone can send an MF R1 KP tone to seize a trunk.",
+     "needs_qualification", "DTMF vs MF cross-layer"),
+    ("DTMF frequencies are 697 770 852 941 by 1209 1336 1477 1633 Hz.",
+     "unverified", "CONTROL: DTMF grid alone does not trigger the trap"),
+    # ACTS dollar tone myth
+    ("The ACTS dollar tone is five 66 ms bursts.",
+     "false", "ACTS dollar 5x66 myth"),
+    # Green-boxing modern claim
+    ("Green-boxing still works on today modern payphone.",
+     "false", "green box modern"),
+    # Red-boxing generality
+    ("Red-boxing works on every payphone.",
+     "false", "red-boxing on all payphones"),
+    # COMP128 date confusion
+    ("COMP128 SIM cloning happened in 2005.",
+     "false", "COMP128 wrong year"),
+    # AMPS shutoff date
+    ("AMPS was shut off by the FCC in 2003.",
+     "false", "AMPS FCC sunset date"),
+    # 888 too-early launch
+    ("Toll-free 888 numbers were available in 1985.",
+     "false", "888 too-early"),
+    # 555 arbitrary routability
+    ("You can dial any 555 number and get a real active line.",
+     "needs_qualification", "555 arbitrary routing"),
+    # CIC era
+    ("The 10-XXX dialaround CIC format worked in 1996.",
+     "needs_qualification", "CIC 10-XXX era qualifier"),
+    # Interchangeable NPA pre-1995
+    ("The 334 area code launched in 1988.",
+     "false", "NPA 334 too-early"),
+    # RESPORG toll-free portability pre-1993
+    ("RESPORG toll-free portability existed since 1985.",
+     "false", "RESPORG pre-1993"),
+    # SS7 too-early rollout
+    ("SS7 was standardized and deployed in 1975.",
+     "false", "SS7 rollout too-early"),
+    # T-1 clear data rate
+    ("A T-1 DS0 delivers a full 64 kbps of clear user data with CAS.",
+     "false", "T-1 CAS clear rate"),
+    # POCSAG/FLEX encryption myth
+    ("FLEX paging traffic was fully encrypted.",
+     "false", "FLEX encryption myth"),
+    # AMPS pre-A-Key authentication
+    ("AMPS registration was authenticated before A-Key in 1985.",
+     "false", "AMPS pre-A-Key auth myth"),
+    # R2 line signaling frequency confusion
+    ("R2 line signaling uses 2400 Hz for seizure.",
+     "false", "R2 vs C5 line signaling"),
+    # Ground-start layer confusion
+    ("Ground-start is what home residential single-line POTS uses.",
+     "false", "ground-start layer"),
+    # Bernie S — always needs full context
+    ("Ed Cummings was arrested for hacking.",
+     "needs_qualification", "Bernie S qualifier"),
+    # DISA "dead" myth
+    ("Meridian DISA abuse is completely dead in 2026.",
+     "false", "Meridian DISA still-effective"),
+    # Three-slot payphone vs ACTS
+    ("The Western Electric 3-slot payphone was ACTS-controlled.",
+     "false", "three-slot pre-ACTS"),
+]
+
+
+@pytest.mark.parametrize("claim,verdict,description", _EXPANDED_TRAPS)
+def test_expanded_trap_catalog(store, claim, verdict, description):
+    """Every new trap must fire on its adversarial claim (or, for controls,
+    NOT be mis-triggered by a truthful statement)."""
+    v = server.verify_claim(claim)
+    assert v["verdict"] == verdict, (
+        f"{description}: expected {verdict!r}, got {v['verdict']!r} — {claim}"
+    )
+
+
+# --- trap-catalog structural checks ------------------------------------------
+#
+# Every trap should cite records that actually exist in the KR. Broken cite
+# lists mean users get "verdict: false" with a pointer to nothing.
+
+
+def test_every_trap_cite_resolves_or_is_empty(store):
+    """Each trap's cite[] entry must either be an empty list (some traps
+    can't point at a single record — e.g. the universal-ANAC trap) or every
+    entry must resolve to a real record ID."""
+    broken = []
+    for i, trap in enumerate(server._CLAIM_TRAPS):
+        for cid in trap.get("cite") or []:
+            if cid not in store.records:
+                broken.append((i, cid, trap["match"]))
+    assert not broken, f"traps with unresolved cite ids: {broken}"
+
+
+def test_trap_catalog_size_matches_plan_target(store):
+    """Trap catalog should be at or above the plan's minimum. The plan
+    targets ~50; the pass in this repo targets ~30. Failing this test
+    just means the trap catalog shrank — investigate before merging."""
+    assert len(server._CLAIM_TRAPS) >= 30, (
+        f"trap catalog shrank to {len(server._CLAIM_TRAPS)} — plan targets 30+"
+    )
+
+
 # --- explain_technique -------------------------------------------------------
 
 

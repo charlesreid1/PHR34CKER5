@@ -446,6 +446,271 @@ _CLAIM_TRAPS = [
         ),
         "cite": ["cellular_gsm"],
     },
+    {
+        "match": [r"(radio.?shack|tone\s*dialer|red.?box).*(colorburst|3\.579|3\.58|ntsc)"],
+        "verdict": "false",
+        "because": (
+            "The Radio Shack tone-dialer red-box mod REPLACES the 3.579545 MHz "
+            "colorburst crystal with a 6.5536 MHz crystal, not the other way "
+            "around. The colorburst crystal is the stock part; the 6.5536 MHz "
+            "is the swap. The scaling ratio (~1.831) is what retunes the '*' "
+            "key to ~1723+2213 Hz, inside ACTS ±1.5% tolerance."
+        ),
+        "cite": ["box_red", "acts_quarter"],
+    },
+    {
+        "match": [r"cap['’]?n\s*crunch|captain\s*crunch"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The Cap'n Crunch whistle produced 2600 Hz — the SF-supervision "
+            "carrier tone on CO-to-CO in-band trunks. Any claim about the "
+            "whistle must specify (a) the frequency (2600 Hz), (b) the layer "
+            "it attacked (co_to_co_inband_trunk, NOT subscriber loop), and "
+            "(c) the region (NANP; a US 2600 Hz whistle does not seize a "
+            "CCITT No.5 international trunk, which needs 2400 Hz)."
+        ),
+        "cite": ["sf_2600", "sig_sf", "ccitt5_line_seize"],
+    },
+    {
+        # NOTE: the second pattern deliberately excludes the substring "mf"
+        # inside "dtmf" — use \bmf\b or a distinguishing keyword.
+        "match": [r"\bdtmf\b", r"(\bmf\b|\bmf\s*r1\b|\br1\b|blue\s*box|inter.?office|\btrunk\b)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "DTMF (Q.23, 697/770/852/941 x 1209/1336/1477/1633 Hz) is a "
+            "SUBSCRIBER-LOOP signaling system. MF R1 (700/900/1100/1300/"
+            "1500/1700 Hz, two-of-six) is the CO-to-CO in-band trunk system. "
+            "They are separate namespaces at separate layers with different "
+            "frequency grids. A blue box does not send DTMF; a touch-tone "
+            "phone does not send MF."
+        ),
+        "cite": ["sig_dtmf", "sig_mf_r1", "mf_kp"],
+    },
+    {
+        "match": [r"(acts|red.?box).*(dollar|\$1).*(5|five).*66"],
+        "verdict": "false",
+        "because": (
+            "The 'dollar = 5 x 66 ms' claim is wrong. Per Bellcore GR-506-"
+            "CORE, the dollar tone is a SINGLE 650 ms burst, and it wasn't "
+            "universally implemented on ACTS installations. Phrack 33.9 "
+            "does not document a dollar tone at all. Five 66 ms bursts is "
+            "not the dollar cadence in any documented spec."
+        ),
+        "cite": ["acts_dollar", "acts_quarter", "acts_nickel"],
+    },
+    {
+        "match": [r"green.?box(ing)?.*(work|effective|use).*(modern|today|2020|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "Green-boxing operator coin-control tones only worked in specific "
+            "four-wire operator-trunk topologies with poor filtering, and the "
+            "operator platforms (TSPS/TOPS/OSPS) that consumed them are "
+            "digital or decommissioned. Coin-control signaling on modern "
+            "payphones is out-of-band or nonexistent."
+        ),
+        "cite": ["box_green", "pay_tsps_operator"],
+    },
+    {
+        "match": [r"red.?box", r"(all|every|any)\s*(payphone|coin\s*phone)"],
+        "verdict": "false",
+        "because": (
+            "Red-boxing only worked against ACTS-supervised Bell 1C/1D "
+            "single-slot 'fortress' payphones. It never worked against "
+            "COCOTs (local validation) or Nortel Millennium smart phones "
+            "(local DSP validation). Any generic 'red-box works on payphones' "
+            "claim needs the platform qualifier."
+        ),
+        "cite": ["pay_acts", "pay_bell_1c_1d", "pay_cocot", "pay_millennium"],
+    },
+    {
+        "match": [r"(comp128|sim.*clon).*(200[0-9]|201[0-9]|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "COMP128-1 was broken in 1998 (Wagner, Goldberg, Briceno), not "
+            "in the 2000s. Physical SIM cloning was tractable via ~150k "
+            "challenge-response queries after the 1998 disclosure. COMP128-"
+            "2 and -3 followed and were harder."
+        ),
+        "cite": ["cellular_gsm"],
+    },
+    {
+        "match": [r"amps.*(shut\s*off|shutoff|sunset|retired|end.of.life|decommission).*(2001|2002|2003|2004|2005|2006|2007)"],
+        "verdict": "false",
+        "because": (
+            "The FCC-authorized AMPS sunset was Feb 18, 2008 in the US. "
+            "Analog was largely obsolete in urban markets by 2003, but the "
+            "regulatory shutoff did not happen until 2008. Rural retention "
+            "ran even longer in some regions."
+        ),
+        "cite": ["cellular_amps"],
+    },
+    {
+        "match": [r"\b888\b", r"(198[0-9]|199[0-5])"],
+        "verdict": "false",
+        "because": (
+            "888 launched on 1996-03-01. Before that, the only toll-free NPA "
+            "was 800. Claims of 888 numbers in the 1980s or early 1990s are "
+            "wrong. Subsequent additions: 877 in 1998, 866 in 2000, 855 in "
+            "2010, 844 in 2013, 833 in 2017."
+        ),
+        "cite": ["npl_toll_free_evolution"],
+    },
+    {
+        "match": [r"\b555\b", r"(any|arbitrary|all)\s+(555\s+)?number", r"(work|real|active|routable|dial)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The 555 prefix is NOT generally routable. 555-1212 is directory "
+            "assistance NANP-wide. 555-0100 through 555-0199 are reserved "
+            "for fictional use in movies/TV since 1994. Other 555 numbers "
+            "can be allocated by NANPA but few are active."
+        ),
+        "cite": ["npl_555"],
+    },
+    {
+        "match": [r"(10[- ]?xxx|101[- ]?xxxx|cic|dial.?around).*(199[0-7]|198[0-9])"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The CIC format changed on 1998-07-01 per FCC Order 97-402. "
+            "Pre-1998: 10-XXX (3-digit CIC). Post-1998: 101-XXXX (4-digit "
+            "CIC, informally '10-10-XXX'). A claim about dialaround CIC "
+            "must specify the era."
+        ),
+        "cite": ["npl_10xxx_101xxxx_cic", "fcc-97-402"],
+    },
+    {
+        "match": [
+            r"(interchangeable\s*npa|area\s*code\s*\b(2[0-9][0-9]|3[0-9][0-9]|4[0-9][0-9]|5[0-9][0-9]|6[0-9][0-9]|7[0-9][0-9]|8[0-9][0-9]|9[0-9][0-9])\b|\b(334|360|520|530|541|561|562|573|602)\b\s*(area\s*code|launched|introduced))",
+            r"(198[0-9]|199[0-4])"
+        ],
+        "verdict": "false",
+        "because": (
+            "Interchangeable NPAs (second digit 2-9 allowed) went live on "
+            "1995-01-15. Pre-1995 area codes were N0X or N1X only; the "
+            "first new-format codes (334, 360, 520) appeared then."
+        ),
+        "cite": ["nanp_1995_transition"],
+    },
+    {
+        "match": [r"resporg.*(198[0-9]|199[0-2])|toll.?free.*portab.*(198[0-9]|199[0-2])"],
+        "verdict": "false",
+        "because": (
+            "RESPORG portability (SMS/800 database) launched on 1993-05-01. "
+            "Before that, toll-free numbers were owned by the terminating "
+            "carrier — the '800 number lock-in' era. Claims of portability "
+            "pre-1993 are wrong."
+        ),
+        "cite": ["npl_toll_free_evolution"],
+    },
+    {
+        "match": [r"ss7.*(deployment|rollout|introduced|standardized).*(197[0-9])"],
+        "verdict": "false",
+        "because": (
+            "SS7 (No.7) rollout began 1980. ANSI SS7 was standardized 1988. "
+            "The 1970s predecessor was CCIS No.6 (deployed 1976); SS7 "
+            "replaced it starting 1980 and became ubiquitous on North "
+            "American interoffice trunks by ~1992."
+        ),
+        "cite": ["sig_ss7_no7", "sig_ccis_no6"],
+    },
+    {
+        "match": [r"(t.?1|ds1|dial.?up.*modem).*(64\s*k|64\s*000|full\s*rate)"],
+        "verdict": "false",
+        "because": (
+            "T-1 robbed-bit CAS steals the LSB of every 6th frame of each "
+            "channel for supervision. The clear data rate per DS0 is 56 kbps, "
+            "not 64. This is why dial-up modems topped out at 56 k on TDM "
+            "channels. ISDN PRI (23B+D / 30B+D) uses out-of-band signaling "
+            "and gets the full 64 kbps per B channel."
+        ),
+        "cite": ["sig_t1_cas"],
+    },
+    {
+        "match": [r"(pocsag|flex).*(encrypt|secure|protected)"],
+        "verdict": "false",
+        "because": (
+            "POCSAG (512/1200/2400 bps FSK) and FLEX (1600-6400 bps 4-level "
+            "FSK) both broadcast cap codes and message bodies UNENCRYPTED. "
+            "A mid-90s eavesdrop stack (ICOM PCR-1000 + PDW or POC32) could "
+            "log every message in a metro. WHCA / hospital / on-call pages "
+            "all traveled in the clear for a decade."
+        ),
+        "cite": ["cellular_pagers_flex", "cellular_pagers_pocsag"],
+    },
+    {
+        "match": [r"(esn|min|amps).*(encrypt|authenticate|secure).*(pre.?a.?key|before.*1996|198[0-9])"],
+        "verdict": "false",
+        "because": (
+            "AMPS transmitted MIN + ESN in the CLEAR on the RECC (Reverse "
+            "Control Channel) as 10 kbps Manchester. A-Key authentication "
+            "was added by IS-54B / IS-136 (TDMA) starting ~1996-1998. "
+            "Pre-A-Key AMPS registration leaked identity to any scanner in "
+            "range — the foundation of clone-fraud economics."
+        ),
+        "cite": ["cellular_amps"],
+    },
+    {
+        "match": [r"r2.*(2400|2600).*(seize|seizure|line\s*signal)"],
+        "verdict": "false",
+        "because": (
+            "R2 (ITU-T Q.400/Q.441) uses 3825 Hz compelled tones for line "
+            "signaling, NOT 2400/2600 Hz. 2400/2600 Hz is CCITT No.5 "
+            "international MF (2400 = seizure, 2600 = proceed-to-send). "
+            "R1, R2, and No.5 are three separate signaling systems."
+        ),
+        "cite": ["sig_r2", "sig_ccitt5"],
+    },
+    {
+        "match": [r"ground.?start.*(subscriber.*residential|home.*phone|single.?line.*pots)"],
+        "verdict": "false",
+        "because": (
+            "Ground-start is a PBX-to-CO trunk supervision method, not a "
+            "residential subscriber-loop method. Home POTS lines use loop-"
+            "start (DC loop closure). Ground-start's purpose is to reduce "
+            "glare on shared trunks — irrelevant for a single-line home phone."
+        ),
+        "cite": ["sig_ground_start", "sig_loop_start"],
+    },
+    {
+        "match": [r"bernie\s*s|ed\s*cummings"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The Bernie S (Ed Cummings) 1995 USSS case turned on possession "
+            "of a Radio Shack tone dialer with a 6.5536 MHz crystal — used "
+            "as USSS proof of 'device to defraud' intent under 18 USC 1029. "
+            "Cummings was convicted and imprisoned. This is a canonical "
+            "reason NOT to physically carry a modified dialer through "
+            "security. Any claim about the case should state (a) the year "
+            "(1995), (b) the specific evidence (6.5536 crystal), and (c) "
+            "the statute (18 USC 1029 counterfeit access device)."
+        ),
+        "cite": ["box_red", "2600-autumn-1990"],
+    },
+    {
+        "match": [r"(disa|meridian.*(pbx|fraud|abuse)).*(dead|obsolete|no\s*longer).*(2020|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "DISA abuse on Meridian / SL-1 / CS1000 PBXs remains effective "
+            "in 2026 against abandoned or default-credentialed installs "
+            "(small hotels, warehouses, orphaned enterprise gear). What "
+            "killed it as a mass fraud target was enterprise credential "
+            "rotation, real-time SS7-side fraud analytics, and IP-PBX "
+            "migration — not any change to the SL-1 attack itself."
+        ),
+        "cite": ["technique_meridian_disa_abuse", "netel_sl1", "def_ss7_fraud_analytics"],
+    },
+    {
+        "match": [r"(coin.?box|three.?slot|3.?slot).*(acts|toll.?switch|red.?box)"],
+        "verdict": "false",
+        "because": (
+            "The Western Electric three-slot payphone (pre-1975) was NOT "
+            "ACTS-signaled. It was operator-attended: coins triggered "
+            "mechanical bells/gongs (one gong = nickel, two = dime, one "
+            "long = quarter) that a human operator listened for. ACTS came "
+            "in 1978 with the single-slot fortress phone (1C/1D). Red-"
+            "boxing attacked ACTS specifically."
+        ),
+        "cite": ["pay_three_slot", "pay_bell_1c_1d", "pay_acts"],
+    },
 ]
 
 
