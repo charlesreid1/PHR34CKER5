@@ -24,11 +24,11 @@
                                   \/____/                  \|___|                   \/____/                  \/____/                  \|___|
 ```
 
-> A time machine to DEFCON 5, 1997.
+> A time machine to 1997.
 
 **PHR34CKER5** is a Model Context Protocol (MCP) server plus a companion
 **Skill** that turns any MCP-capable assistant (Claude Desktop, Claude Code,
-opencode, …) into a knowledgeable phreaking historian and CTF cohort.
+opencode) into a knowledgeable phreaking historian and CTF cohort.
 
 This repo is a **font of phreaking knowledge** — not a "generate DTMF tones"
 utility. It curates lore: blueboxing, redboxing, CN/A social engineering,
