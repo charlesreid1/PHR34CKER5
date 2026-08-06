@@ -48,6 +48,39 @@ Tone generation (writes WAV files, returns `{path, duration_ms, ...}`):
 When a tool renders a WAV, mention the returned `path` and `duration_ms`
 so the user can play the file.
 
+Live telephony via Twilio (requires TWILIO_* env vars; the first call
+lazy-boots a local FastAPI server + ngrok tunnel):
+
+- `dial(to, from_=None, record=False)` — place a real PSTN call, returns
+  `{call_sid, status, ...}`.
+- `hangup(call_sid)` — end a call.
+- `list_calls()`, `call_status(call_sid)` — inspect state.
+- `wait_for_answer(call_sid, timeout_s=60)` — block until the callee
+  picks up and the Media Streams WebSocket is live.
+- `wait(seconds)` — sleep in a scripted sequence.
+- `play_wav_into_call(call_sid, path)` — inject any pre-rendered WAV.
+- `play_tone_into_call`, `play_dtmf_into_call`, `play_mf_into_call`,
+  `play_2600_into_call`, `play_red_box_into_call` — inject live audio.
+- `listen(call_sid, seconds)` — pull inbound audio out as a WAV.
+- `start_recording` / `stop_recording` / `get_recording_url` —
+  Twilio-native recording.
+
+Canonical scripted sequence — "dial X, wait 10 seconds, deposit 75¢":
+
+```
+call = dial("+14155551212")
+wait_for_answer(call["call_sid"])
+wait(10)
+play_red_box_into_call(call["call_sid"], "qqq")
+listen(call["call_sid"], seconds=5)
+hangup(call["call_sid"])
+```
+
+Consent + legality: recording laws are jurisdiction-specific; the
+signaling tones are historical artifacts that no modern carrier honors
+for real routing. Use live telephony against lines the user owns or is
+authorized to test — never for toll-fraud attempts.
+
 ## How to use it
 
 1. **Orient first.** For an unfamiliar term, call `search_lore(term)`

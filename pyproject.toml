@@ -3,7 +3,7 @@ name = "phr34cker5-mcp"
 version = "0.0.1"
 description = "PHR34CKER5 — an MCP server that serves phreaking lore, zines, and skills. A time machine to DEFCON 5, 1997."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 license = { text = "MIT" }
 authors = [{ name = "PHR34CKER5" }]
 keywords = ["mcp", "phreaking", "2600", "ctf", "lore", "bluebox", "defcon"]
@@ -16,7 +16,16 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=1.2.0",
+    "twilio>=9.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "websockets>=12.0",
+    "pyngrok>=7.0.0",
 ]
+
+[project.optional-dependencies]
+# For running the offline-only corpus/tone tools without pulling telephony deps.
+minimal = []
 
 [project.scripts]
 phr34cker5-mcp = "phr34cker5_mcp.__main__:main"

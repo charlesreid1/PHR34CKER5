@@ -91,6 +91,84 @@ generate_dtmf("1,820")
 generate_mf("K18005551212S")
 ```
 
+### Live telephony — Twilio
+
+Real PSTN calls. Origination, live audio injection, live audio capture,
+recording. The first call to any tool below lazy-boots a local FastAPI
+server (TwiML webhooks + a bidirectional Media Streams WebSocket) and
+opens an ngrok tunnel so Twilio can reach it.
+
+**Requires Python 3.10–3.12** (uses stdlib `audioop` for μ-law).
+
+| tool | what it does |
+|---|---|
+| `dial(to, from_=None, record=False)` | place outbound PSTN call, returns `CallSid` |
+| `hangup(call_sid)` | end call via REST |
+| `list_calls()` | every call this MCP instance has seen |
+| `call_status(call_sid)` | fresh Twilio status + local WS state |
+| `wait_for_answer(call_sid, timeout_s=60)` | block until answered + WS connected |
+| `wait(seconds)` | sleep in a scripted sequence |
+| `play_wav_into_call(call_sid, path)` | inject any mono 8kHz WAV |
+| `play_tone_into_call(call_sid, freq_hz, ms)` | inject a single sine |
+| `play_dtmf_into_call(call_sid, digits, ...)` | live DTMF |
+| `play_mf_into_call(call_sid, digits, ...)` | live blue-box MF |
+| `play_2600_into_call(call_sid, ms=1000)` | live 2600 Hz |
+| `play_red_box_into_call(call_sid, coins)` | live ACTS coin tones |
+| `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
+| `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
+
+Canonical "dial X, wait 10s, deposit 75c" sequence:
+
+```
+call = dial("+14155551212")
+wait_for_answer(call["call_sid"])
+wait(10)
+play_red_box_into_call(call["call_sid"], "qqq")
+listen(call["call_sid"], seconds=5)
+hangup(call["call_sid"])
+```
+
+#### Env vars
+
+| var | required | notes |
+|---|---|---|
+| `TWILIO_ACCOUNT_SID` | yes | from console.twilio.com |
+| `TWILIO_AUTH_TOKEN` | yes | keep it secret |
+| `TWILIO_FROM_NUMBER` | yes | a Twilio-owned or verified E.164 number |
+| `NGROK_AUTHTOKEN` | recommended | free at ngrok.com; without it tunnels are unreliable |
+| `PHR34CKER5_PUBLIC_URL` | alternative | skip ngrok, point at your own public HTTPS URL (e.g. Cloudflare Tunnel) |
+
+Add them to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "phr34cker5": {
+      "command": "uvx",
+      "args": ["phr34cker5-mcp"],
+      "env": {
+        "TWILIO_ACCOUNT_SID": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "TWILIO_AUTH_TOKEN":  "your_auth_token",
+        "TWILIO_FROM_NUMBER": "+15555550123",
+        "NGROK_AUTHTOKEN":    "your_ngrok_token"
+      }
+    }
+  }
+}
+```
+
+#### Legal & consent
+
+Recording laws vary by jurisdiction — many US states are one-party consent,
+others (CA, FL, IL, MA, MD, MT, NH, PA, WA) require all-party consent. The
+`play_2600_into_call` / `play_mf_into_call` / `play_red_box_into_call`
+tools reproduce historical tones that had operational meaning on the
+pre-CCIS PSTN; modern carriers (Twilio included) will not honor them for
+signaling, and using them to attempt toll fraud is illegal. This project
+treats live telephony as a **CTF / research capability**: use it against
+lines you own, test numbers you're authorized to hit (Twilio provides some),
+or your own conference bridges.
+
 ## Install the MCP server
 
 ### Option A — run from source (recommended while iterating)

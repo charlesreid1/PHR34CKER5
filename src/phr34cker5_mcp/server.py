@@ -378,6 +378,279 @@ def generate_red_box(
     )
 
 
+# --- live telephony (Twilio) -------------------------------------------------
+#
+# Every tool below requires:
+#   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
+# and either NGROK_AUTHTOKEN (to auto-tunnel) or PHR34CKER5_PUBLIC_URL.
+#
+# First call boots the FastAPI server + ngrok tunnel; subsequent calls reuse.
+
+
+def _rt():
+    """Lazy import + start of the Twilio runtime."""
+    from phr34cker5_mcp.runtime import TwilioRuntime
+
+    rt = TwilioRuntime.instance()
+    rt.ensure_started()
+    return rt
+
+
+def _call_summary(rt, call_sid: str) -> dict:
+    try:
+        cs = rt.get_call(call_sid)
+    except KeyError:
+        cs = None
+    api_call = rt.client.calls(call_sid).fetch()
+    return {
+        "call_sid": call_sid,
+        "twilio_status": api_call.status,          # queued/ringing/in-progress/completed/…
+        "to": api_call.to,
+        "from": api_call.from_,
+        "direction": api_call.direction,
+        "duration_s": int(api_call.duration or 0),
+        "ws_connected": bool(cs and cs.ws_connected),
+        "outbound_backlog_ms": cs.outbound_backlog_ms() if cs else 0,
+    }
+
+
+@mcp.tool()
+def dial(to: str, from_: str | None = None, record: bool = False) -> dict:
+    """
+    Place an outbound PSTN call from your Twilio number to `to`.
+
+    Args:
+        to: destination number in E.164 (e.g. '+14155551212').
+        from_: override caller-ID (must be a Twilio-owned or verified number).
+               Defaults to $TWILIO_FROM_NUMBER.
+        record: if True, ask Twilio to record the entire call. The recording
+                is fetched via get_recording_url() after hangup.
+
+    Returns a dict with the CallSid and current Twilio status. Once Twilio
+    connects the call, our TwiML opens a bidirectional Media Stream back to
+    the MCP so play_*_into_call() and listen() work.
+    """
+    rt = _rt()
+    kwargs = dict(
+        to=to,
+        from_=from_ or rt.from_number,
+        url=rt.outbound_twiml_url(),
+        method="POST",
+    )
+    if record:
+        kwargs["record"] = True
+    call = rt.client.calls.create(**kwargs)
+    rt.register_call(call.sid, direction="outbound", to_number=to, from_number=kwargs["from_"])
+    return {
+        "call_sid": call.sid,
+        "status": call.status,
+        "to": to,
+        "from": kwargs["from_"],
+        "twiml_url": rt.outbound_twiml_url(),
+        "media_ws": rt.media_ws_url(),
+    }
+
+
+@mcp.tool()
+def hangup(call_sid: str) -> dict:
+    """End a live call via Twilio's REST API."""
+    rt = _rt()
+    call = rt.client.calls(call_sid).update(status="completed")
+    return {"call_sid": call_sid, "status": call.status}
+
+
+@mcp.tool()
+def list_calls() -> dict:
+    """List calls this MCP instance has originated or seen this session."""
+    rt = _rt()
+    with rt._calls_lock:
+        sids = list(rt.calls.keys())
+    return {
+        "count": len(sids),
+        "calls": [_call_summary(rt, sid) for sid in sids],
+    }
+
+
+@mcp.tool()
+def call_status(call_sid: str) -> dict:
+    """Fetch fresh Twilio status for a call, plus our local WS state."""
+    rt = _rt()
+    return _call_summary(rt, call_sid)
+
+
+@mcp.tool()
+def wait_for_answer(call_sid: str, timeout_s: int = 60) -> dict:
+    """
+    Block until the far end picks up (Twilio status 'in-progress') and our
+    media WebSocket is connected. Returns as soon as both are true, or the
+    final status if it times out / fails.
+    """
+    import time as _t
+
+    rt = _rt()
+    deadline = _t.time() + timeout_s
+    last = None
+    while _t.time() < deadline:
+        summary = _call_summary(rt, call_sid)
+        last = summary
+        if summary["twilio_status"] == "in-progress" and summary["ws_connected"]:
+            return summary
+        if summary["twilio_status"] in ("completed", "failed", "busy", "no-answer", "canceled"):
+            return summary
+        _t.sleep(0.5)
+    return last or {"call_sid": call_sid, "error": "timeout"}
+
+
+@mcp.tool()
+def wait(seconds: float) -> dict:
+    """Sleep — useful for scripting sequences like 'dial, wait 10s, send tones'."""
+    import time as _t
+
+    _t.sleep(max(0.0, seconds))
+    return {"waited_s": seconds}
+
+
+# ---- audio injection ----
+
+
+def _inject(call_sid: str, pcm: bytes, label: str) -> dict:
+    rt = _rt()
+    cs = rt.get_call(call_sid)
+    cs.enqueue_outbound_pcm(pcm)
+    return {
+        "call_sid": call_sid,
+        "queued_ms": (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE,
+        "backlog_ms": cs.outbound_backlog_ms(),
+        "kind": label,
+    }
+
+
+@mcp.tool()
+def play_wav_into_call(call_sid: str, path: str) -> dict:
+    """
+    Inject an existing WAV file (mono 8kHz signed-16 PCM) into a live call.
+
+    Use this to replay files produced by any of the generate_* tone tools
+    without re-synthesizing.
+    """
+    import wave
+
+    with wave.open(path, "rb") as w:
+        if w.getnchannels() != 1 or w.getsampwidth() != 2 or w.getframerate() != tones.SAMPLE_RATE:
+            raise ValueError(
+                f"{path}: expected mono, 16-bit, {tones.SAMPLE_RATE}Hz "
+                f"(got {w.getnchannels()}ch, {w.getsampwidth()*8}-bit, {w.getframerate()}Hz)"
+            )
+        pcm = w.readframes(w.getnframes())
+    return _inject(call_sid, pcm, f"wav:{path}")
+
+
+@mcp.tool()
+def play_tone_into_call(call_sid: str, freq_hz: float, ms: int = 1000) -> dict:
+    """Inject a single sine tone into a live call."""
+    return _inject(call_sid, tones.sine_bytes(freq_hz, ms), f"sine:{freq_hz}hz")
+
+
+@mcp.tool()
+def play_dtmf_into_call(
+    call_sid: str,
+    digits: str,
+    tone_ms: int = 100,
+    gap_ms: int = 80,
+) -> dict:
+    """Inject a DTMF sequence into a live call (same alphabet as generate_dtmf)."""
+    return _inject(call_sid, tones.dtmf_bytes(digits, tone_ms, gap_ms), f"dtmf:{digits}")
+
+
+@mcp.tool()
+def play_mf_into_call(
+    call_sid: str,
+    digits: str,
+    tone_ms: int = 68,
+    gap_ms: int = 68,
+    kp_ms: int = 100,
+) -> dict:
+    """Inject an R1 MF (blue-box) sequence into a live call."""
+    return _inject(
+        call_sid,
+        tones.mf_bytes(digits, tone_ms, gap_ms, kp_ms),
+        f"mf:{digits}",
+    )
+
+
+@mcp.tool()
+def play_2600_into_call(call_sid: str, ms: int = 1000) -> dict:
+    """Inject the 2600 Hz supervision tone into a live call."""
+    return _inject(call_sid, tones.sf_2600_bytes(ms), "sf_2600")
+
+
+@mcp.tool()
+def play_red_box_into_call(call_sid: str, coins: str) -> dict:
+    """
+    Inject ACTS coin-deposit (red box) tones into a live call.
+
+    coins: n/d/q for nickel/dime/quarter. Example: 'qqq' for 75c.
+    """
+    return _inject(call_sid, tones.red_box_bytes(coins), f"redbox:{coins}")
+
+
+# ---- listening ----
+
+
+@mcp.tool()
+def listen(call_sid: str, seconds: float = 5.0, save_wav: bool = True) -> dict:
+    """
+    Pull up to `seconds` of inbound audio from a live call and save it as a WAV.
+
+    Returns the WAV path plus how much audio was actually captured.
+    """
+    import time as _t
+
+    rt = _rt()
+    cs = rt.get_call(call_sid)
+    _t.sleep(max(0.0, seconds))  # let audio accumulate in the ring buffer
+    pcm = cs.drain_inbound_pcm(max_ms=int(seconds * 1000) + 500)
+    ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+    if not save_wav:
+        return {"call_sid": call_sid, "captured_ms": ms, "bytes": len(pcm)}
+    out = _tone_path(f"listen-{call_sid[:8]}", None)
+    rt_info = tones.write_wav(out, pcm)
+    return _render_result(rt_info, {"call_sid": call_sid, "captured_ms": ms})
+
+
+# ---- Twilio-native recording ----
+
+
+@mcp.tool()
+def start_recording(call_sid: str) -> dict:
+    """Ask Twilio to record the whole call. Uses their infra, not our WS."""
+    rt = _rt()
+    rec = rt.client.calls(call_sid).recordings.create()
+    return {"call_sid": call_sid, "recording_sid": rec.sid, "status": rec.status}
+
+
+@mcp.tool()
+def stop_recording(call_sid: str, recording_sid: str) -> dict:
+    rt = _rt()
+    rec = rt.client.calls(call_sid).recordings(recording_sid).update(status="stopped")
+    return {"call_sid": call_sid, "recording_sid": rec.sid, "status": rec.status}
+
+
+@mcp.tool()
+def get_recording_url(recording_sid: str) -> dict:
+    """Return the media URL for a Twilio recording (append .wav or .mp3)."""
+    rt = _rt()
+    rec = rt.client.recordings(recording_sid).fetch()
+    media = f"https://api.twilio.com{rec.uri.replace('.json', '.wav')}"
+    return {
+        "recording_sid": recording_sid,
+        "status": rec.status,
+        "duration_s": int(rec.duration or 0),
+        "media_url_wav": media,
+        "media_url_mp3": media.replace(".wav", ".mp3"),
+    }
+
+
 @mcp.resource(f"{URI_SCHEME}://index")
 def _index() -> str:
     """Human-readable index of the corpus."""
