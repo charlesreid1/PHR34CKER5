@@ -45,8 +45,16 @@ echo "==> Wrote $ENV_FILE"
 echo
 echo "Two ways to use it:"
 echo
+SHELL_NAME="$(basename "${SHELL:-/bin/bash}")"
+case "$SHELL_NAME" in
+    bash) RC_FILE="$HOME/.bashrc" ;;
+    zsh)  RC_FILE="$HOME/.zshrc"  ;;
+    fish) RC_FILE="$HOME/.config/fish/config.fish" ;;
+    *)    RC_FILE="$HOME/.${SHELL_NAME}rc" ;;
+esac
+
 echo "  A) Load it in your shell (recommended):"
-echo "       echo '[ -f $ENV_FILE ] && . $ENV_FILE' >> ~/.zshrc"
+echo "       echo '[ -f $ENV_FILE ] && . $ENV_FILE' >> $RC_FILE"
 echo "       . $ENV_FILE"
 echo
 echo "  B) Point your MCP client at it. In claude_desktop_config.json:"
