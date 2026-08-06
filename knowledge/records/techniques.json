@@ -1,0 +1,45 @@
+[
+  {
+    "id": "technique_blue_box_domestic",
+    "name": "Domestic blue-box trunk seizure",
+    "aliases": ["blueboxing", "2600 seize + MF route"],
+    "category": "technique",
+    "region": "NANP",
+    "era_bounds": ["1960-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "preconditions": ["an in-band SF/MF inter-office trunk (pre-CCIS)", "answer supervision returned by the far CO"],
+    "composes": ["sf_2600", "mf_kp", "mf_st", "box_blue"],
+    "steps": [
+      "Dial a long-distance number you legitimately reach.",
+      "After answer supervision, play 2600 Hz into the audio path for ~700 ms (switch-dependent: 4ESS >=400 ms).",
+      "The originating tandem reads far-end on-hook and drops the trunk to a wink/idle while your local loop stays up.",
+      "MF-pulse KP + destination digits + ST as if you were an originating tandem.",
+      "The tandem routes your new call."
+    ],
+    "vulnerability_window": "Died as trunks migrated SF/MF -> CCIS/SS7. Impractical on major US routes by ~1990; straggler independents into the mid-1990s.",
+    "retirement_cause": "Out-of-band signaling (CCIS No.6, then SS7): a 2600 Hz tone in the voice path is now just audio.",
+    "citations": ["bstj-1960-11", "esquire-1971"],
+    "see_also": ["box_blue", "sf_2600", "ccitt5_line_seize"]
+  },
+  {
+    "id": "technique_red_box_fortress",
+    "name": "Red-box a fortress phone at an ACTS prompt",
+    "aliases": ["redboxing", "coin-tone simulation"],
+    "category": "technique",
+    "region": "NANP",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "primary",
+    "preconditions": ["an ACTS-equipped Bell single-slot (fortress) payphone whose 1700+2200 Hz coin receiver is on the toll switch", "NOT a COCOT (locally validated)"],
+    "composes": ["acts_nickel", "acts_dime", "acts_quarter", "box_red"],
+    "steps": [
+      "Dial a long-distance number from a fortress phone.",
+      "ACTS voice prompt: 'Please deposit X.'",
+      "Instead of coins, play the 1700+2200 Hz coin-tone bursts into the mouthpiece (quarter = five 33 ms bursts per GR-506-CORE).",
+      "ACTS credits the deposit and cuts the call through."
+    ],
+    "vulnerability_window": "Worked ~1978 until ACTS single-slots were retrofitted/replaced 1996-2002.",
+    "retirement_cause": "Local coin validation in smart payphones (Millennium/COCOT) and T1/robbed-bit trunks stripping in-band ACTS supervision.",
+    "citations": ["gr-506-core", "2600-autumn-1990", "phrack-33-9"],
+    "see_also": ["box_red", "acts_quarter"]
+  }
+]

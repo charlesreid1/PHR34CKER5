@@ -1,0 +1,93 @@
+[
+  {
+    "id": "bstj-1960-11",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "In-Band Single-Frequency Signaling; Signaling Systems for Control of Telephone Switching (Multifrequency Pulsing)",
+    "author": "Weaver, A. & Newell, N. A., et al.",
+    "publication": "Bell System Technical Journal, Vol. 39 No. 6 (Nov 1960), pp. 1319-1408",
+    "note": "The primary source for R1 MF and 2600 Hz SF supervision. BSTJ 1960 defines one KP and one ST; the 700+1700 and 900+1700 combinations are 'Code 11' / 'Code 12' with no semantic names.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-506-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "GR-506-CORE, LSSGR: Signaling for Analog Interfaces",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-506-CORE (1996)",
+    "note": "Authoritative telco-side ACTS coin-signal timing: nickel 1x66ms, dime 2x66/66ms, quarter 5x33/33ms, dollar 1x650ms. p.249.",
+    "confidence": "primary"
+  },
+  {
+    "id": "tr-npl-000275",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "TR-NPL-000275, MF Signaling",
+    "author": "Bellcore",
+    "publication": "Bellcore TR-NPL-000275",
+    "note": "Later Bell notation promoting the paired KP1/KP2 + ST/ST2P/ST3P scheme; MF tolerance +/-1.5%, level -7 dBm0/freq.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-blue-1988",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Blue Book (1988): Q.310-Q.332 (No.5), Q.400-Q.490 (R2), Q.140/Q.180 (No.6), Q.700 (No.7), Q.23/Q.24 (DTMF)",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT Blue Book, 1988",
+    "note": "International signaling. No.5 line signals use 2400 Hz and 2600 Hz; DTMF timing and twist per Q.24.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-33-9",
+    "category": "bibliography",
+    "type": "community",
+    "title": "A REAL Functioning RED BOX Schematic",
+    "author": "J.R. \"Bob\" Dobbs",
+    "publication": "Phrack Inc., Issue 33, File 9 (Sept 1991)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK33",
+    "note": "Community-canon ACTS timing that homebrew red boxes actually emitted: nickel 60ms, dime 2x60/60ms, quarter 5x35/35ms. Widely repeated 1985-2005.",
+    "confidence": "community"
+  },
+  {
+    "id": "2600-autumn-1990",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Converting a Tone Dialer into a Red Box",
+    "author": "Noah Clayton",
+    "publication": "2600 Magazine, Vol. 7 No. 3 (Autumn 1990)",
+    "note": "Original publication of the Radio Shack 43-141 crystal-swap (3.579545 MHz -> 6.5536 MHz) red-box procedure.",
+    "confidence": "community"
+  },
+  {
+    "id": "esquire-1971",
+    "category": "bibliography",
+    "type": "journalism",
+    "title": "Secrets of the Little Blue Box",
+    "author": "Ron Rosenbaum",
+    "publication": "Esquire, Oct 1971",
+    "note": "Historical framing, not a technical primary source.",
+    "confidence": "secondary"
+  },
+  {
+    "id": "milstd-187-100",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "MIL-STD-187-100, Military Communications System Technical Standards (AUTOVON precedence)",
+    "author": "US Department of Defense",
+    "publication": "MIL-STD-187-100",
+    "note": "Authoritative AUTOVON precedence mapping: A=Flash Override, B=Flash, C=Immediate, D=Priority. Some community sources reverse C and D.",
+    "confidence": "primary"
+  },
+  {
+    "id": "itu-t-o-series",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ITU-T O-series (transmission measuring equipment)",
+    "author": "ITU-T",
+    "publication": "ITU-T O-series Recommendations",
+    "note": "Test-tone and level-measurement practice; the 1004/1020 Hz reference tone family.",
+    "confidence": "primary"
+  }
+]
