@@ -58,10 +58,11 @@ hangup(call["call_sid"])
 
 ```
 src/phr34cker5_mcp/    the MCP server (installable Python package)
-knowledge/             the lore corpus (markdown, one topic per dir)
+knowledge/             prose corpus (one topic per dir) + records/ (typed, cited facts)
 skills/phreaking/      the SKILL.md that tells assistants to use the MCP
 scripts/               user-facing shell helpers (credential setup, etc.)
 docs/                  long-form guides that don't fit in the README
+tests/                 pytest suite (pure-DSP + fake-runtime; no network)
 ```
 
 See [`scripts/README.md`](scripts/README.md) for why `scripts/` and `src/`
@@ -158,16 +159,25 @@ opens an ngrok tunnel so Twilio can reach it.
 | `hangup(call_sid)` | end call via REST |
 | `list_calls()` | every call this MCP instance has seen |
 | `call_status(call_sid)` | fresh Twilio status + local WS state |
+| `call_log(call_sid)` | full local timeline (injects, marks, auto-hangup) with ms offsets — post-mortem |
 | `wait_for_answer(call_sid, timeout_s=60)` | block until answered + WS connected |
+| `wait_for_inbound(timeout_s=120, since_sid=None)` | block for an incoming call (target dials *you*; point the number's inbound webhook at `/twiml/inbound`) |
 | `wait(seconds)` | sleep in a scripted sequence |
 | `play_wav_into_call(call_sid, path)` | inject any mono 8kHz WAV |
 | `play_tone_into_call(call_sid, freq_hz, ms)` | inject a single sine |
-| `play_dtmf_into_call(call_sid, digits, ...)` | live DTMF |
+| `play_dtmf_into_call(call_sid, digits, ...)` | live DTMF (synthesized audio) |
+| `send_dtmf_via_twilio(call_sid, digits)` | clean Twilio-generated DTMF for picky IVRs (ends the media stream) |
 | `play_mf_into_call(call_sid, digits, ...)` | live blue-box MF |
 | `play_2600_into_call(call_sid, ms=1000)` | live 2600 Hz |
 | `play_red_box_into_call(call_sid, coins)` | live ACTS coin tones |
+| `play_green_box_into_call(call_sid, signal="collect")` | live operator coin-control tones |
 | `play_fax_cng_into_call(call_sid, cycles=4)` | live fax CNG |
 | `play_fax_ced_into_call(call_sid, ms=3000)` | live fax CED |
+| `play_busy_into_call` / `play_reorder_into_call` / `play_ringback_into_call` | live call-progress tones |
+| `play_milliwatt_into_call(call_sid, ms=10000)` | live 1004 Hz test tone |
+| `play_modem_carrier_into_call(call_sid, rate="v22", ...)` | live synthetic modem answer+carrier |
+| `play_recording_into_call(call_sid, recording_url)` | replay a captured recording / any audio URL |
+| `multi_call_bridge(call_sids, announce=None)` | bridge live calls into a Twilio conference |
 | `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
 | `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
 
@@ -447,12 +457,22 @@ conventions in [`knowledge/MANIFEST.md`](knowledge/MANIFEST.md). Restart the
 server; the file becomes readable, searchable, and available as a resource
 under `phr34cker5://<topic>/<slug>`.
 
+For precise, dated facts (frequencies, timings, disputes), add a typed
+record under `knowledge/records/` instead — the `lookup_tone` /
+`verify_claim` / `explain_technique` tools bind to those. See
+[`knowledge/records/README.md`](knowledge/records/README.md) for the schema
+(every record needs `era_bounds` and a `citations[]` that resolves into the
+bibliography, or the server won't load it).
+
 ## Ethos
 
-This corpus is a **history and CTF resource**, not an operations manual. It
-documents how phone signaling *used to work* and why the tricks of the era
-don't work on modern networks. Frame everything historically; do not
-instruct operating against live production infrastructure.
+This is a **CTF and history resource**. At a phreaking village the target is
+built to replay the golden-era network, so old-school techniques — blue box,
+red box, the 2600 Hz whistle — are exactly what you reach for, and the tools
+never refuse one for being "obsolete." The corpus records *when and where*
+each trick worked (and why it left the production PSTN) as context, not as a
+gate. The one hard line: use it against CTF/Village gear and lines you own or
+are authorized to test — not to defraud live production infrastructure.
 
 ## License
 
