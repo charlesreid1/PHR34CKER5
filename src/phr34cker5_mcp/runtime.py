@@ -66,6 +66,45 @@ def _bind_port() -> int | None:
     return int(v) if v else None
 
 
+def _max_call_seconds() -> float | None:
+    """
+    Cost guardrail: auto-hangup any call older than MAX_CALL_MINUTES.
+
+    Belt-and-suspenders on the 1-hour <Pause> in our TwiML — a stuck or
+    forgotten call otherwise runs (and bills) for the full hour. Unset or
+    <= 0 disables the watchdog. Accepts fractional minutes.
+    """
+    v = os.environ.get("MAX_CALL_MINUTES")
+    if not v:
+        return None
+    try:
+        minutes = float(v)
+    except ValueError:
+        return None
+    return minutes * 60.0 if minutes > 0 else None
+
+
+def overdue_call_sids(calls: dict, max_seconds: float, now: float) -> list[str]:
+    """
+    Pure helper: which live calls have exceeded max_seconds.
+
+    A call is a candidate once it's registered; we measure from connected_at
+    if the media WS connected, else from started_at. Calls already marked
+    ended (ended_at set) are skipped. Kept pure so it's unit-testable without
+    a Twilio client or threads.
+    """
+    overdue = []
+    for sid, cs in calls.items():
+        if getattr(cs, "ended_at", None) is not None:
+            continue
+        start = getattr(cs, "connected_at", None) or getattr(cs, "started_at", None)
+        if start is None:
+            continue
+        if now - start >= max_seconds:
+            overdue.append(sid)
+    return overdue
+
+
 class TwilioRuntime:
     _instance: "TwilioRuntime | None" = None
     _instance_lock = threading.Lock()
@@ -88,6 +127,11 @@ class TwilioRuntime:
         self.calls: Dict[str, CallState] = {}
         self._calls_lock = threading.Lock()
 
+        # Cost guardrail (MAX_CALL_MINUTES) watchdog.
+        self._watchdog_thread: threading.Thread | None = None
+        self._watchdog_stop = threading.Event()
+        self.auto_hung_up: Dict[str, float] = {}  # sid -> when we killed it
+
     # ---- singleton ----
 
     @classmethod
@@ -108,11 +152,48 @@ class TwilioRuntime:
             self._init_twilio_client()
             self._start_http_server()
             self._resolve_public_url()
+            self._start_watchdog()
             self._started = True
             log.info(
                 "TwilioRuntime ready — public=%s ws=%s from=%s",
                 self._public_http_url, self._public_ws_url, self._from_number,
             )
+
+    def _start_watchdog(self) -> None:
+        """Start the MAX_CALL_MINUTES auto-hangup watchdog, if configured."""
+        max_seconds = _max_call_seconds()
+        if max_seconds is None:
+            log.info("no MAX_CALL_MINUTES set — call-duration watchdog disabled")
+            return
+
+        def _run():
+            while not self._watchdog_stop.wait(5.0):
+                try:
+                    self._reap_overdue_calls(max_seconds)
+                except Exception:  # noqa: BLE001 — never let the watchdog die
+                    log.exception("watchdog reap error")
+
+        t = threading.Thread(target=_run, name="phr34cker5-call-watchdog", daemon=True)
+        t.start()
+        self._watchdog_thread = t
+        log.info("call-duration watchdog armed: MAX_CALL_MINUTES -> %.1fs", max_seconds)
+
+    def _reap_overdue_calls(self, max_seconds: float) -> None:
+        with self._calls_lock:
+            snapshot = dict(self.calls)
+        for sid in overdue_call_sids(snapshot, max_seconds, time.time()):
+            if sid in self.auto_hung_up:
+                continue
+            try:
+                self._client.calls(sid).update(status="completed")
+                self.auto_hung_up[sid] = time.time()
+                cs = snapshot.get(sid)
+                if cs is not None:
+                    cs.ended_at = time.time()
+                log.warning("watchdog auto-hung-up call %s (exceeded %.0fs)", sid, max_seconds)
+            except Exception:  # noqa: BLE001 — call may already be gone
+                self.auto_hung_up[sid] = time.time()
+                log.exception("watchdog failed to hang up %s", sid)
 
     def _init_twilio_client(self) -> None:
         sid = _require_env("TWILIO_ACCOUNT_SID")
