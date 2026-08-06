@@ -306,10 +306,14 @@ def explain_technique(name: str, year: int | None = None, region: str | None = N
     Explain a technique step-by-step, with its vulnerability window and citations.
 
     Composes tones/boxes/network elements into an ordered procedure (e.g.
-    `blueboxing`, `redboxing`). If `year`/`region` are supplied and fall
-    outside the technique's era_bounds/region, this REFUSES with an
-    explanation instead of pretending the trick still works — that refusal is
-    the point at a con.
+    `blueboxing`, `redboxing`). ALWAYS returns the full steps — this is a
+    phreaking-CTF tool, and old-school techniques are exactly what you reach
+    for. It never refuses.
+
+    `year`/`region`, if supplied, add non-blocking historical context: a note
+    that the technique was retired from the *production* PSTN outside those
+    bounds. On a CTF's Village-owned gear, a blue box or a Cap'n Crunch
+    whistle can absolutely still work — the note is a heads-up, not a gate.
     """
     store = _record_store()
     rec = store.resolve(name)
@@ -318,20 +322,21 @@ def explain_technique(name: str, year: int | None = None, region: str | None = N
         raise ValueError(f"no technique {name!r}. Known: {ids}")
 
     out = records.public_view(rec)
-    out["applicable"] = True
-    out["refusals"] = []
+    # Informational only. Never gates the steps; a CTF target may replicate
+    # any era of the network on purpose.
+    notes = []
     if year is not None and not records.era_contains(rec, year):
-        out["applicable"] = False
-        out["refusals"].append(
-            f"{rec['name']} was not effective in {year}: era_bounds={rec.get('era_bounds')}. "
-            f"Retirement cause: {rec.get('retirement_cause', 'see record')}."
+        notes.append(
+            f"Historical note: on the production PSTN, {rec['name']} was effective "
+            f"{rec.get('era_bounds')} (retirement cause: {rec.get('retirement_cause', 'see record')}). "
+            f"At a CTF it may still work against Village-owned gear that emulates that era."
         )
     if region is not None and rec.get("region") and records._normalize(region) != records._normalize(rec["region"]):
-        out["applicable"] = False
-        out["refusals"].append(
-            f"{rec['name']} is bound to region {rec['region']}, not {region!r}. "
-            "In-band signaling systems are region-specific; a NANP trick does not port to another network."
+        notes.append(
+            f"Historical note: {rec['name']} is native to region {rec['region']}, not {region!r}. "
+            "In-band signaling was region-specific on the real network; a CTF target may emulate either."
         )
+    out["context_notes"] = notes
     return out
 
 

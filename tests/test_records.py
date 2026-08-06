@@ -151,21 +151,31 @@ def test_unmatched_claim_is_unverified_not_bluffed(store):
 # --- explain_technique -------------------------------------------------------
 
 
-def test_explain_technique_refuses_out_of_era(store):
+def test_explain_technique_never_refuses_out_of_era(store):
+    # A phreaking CTF is exactly where old techniques get used. Always return
+    # the steps; the out-of-era case only adds a non-blocking context note.
     e = server.explain_technique("blueboxing", year=2005)
-    assert e["applicable"] is False
-    assert e["refusals"]
-
-
-def test_explain_technique_in_era_ok(store):
-    e = server.explain_technique("redboxing", year=1993)
-    assert e["applicable"] is True
     assert e["steps"]
+    assert "applicable" not in e and "refusals" not in e
+    assert e["context_notes"]  # heads-up, not a gate
 
 
-def test_explain_technique_wrong_region_refuses(store):
+def test_explain_technique_in_era_has_no_note(store):
+    e = server.explain_technique("redboxing", year=1993)
+    assert e["steps"]
+    assert e["context_notes"] == []
+
+
+def test_explain_technique_wrong_region_still_returns_steps(store):
     e = server.explain_technique("blueboxing", region="ITU-R2")
-    assert e["applicable"] is False
+    assert e["steps"]
+    assert e["context_notes"]
+
+
+def test_explain_technique_no_args_no_notes(store):
+    e = server.explain_technique("blueboxing")
+    assert e["steps"]
+    assert e["context_notes"] == []
 
 
 # --- bibliography / cross_reference / search_records -------------------------

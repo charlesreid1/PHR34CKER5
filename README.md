@@ -93,7 +93,7 @@ judge's precision question should hit.
 |---|---|
 | `lookup_tone(name)` | exact spec for a named tone/code — `frequencies_hz`, `tolerance`, `level_dBm0`, `on_ms/off_ms`, plus `disputed{}` and the citation envelope. Resolves aliases (`2600`, `KP`, `red box quarter`, `the whistle`) |
 | `verify_claim(text)` | grades a claim `true / false / needs_qualification / unverified` against the trap catalog (e.g. "2600 Hz seizes an international trunk" → **false**; No.5 seizure is 2400 Hz). Won't bluff an unmatched claim |
-| `explain_technique(name, year?, region?)` | step-by-step composition with vulnerability window; **refuses** if `year`/`region` fall outside the technique's era/region |
+| `explain_technique(name, year?, region?)` | step-by-step composition with vulnerability window; **always returns the steps** (old-school techniques are the point at a CTF). `year`/`region` add a non-blocking historical note, never a refusal |
 | `bibliography(cite_id?)` | resolve a source id, or list all |
 | `cross_reference(record_id)` | traverse a record's `see_also` links |
 | `search_records(query?, category?, region?, year?)` | filter the KR — e.g. NANP `tone_signal`s effective in 1998 |
