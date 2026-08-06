@@ -135,10 +135,104 @@ hangup(call["call_sid"])
 | `TWILIO_ACCOUNT_SID` | yes | from console.twilio.com |
 | `TWILIO_AUTH_TOKEN` | yes | keep it secret |
 | `TWILIO_FROM_NUMBER` | yes | a Twilio-owned or verified E.164 number |
-| `NGROK_AUTHTOKEN` | recommended | free at ngrok.com; without it tunnels are unreliable |
-| `PHR34CKER5_PUBLIC_URL` | alternative | skip ngrok, point at your own public HTTPS URL (e.g. Cloudflare Tunnel) |
+| `PHR34CKER5_PUBLIC_URL` | VPS mode | the public HTTPS URL Twilio will hit (e.g. `https://phreak.example.com`). When set, ngrok is not used. |
+| `PHR34CKER5_BIND_HOST` | VPS mode | interface uvicorn binds to. Default `127.0.0.1`. Set `0.0.0.0` on a VPS. |
+| `PHR34CKER5_BIND_PORT` | VPS mode | pin the local port so your reverse proxy has a stable upstream. Default: random ephemeral. |
+| `NGROK_AUTHTOKEN` | laptop mode | free at ngrok.com. Only used when `PHR34CKER5_PUBLIC_URL` is unset. Requires `pip install "phr34cker5-mcp[ngrok]"`. |
 
-Add them to your MCP config:
+Two deployment topologies:
+
+##### A. VPS mode (recommended — no laptop in the middle)
+
+The MCP runs on your server. Twilio talks directly to your domain over
+TLS. Steps below use Caddy + systemd on a Debian/Ubuntu box; adapt to
+your stack.
+
+**1. Install:**
+
+```sh
+# on the VPS
+sudo useradd -r -m -s /bin/bash phr34cker5
+sudo -u phr34cker5 bash -lc '
+  cd ~
+  python3 -m venv .venv
+  .venv/bin/pip install -U pip
+  .venv/bin/pip install phr34cker5-mcp   # or: pip install -e /path/to/checkout
+'
+```
+
+**2. `/etc/systemd/system/phr34cker5-mcp.service`:**
+
+```ini
+[Unit]
+Description=PHR34CKER5 MCP (Twilio bridge)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=phr34cker5
+WorkingDirectory=/home/phr34cker5
+Environment=TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Environment=TWILIO_AUTH_TOKEN=your_auth_token
+Environment=TWILIO_FROM_NUMBER=+15555550123
+Environment=PHR34CKER5_PUBLIC_URL=https://phreak.example.com
+Environment=PHR34CKER5_BIND_HOST=127.0.0.1
+Environment=PHR34CKER5_BIND_PORT=8787
+# Note: MCP servers typically talk stdio; on a VPS you'd usually run this
+# under an MCP transport like SSE. For now, use --transport sse.
+ExecStart=/home/phr34cker5/.venv/bin/phr34cker5-mcp --transport sse
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable --now phr34cker5-mcp
+sudo systemctl status phr34cker5-mcp
+```
+
+**3. `/etc/caddy/Caddyfile`:**
+
+```caddy
+phreak.example.com {
+    encode zstd gzip
+
+    # Twilio Media Streams uses WebSocket; Caddy auto-upgrades.
+    reverse_proxy 127.0.0.1:8787
+}
+```
+
+```sh
+sudo systemctl reload caddy
+```
+
+Caddy will provision a Let's Encrypt cert automatically. Confirm:
+
+```sh
+curl -sS https://phreak.example.com/healthz
+# {"ok": true, "calls": 0}
+```
+
+**4. Point Twilio at your domain** — in the Twilio console, on the phone
+number you're using: set **A Call Comes In** → Webhook →
+`https://phreak.example.com/twiml/inbound` (for inbound calls). Outbound
+calls use the URL the MCP passes to `dial()` at call time; no console
+config needed.
+
+##### B. Laptop mode (ngrok)
+
+For local dev only. Install with the ngrok extra:
+
+```sh
+pip install "phr34cker5-mcp[ngrok]"
+```
+
+Add to your MCP config:
 
 ```json
 {
@@ -156,6 +250,9 @@ Add them to your MCP config:
   }
 }
 ```
+
+The first live tool call spawns an ngrok tunnel; the URL is logged and
+used for the lifetime of the process. Restart = new URL.
 
 #### Legal & consent
 

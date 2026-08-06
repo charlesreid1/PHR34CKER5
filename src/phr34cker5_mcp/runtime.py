@@ -42,10 +42,28 @@ def _require_env(name: str) -> str:
     return v
 
 
-def _free_port() -> int:
+def _free_port(host: str = "127.0.0.1") -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
+        s.bind((host, 0))
         return s.getsockname()[1]
+
+
+def _bind_host() -> str:
+    """
+    Interface uvicorn binds to. Default 127.0.0.1 (safe for laptop+ngrok).
+    Set PHR34CKER5_BIND_HOST=0.0.0.0 on a VPS so a reverse proxy on the
+    same box (or an external one) can reach us.
+    """
+    return os.environ.get("PHR34CKER5_BIND_HOST", "127.0.0.1")
+
+
+def _bind_port() -> int | None:
+    """
+    Pin the local port with PHR34CKER5_BIND_PORT so the reverse proxy has
+    a stable upstream. Default: pick a free ephemeral port.
+    """
+    v = os.environ.get("PHR34CKER5_BIND_PORT")
+    return int(v) if v else None
 
 
 class TwilioRuntime:
@@ -104,13 +122,20 @@ class TwilioRuntime:
 
     def _start_http_server(self) -> None:
         self._app = twilio_bridge.create_app(self)
-        self._local_port = _free_port()
+        host = _bind_host()
+        port = _bind_port() or _free_port(host if host != "0.0.0.0" else "127.0.0.1")
+        self._local_port = port
         cfg = uvicorn.Config(
             self._app,
-            host="127.0.0.1",
-            port=self._local_port,
+            host=host,
+            port=port,
             log_level="warning",
             loop="asyncio",
+            # Trust X-Forwarded-* from the reverse proxy in front of us
+            # (Caddy / nginx / Cloudflare). Safe here because we only
+            # deploy behind a proxy in the VPS topology.
+            proxy_headers=True,
+            forwarded_allow_ips="*",
         )
         server = uvicorn.Server(cfg)
 
@@ -122,15 +147,17 @@ class TwilioRuntime:
         self._server_thread = t
 
         # Wait for the socket to actually accept before returning.
+        # Use loopback for the health probe even when bound to 0.0.0.0.
+        probe_host = "127.0.0.1" if host in ("0.0.0.0", "127.0.0.1") else host
         deadline = time.time() + 10
         while time.time() < deadline:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 try:
-                    s.connect(("127.0.0.1", self._local_port))
+                    s.connect((probe_host, port))
                     return
                 except OSError:
                     time.sleep(0.05)
-        raise RuntimeError("uvicorn failed to come up within 10s")
+        raise RuntimeError(f"uvicorn failed to come up on {host}:{port} within 10s")
 
     def _resolve_public_url(self) -> None:
         override = os.environ.get("PHR34CKER5_PUBLIC_URL")
@@ -140,8 +167,17 @@ class TwilioRuntime:
             self._public_ws_url = _http_to_ws(base) + "/media"
             return
 
-        # Spawn ngrok.
-        from pyngrok import conf, ngrok
+        # No public URL configured — fall back to spawning ngrok. pyngrok is
+        # imported lazily so VPS deployments don't need it installed.
+        try:
+            from pyngrok import conf, ngrok
+        except ImportError as e:
+            raise MissingConfig(
+                "no PHR34CKER5_PUBLIC_URL set and pyngrok is not installed. "
+                "Either set PHR34CKER5_PUBLIC_URL=https://your.domain to "
+                "point Twilio at your public ingress, or `pip install "
+                "pyngrok` to auto-tunnel from a laptop."
+            ) from e
 
         auth = os.environ.get("NGROK_AUTHTOKEN")
         if auth:
