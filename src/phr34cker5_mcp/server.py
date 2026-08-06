@@ -16,11 +16,15 @@ import argparse
 import os
 import random
 import re
+import tempfile
+import uuid
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
+
+from phr34cker5_mcp import tones
 
 URI_SCHEME = "phr34cker5"
 
@@ -202,6 +206,176 @@ def random_lore() -> dict:
         "uri": lf.uri,
         "content": lf.path.read_text(encoding="utf-8"),
     }
+
+
+# --- tone generation ---------------------------------------------------------
+
+
+def _tone_out_dir() -> Path:
+    """Where rendered WAV files land. Overridable via $PHR34CKER5_TONE_DIR."""
+    env = os.environ.get("PHR34CKER5_TONE_DIR")
+    if env:
+        d = Path(env).expanduser().resolve()
+    else:
+        d = Path(tempfile.gettempdir()) / "phr34cker5-tones"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _tone_path(label: str, path: str | None) -> str:
+    if path:
+        p = Path(path).expanduser().resolve()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return str(p)
+    return str(_tone_out_dir() / f"{label}-{uuid.uuid4().hex[:8]}.wav")
+
+
+def _render_result(rt: tones.RenderedTone, extra: dict | None = None) -> dict:
+    out = {
+        "path": rt.path,
+        "sample_rate": rt.sample_rate,
+        "duration_ms": rt.duration_ms,
+        "channels": rt.channels,
+        "sample_width_bytes": rt.sample_width_bytes,
+    }
+    if extra:
+        out.update(extra)
+    return out
+
+
+@mcp.tool()
+def generate_tone(
+    freq_hz: float,
+    ms: int = 1000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Generate a single-frequency sine tone as a WAV file.
+
+    Args:
+        freq_hz: frequency in Hz (e.g. 2600 for SF supervision, 440 for A4).
+        ms: duration in milliseconds.
+        amplitude: 0.0-1.0. Default leaves headroom.
+        path: output WAV path. If omitted, writes to a temp file and returns
+              the path. Directories are created as needed.
+    """
+    pcm = tones.sine_bytes(freq_hz, ms, amplitude)
+    out = _tone_path(f"tone-{int(freq_hz)}hz", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "sine", "freq_hz": freq_hz},
+    )
+
+
+@mcp.tool()
+def generate_dual_tone(
+    f1_hz: float,
+    f2_hz: float,
+    ms: int = 1000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """Sum of two sine tones — the underlying primitive for DTMF, MF, ACTS."""
+    pcm = tones.dual_tone_bytes(f1_hz, f2_hz, ms, amplitude)
+    out = _tone_path(f"dual-{int(f1_hz)}-{int(f2_hz)}hz", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "dual_tone", "f1_hz": f1_hz, "f2_hz": f2_hz},
+    )
+
+
+@mcp.tool()
+def generate_dtmf(
+    digits: str,
+    tone_ms: int = 100,
+    gap_ms: int = 80,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Render a DTMF sequence to a WAV file.
+
+    Args:
+        digits: any of `0-9 * # A B C D` (case-insensitive). Use `,` / `p`
+                / whitespace for a pause of `gap_ms`.
+        tone_ms: per-digit tone duration.
+        gap_ms: silence between digits (and duration of pause characters).
+        amplitude: 0.0-1.0.
+        path: output WAV path (defaults to a temp file).
+
+    Example: `generate_dtmf("1-820", ...)` dials 1, 8, 2, 0 with a pause
+    between the 1 and the 820.
+    """
+    pcm = tones.dtmf_bytes(digits, tone_ms, gap_ms, amplitude)
+    out = _tone_path("dtmf", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "dtmf", "digits": digits},
+    )
+
+
+@mcp.tool()
+def generate_mf(
+    digits: str,
+    tone_ms: int = 68,
+    gap_ms: int = 68,
+    kp_ms: int = 100,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Render an R1 MF (blue-box) sequence to a WAV file.
+
+    Alphabet: 0-9, K (KP — Key Pulse, start), S (ST — Start, end). Use `,`
+    / `p` / whitespace for a gap. A typical seizure-then-route sequence
+    from the era is `K<digits>S`, e.g. `K18005551212S`.
+
+    Historical only — see phr34cker5://blueboxing/README for context.
+    """
+    pcm = tones.mf_bytes(digits, tone_ms, gap_ms, kp_ms, amplitude)
+    out = _tone_path("mf", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "mf", "digits": digits},
+    )
+
+
+@mcp.tool()
+def generate_sf_2600(
+    ms: int = 1000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """The 2600 Hz trunk-idle supervision tone. See phr34cker5://2600hz/README."""
+    pcm = tones.sf_2600_bytes(ms, amplitude)
+    out = _tone_path("sf-2600", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "sf_2600", "freq_hz": 2600},
+    )
+
+
+@mcp.tool()
+def generate_red_box(
+    coins: str,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Render an ACTS coin-deposit sequence (red box) to a WAV file.
+
+    `coins` uses n=nickel, d=dime, q=quarter (case-insensitive). Non-alpha
+    characters insert an inter-coin gap. Example: `qqq` for 75c.
+
+    Historical only — see phr34cker5://redboxing/README for context.
+    """
+    pcm = tones.red_box_bytes(coins, amplitude)
+    out = _tone_path("redbox", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "red_box", "coins": coins},
+    )
 
 
 @mcp.resource(f"{URI_SCHEME}://index")

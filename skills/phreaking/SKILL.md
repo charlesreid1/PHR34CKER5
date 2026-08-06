@@ -22,6 +22,8 @@ has better material.
 
 ## Available tools (on the `phr34cker5` MCP server)
 
+Corpus (read-only):
+
 - `list_topics()` — show every topic and file in the corpus.
 - `read_lore(topic, name)` — read one file. `topic` is the directory,
   `name` is the file's slug (no `.md`).
@@ -29,6 +31,22 @@ has better material.
   search across every file. Returns hit counts and first-match previews.
 - `random_lore()` — one random file, contents included. Useful when the
   user wants inspiration or a starting point rather than a specific answer.
+
+Tone generation (writes WAV files, returns `{path, duration_ms, ...}`):
+
+- `generate_tone(freq_hz, ms=1000)` — one sine at any frequency.
+- `generate_dual_tone(f1_hz, f2_hz, ms=1000)` — two summed sines.
+- `generate_dtmf(digits, ...)` — DTMF for `0-9 * # A-D`. Use `,`/`p`/space
+  for pauses. E.g. the user says "I want to dial 1820" → call
+  `generate_dtmf("1820")`.
+- `generate_mf(digits, ...)` — R1 MF (blue-box). Alphabet: `0-9`, `K` (KP),
+  `S` (ST). A canonical seizure-then-route is `K<digits>S`.
+- `generate_sf_2600(ms=1000)` — the 2600 Hz trunk-idle tone.
+- `generate_red_box(coins)` — ACTS coin deposit. `n`/`d`/`q` for
+  nickel/dime/quarter. `qqq` = 75¢.
+
+When a tool renders a WAV, mention the returned `path` and `duration_ms`
+so the user can play the file.
 
 ## How to use it
 
