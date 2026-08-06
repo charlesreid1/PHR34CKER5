@@ -37,13 +37,16 @@ Every `.md` file below is exposed as an MCP resource under
 
 Add files freely. The server picks them up on next startup.
 
-## Topics (seeded stubs)
+## Topics
 
-- **blueboxing/**   — 2600 Hz, MF signaling, KP/ST, trunk seizure
+- **blueboxing/**   — 2600 Hz, MF signaling, KP/ST, trunk seizure; the full
+  R1 MF digit table lives in `blueboxing/mf-tones.md`
 - **redboxing/**   — coin-return simulation, ACTS, quarter/dime/nickel tones
 - **greenboxing/** — coin collect/return operator tones
 - **cna/**          — Customer Name and Address bureaus, social engineering
 - **2600hz/**       — the whistle, Cap'n Crunch, in-band signaling history
+- **dtmf/**         — the touch-tone grid, AUTOVON A/B/C/D, twist, misconceptions
+- **modems/**       — carrier handshakes (Bell 103 → V.34), the 2100 Hz answer tone
 - **bbs/**          — bulletin board systems, 300/1200/2400 baud culture
 - **war-dialing/**  — ToneLoc, THC-Scan, scanning number ranges
 - **ess/**          — Electronic Switching Systems (1ESS → 5ESS), CCIS/SS7
@@ -51,6 +54,9 @@ Add files freely. The server picks them up on next startup.
 - **zines/**        — 2600 Magazine, Phrack, TAP — pointers and history
 - **glossary/**     — jargon, acronyms, org names (Ma Bell, CN/A, RBOC…)
 - **fax/**          — T.30 handshake, CNG/CED, Group 3, fax war dialing
+- **ctf/**          — CTF-facing puzzle genres (IVR mazes, DISA, voicemail,
+  modem carriers, fax flags, conference bridges, ANAC/CN·A, milliwatt lines)
+  and how to probe each with the MCP tools
 
 ## Conventions
 
