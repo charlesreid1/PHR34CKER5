@@ -357,6 +357,44 @@ def generate_sf_2600(
 
 
 @mcp.tool()
+def generate_fax_cng(
+    cycles: int = 4,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Render the T.30 CNG (fax calling) tone: 1100 Hz, 0.5s on / 3s off.
+
+    `cycles` is the number of on/off periods. See phr34cker5://fax/README.
+    """
+    pcm = tones.cng_bytes(cycles, amplitude)
+    out = _tone_path("fax-cng", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "fax_cng", "freq_hz": 1100, "cycles": cycles},
+    )
+
+
+@mcp.tool()
+def generate_fax_ced(
+    ms: int = 3000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Render the T.30 CED (called-station ID) tone: 2100 Hz continuous.
+
+    Standard duration is 2.6-4.0 s. See phr34cker5://fax/README.
+    """
+    pcm = tones.ced_bytes(ms, amplitude)
+    out = _tone_path("fax-ced", path)
+    return _render_result(
+        tones.write_wav(out, pcm),
+        {"kind": "fax_ced", "freq_hz": 2100},
+    )
+
+
+@mcp.tool()
 def generate_red_box(
     coins: str,
     amplitude: float = tones.AMPLITUDE,
@@ -582,6 +620,18 @@ def play_mf_into_call(
 def play_2600_into_call(call_sid: str, ms: int = 1000) -> dict:
     """Inject the 2600 Hz supervision tone into a live call."""
     return _inject(call_sid, tones.sf_2600_bytes(ms), "sf_2600")
+
+
+@mcp.tool()
+def play_fax_cng_into_call(call_sid: str, cycles: int = 4) -> dict:
+    """Inject the T.30 fax CNG tone into a live call."""
+    return _inject(call_sid, tones.cng_bytes(cycles), f"fax_cng:{cycles}c")
+
+
+@mcp.tool()
+def play_fax_ced_into_call(call_sid: str, ms: int = 3000) -> dict:
+    """Inject the T.30 fax CED tone into a live call."""
+    return _inject(call_sid, tones.ced_bytes(ms), f"fax_ced:{ms}ms")
 
 
 @mcp.tool()

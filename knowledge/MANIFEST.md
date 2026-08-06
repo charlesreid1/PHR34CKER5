@@ -44,6 +44,7 @@ Add files freely. The server picks them up on next startup.
 - **tandem-stacking/** — chaining tandems, international routing tricks
 - **zines/**        — 2600 Magazine, Phrack, TAP — pointers and history
 - **glossary/**     — jargon, acronyms, org names (Ma Bell, CN/A, RBOC…)
+- **fax/**          — T.30 handshake, CNG/CED, Group 3, fax war dialing
 
 ## Conventions
 

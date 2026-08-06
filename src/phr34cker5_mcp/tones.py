@@ -211,6 +211,45 @@ def red_box_bytes(
     return bytes(out)
 
 
+# --- Fax (T.30 handshake tones) ---------------------------------------------
+#
+# T.30 defines two tones that identify a fax call at handshake time. They're
+# the audio you hear when a fax picks up.
+#
+#   CNG (calling tone):      1100 Hz, 0.5 s on / 3.0 s off, repeated by the
+#                            calling fax until the called end responds.
+#   CED (called-station ID): 2100 Hz, 2.6-4.0 s continuous, sent by the
+#                            answering fax as an "I'm a fax, go ahead" reply.
+#
+# Everything after CED (V.21 HDLC preamble, DIS/DCS frames, image data)
+# belongs to a real fax stack — see knowledge/fax/README.md.
+
+
+def cng_bytes(cycles: int = 4, amplitude: float = AMPLITUDE) -> bytes:
+    """
+    T.30 CNG (fax calling tone). 1100 Hz, 500 ms on / 3000 ms off, per cycle.
+
+    A real calling fax repeats this until the far end answers. `cycles` is
+    how many on/off periods to render.
+    """
+    on = sine_bytes(1100, 500, amplitude)
+    off = silence_bytes(3000)
+    out = bytearray()
+    for _ in range(max(1, cycles)):
+        out += on
+        out += off
+    return bytes(out)
+
+
+def ced_bytes(ms: int = 3000, amplitude: float = AMPLITUDE) -> bytes:
+    """
+    T.30 CED (called-station identification). 2100 Hz continuous.
+
+    Standard duration is 2.6-4.0 s. Default 3000 ms sits in the middle.
+    """
+    return sine_bytes(2100, ms, amplitude)
+
+
 # --- WAV writer --------------------------------------------------------------
 
 

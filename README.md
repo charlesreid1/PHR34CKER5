@@ -82,6 +82,8 @@ Pure Python (stdlib `wave` + `math`, no numpy). Every tool writes a mono
 | `generate_mf(digits, tone_ms=68, gap_ms=68, kp_ms=100, ...)` | R1 MF: 0-9, K (KP), S (ST) |
 | `generate_sf_2600(ms=1000, ...)` | the 2600 Hz supervision tone |
 | `generate_red_box(coins, ...)` | ACTS coin bursts: n / d / q |
+| `generate_fax_cng(cycles=4, ...)` | T.30 CNG (1100 Hz, 0.5s on / 3s off) |
+| `generate_fax_ced(ms=3000, ...)` | T.30 CED (2100 Hz continuous) |
 
 Example — dial 1-820 as DTMF, then blue-box a `KP 1 800 555 1212 ST`
 sequence:
@@ -114,6 +116,8 @@ opens an ngrok tunnel so Twilio can reach it.
 | `play_mf_into_call(call_sid, digits, ...)` | live blue-box MF |
 | `play_2600_into_call(call_sid, ms=1000)` | live 2600 Hz |
 | `play_red_box_into_call(call_sid, coins)` | live ACTS coin tones |
+| `play_fax_cng_into_call(call_sid, cycles=4)` | live fax CNG |
+| `play_fax_ced_into_call(call_sid, ms=3000)` | live fax CED |
 | `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
 | `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
 
