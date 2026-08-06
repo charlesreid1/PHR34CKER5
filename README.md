@@ -155,8 +155,8 @@ whole call plan, or figure out what's on the line.
 
 `play_sequence` steps are dicts keyed by `action` — `dtmf`, `mf`, `tone`,
 `2600`, `redbox`, `cng`, `ced`, `wav`, `wait`, `wait_for_answer`, `hangup`,
-`listen`, `detect_tone`, `dtmf_decode`. The canonical "deposit 75¢" flow as
-one call:
+`listen`, `detect_tone`, `dtmf_decode`, `transcribe`. The canonical
+"deposit 75¢" flow as one call:
 
 ```
 play_sequence(sid, [

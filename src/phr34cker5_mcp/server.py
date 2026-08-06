@@ -655,6 +655,7 @@ def play_sequence(call_sid: str, steps: list[dict], stop_on_error: bool = True) 
         {"action": "listen",      "s": 5}          -> WAV path
         {"action": "detect_tone", "s": 3, "targets": ["dial-tone","busy"]}
         {"action": "dtmf_decode", "s": 5}          -> digits
+        {"action": "transcribe",  "s": 10}         -> speech-to-text
 
     Example — dial handled elsewhere; here we wait for answer, pause, deposit
     75c, and listen:
@@ -712,6 +713,10 @@ def play_sequence(call_sid: str, steps: list[dict], stop_on_error: bool = True) 
             elif action == "dtmf_decode":
                 secs = float(step.get("s", step.get("seconds", 5.0)))
                 entry.update(dtmf_decode(call_sid, seconds=secs))
+
+            elif action == "transcribe":
+                secs = float(step.get("s", step.get("seconds", 10.0)))
+                entry.update(transcribe(call_sid, seconds=secs))
 
             else:
                 raise ValueError(f"unknown action: {action!r}")

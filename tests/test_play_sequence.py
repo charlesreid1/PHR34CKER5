@@ -69,6 +69,16 @@ def test_inject_step_reports_playout(piped_call):
     assert step["queued_ms"] > 0
 
 
+def test_transcribe_is_a_recognized_action(piped_call):
+    # transcribe degrades gracefully without a real Twilio client (captures a
+    # WAV, reports local_only) rather than being rejected as an unknown action.
+    r = server.play_sequence("CAtest", [{"action": "transcribe", "s": 0.02}])
+    step = r["results"][0]
+    assert step["ok"] is True
+    assert step["action"] == "transcribe"
+    assert "wav_path" in step
+
+
 def test_unknown_action_stops_by_default(piped_call):
     r = server.play_sequence(
         "CAtest",
