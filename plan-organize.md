@@ -375,6 +375,60 @@ That's the gap.
     (`phr34cker5://calls/<sid>/events`) so the assistant can subscribe
     instead of polling `call_status`.
 
+### Knowledge-retrieval tools (lore side)
+
+The action tools above are one axis; the lore tools are the other. The
+current corpus retrieval (`list_topics`, `search_lore`, `read_lore`,
+`random_lore`) is too coarse for CTF-grade Q/A — a DEFCON judge will ask
+"what tolerance does the ACTS quarter tone have?" and the assistant
+needs a typed lookup, not a full-text search. The typed-record schema
+these tools depend on is specified in `plan-knowledge.md` (see
+"Corpus discipline" and "Top-level ontology"); the tools themselves
+land here:
+
+16. **`lookup_tone(name)`** — returns exact `{frequencies_hz[],
+    tolerance_hz, level_dBm0, on_ms, off_ms, region, era_bounds}` for a
+    named tone (`2600_sf`, `mf_kp1`, `red_box_quarter_bellcore`,
+    `red_box_quarter_phrack339`, `acts_dollar`, `dtmf_a_autovon`,
+    etc.). Backed by typed records in `knowledge/`, not free-text.
+
+17. **`explain_technique(name, year, region)`** — step-by-step
+    composition of tones, boxes, and network elements with vulnerability
+    window and retirement cause. Answers "how would you red-box a
+    fortress phone in 1993 Chicago?" with the right citations and the
+    right dates. Refuses to answer if `year`/`region` land outside the
+    technique's `era_bounds`.
+
+18. **`verify_claim(text)`** — takes a natural-language claim ("blue box
+    uses 2600 Hz to signal hangup on international trunks") and returns
+    a graded response (`verdict ∈ {true, false, needs_qualification}`)
+    with citations, contradictions, and missing region/era qualifiers.
+    This is the tool that rejects DEFCON traps: the correct verdict on
+    that claim is `false` — on CCITT No.5 the seizure tone is 2400 Hz;
+    2600 Hz alone doesn't seize an international trunk. See
+    `plan-knowledge.md` "Explicitly disputed entries" for the catalog
+    of trap patterns.
+
+19. **`search` filters** — extend `search_lore` with `category`,
+    `region`, and `year` filters so the assistant can scope hits to
+    (e.g.) NANP × 1998, not the entire corpus. Categories come from the
+    ontology in `plan-knowledge.md` (`signaling_system`, `tone_signal`,
+    `box`, `network_element`, `numbering_plan`, `payphone_system`,
+    `cellular_system`, `pbx_and_voicemail`, `data_network`, `technique`,
+    `defense_and_detection`, `bibliography`).
+
+20. **`bibliography(cite_id)`** — citation formatter; every record in
+    the corpus cites into a shared bibliography by ID (BSTJ Nov 1960,
+    GR-506-CORE, Phrack 33.9, etc.).
+
+21. **`cross_reference(record_id)`** — see_also traversal for
+    `[[topic/name]]` links.
+
+Every knowledge-tool response includes a common envelope:
+`citations[]`, `era_bounds`, `region`, `confidence ∈ {primary,
+secondary, community, folklore}`. That envelope is how the assistant
+weights its answer at the con.
+
 ---
 
 ## Phase 4 — Skill update
@@ -400,14 +454,21 @@ Update `skills/phreaking/SKILL.md` to:
    commit `docs/twilio_setup.md`, create `docs/call_recipes.md` and
    `docs/ctf_playbook.md` stubs, update `knowledge/MANIFEST.md`. Fast,
    no code risk, biggest clarity payoff. Check in before proceeding.
-2. **Phase 3 top 4 tools** — `play_sequence`, `detect_tone`,
-   `dtmf_decode`, `transcribe`. These are the leverage tools.
+2. **Phase 3 top 4 action tools** — `play_sequence`, `detect_tone`,
+   `dtmf_decode`, `transcribe`. These are the leverage tools on the
+   *acting* side.
 3. **Phase 2 knowledge fills** — start with `ctf/`, `modems/`,
    `dtmf/`, plus the specific stubs the MANIFEST already promises.
    Fill `docs/call_recipes.md` and `docs/ctf_playbook.md` for real as
-   we accumulate real recipes.
-4. **Phase 3 remaining tools + cost guardrails**.
-5. **Phase 4 skill update** to teach the assistant to use the new
+   we accumulate real recipes. Adopt the typed-record schema from
+   `plan-knowledge.md` in parallel so the knowledge-retrieval tools
+   below have something to bind to.
+4. **Phase 3 knowledge-retrieval tools** — `lookup_tone`,
+   `verify_claim`, `explain_technique`. `verify_claim` is the one
+   that separates the assistant from a Wikipedia paraphrase; ship it
+   as soon as ~20 tone/box records exist to back it.
+5. **Phase 3 remaining action tools + cost guardrails**.
+6. **Phase 4 skill update** to teach the assistant to use the new
    surface.
 
 Each phase is independently valuable; stopping between phases leaves
