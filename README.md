@@ -26,31 +26,45 @@
 
 > A time machine to 1997.
 
-**PHR34CKER5** is a Model Context Protocol (MCP) server plus a companion
-**Skill** that turns any MCP-capable assistant (Claude Desktop, Claude Code,
-opencode) into a knowledgeable phreaking historian and CTF cohort.
+**PHR34CKER5** is a CTF phreaking co-pilot: a corpus of lore *and* a
+live-telephony toolbox exposed over the Model Context Protocol (MCP), plus
+a companion **Skill** that teaches any MCP-capable assistant (Claude Desktop,
+Claude Code, opencode) to use it. It knows the history — blueboxing,
+red-boxing, ACTS, ESS, CN/A, T.30 — and it can act on it: synthesize tones,
+place PSTN calls via Twilio, script sequences, and record.
 
-This repo is a **font of phreaking knowledge** — not a "generate DTMF tones"
-utility. It curates lore: blueboxing, redboxing, CN/A social engineering,
-2600 Hz, BBS culture, ESS switch generations, war dialing, tandem stacking,
-the zines (2600, Phrack, TAP), the jargon. The MCP server exposes the corpus
-as resources and search tools. The Skill teaches the assistant to consult
-the corpus before answering.
+## What can it do?
 
-## What's in the box
+Three tiers, from knowing to acting:
+
+- **Know** — corpus tools: `list_topics`, `search_lore`, `read_lore`, `random_lore`
+- **Synthesize** — tone generators: DTMF, R1 MF, red box, fax CNG/CED, 2600 Hz
+- **Act** — live-call tools: `dial`, `wait_for_answer`, `play_*_into_call`, `listen`, `record`
+
+The canonical move is to script all three together — "dial X, wait for
+answer, wait 10s, deposit 75¢, listen for 5s, hang up":
 
 ```
-phr34cker5/
-├── pyproject.toml           # uv/pipx/uvx-installable Python package
-├── src/phr34cker5_mcp/      # the MCP server
-├── knowledge/               # the corpus — markdown, one idea per file
-│   ├── MANIFEST.md
-│   ├── blueboxing/  redboxing/  greenboxing/  cna/  2600hz/
-│   ├── bbs/  war-dialing/  ess/  tandem-stacking/  zines/  glossary/
-├── skills/
-│   └── phreaking/SKILL.md   # Claude Code / opencode skill
-└── README.md                # you are here
+call = dial("+14155551212")
+wait_for_answer(call["call_sid"])
+wait(10)
+play_red_box_into_call(call["call_sid"], "qqq")
+listen(call["call_sid"], seconds=5)
+hangup(call["call_sid"])
 ```
+
+## Repo map
+
+```
+src/phr34cker5_mcp/    the MCP server (installable Python package)
+knowledge/             the lore corpus (markdown, one topic per dir)
+skills/phreaking/      the SKILL.md that tells assistants to use the MCP
+scripts/               user-facing shell helpers (credential setup, etc.)
+docs/                  long-form guides that don't fit in the README
+```
+
+See [`scripts/README.md`](scripts/README.md) for why `scripts/` and `src/`
+are separate, and [`docs/`](docs/) for the long-form guides.
 
 ## MCP tools
 
@@ -102,6 +116,10 @@ opens an ngrok tunnel so Twilio can reach it.
 
 **Requires Python 3.10–3.12** (uses stdlib `audioop` for μ-law).
 
+> See [docs/twilio_setup.md](docs/twilio_setup.md) for the full CTF-focused
+> Twilio playbook — buying a number, verifying credentials, VPS vs. laptop
+> topologies, and the stuck-call budget footgun.
+
 | tool | what it does |
 |---|---|
 | `dial(to, from_=None, record=False)` | place outbound PSTN call, returns `CallSid` |
@@ -121,16 +139,8 @@ opens an ngrok tunnel so Twilio can reach it.
 | `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
 | `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
 
-Canonical "dial X, wait 10s, deposit 75c" sequence:
-
-```
-call = dial("+14155551212")
-wait_for_answer(call["call_sid"])
-wait(10)
-play_red_box_into_call(call["call_sid"], "qqq")
-listen(call["call_sid"], seconds=5)
-hangup(call["call_sid"])
-```
+(For the canonical scripted sequence that ties these together, see
+[What can it do?](#what-can-it-do) at the top.)
 
 #### Env vars
 

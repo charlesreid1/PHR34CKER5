@@ -24,10 +24,16 @@
                                   \/____/                  \|___|                   \/____/                  \/____/                  \|___|
 ```
 
-This directory is the **font** — the reservoir of phreaking knowledge that
-PHR34CKER5 serves over MCP. Every `.md` file below is exposed as an MCP
-resource under `phr34cker5://<topic>/<name>` and is searchable via the
-`search_lore` tool.
+This directory is the **reference half** of PHR34CKER5 — the reservoir of
+phreaking knowledge that the assistant consults to advise. The **acting
+half** lives in [`src/`](../src/): the MCP tools that synthesize tones,
+place live PSTN calls, and record. The corpus tells you *what a thing is*
+and *what it sounded like*; the tools *do it*. A good CTF answer usually
+draws on both — look up the tone here, then generate and inject it from
+`src/`.
+
+Every `.md` file below is exposed as an MCP resource under
+`phr34cker5://<topic>/<name>` and is searchable via the `search_lore` tool.
 
 Add files freely. The server picks them up on next startup.
 
