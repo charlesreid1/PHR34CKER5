@@ -117,8 +117,19 @@ Pure Python (stdlib `wave` + `math`, no numpy). Every tool writes a mono
 | `generate_mf(digits, tone_ms=68, gap_ms=68, kp_ms=100, ...)` | R1 MF: 0-9, K (KP), S (ST) |
 | `generate_sf_2600(ms=1000, ...)` | the 2600 Hz supervision tone |
 | `generate_red_box(coins, ...)` | ACTS coin bursts: n / d / q |
+| `generate_green_box(signal="collect", ...)` | operator coin control: collect / return / ringback |
 | `generate_fax_cng(cycles=4, ...)` | T.30 CNG (1100 Hz, 0.5s on / 3s off) |
 | `generate_fax_ced(ms=3000, ...)` | T.30 CED (2100 Hz continuous) |
+| `generate_busy(cycles=4, ...)` | line-busy tone (480+620 Hz, 500/500 ms) |
+| `generate_reorder(cycles=8, ...)` | reorder / fast-busy (480+620 Hz, 250/250 ms) |
+| `generate_ringback(cycles=2, ...)` | audible ringback (440+480 Hz, 2s on / 4s off) |
+| `generate_milliwatt(ms=10000, ...)` | 1004 Hz test tone — every CO had one |
+| `generate_modem_carrier(rate="v22", ...)` | synthetic modem answer+carrier (bell103/v21/v22/v32/v34) |
+
+The call-progress tones (`busy`, `reorder`, `ringback`, `milliwatt`,
+`modem`) round-trip through `detect_tone` to the same classification, so
+they double as detector fixtures. Each also has a `play_*_into_call`
+injector and a `play_sequence` action.
 
 Example — dial 1-820 as DTMF, then blue-box a `KP 1 800 555 1212 ST`
 sequence:
@@ -202,6 +213,7 @@ play_sequence(sid, [
 | `PHR34CKER5_BIND_HOST` | VPS mode | interface uvicorn binds to. Default `127.0.0.1`. Set `0.0.0.0` on a VPS. |
 | `PHR34CKER5_BIND_PORT` | VPS mode | pin the local port so your reverse proxy has a stable upstream. Default: random ephemeral. |
 | `NGROK_AUTHTOKEN` | laptop mode | free at ngrok.com. Only used when `PHR34CKER5_PUBLIC_URL` is unset. Requires `pip install "phr34cker5-mcp[ngrok]"`. |
+| `MAX_CALL_MINUTES` | no | cost guardrail. Any call older than this is auto-hung-up by a watchdog — belt-and-suspenders on the 1-hour `<Pause>`. Unset/0 disables. Fractional OK. `call_status` reports `auto_hung_up`. |
 
 Two deployment topologies:
 

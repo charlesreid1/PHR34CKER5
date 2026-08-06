@@ -701,6 +701,73 @@ def generate_red_box(
     )
 
 
+@mcp.tool()
+def generate_busy(cycles: int = 4, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Line-busy tone: 480+620 Hz, 500 ms on / 500 ms off. `cycles` on/off periods."""
+    pcm = tones.busy_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("busy", path), pcm), {"kind": "busy", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_reorder(cycles: int = 8, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Reorder / fast-busy (all-trunks-busy): 480+620 Hz, 250 ms on / 250 ms off."""
+    pcm = tones.reorder_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("reorder", path), pcm), {"kind": "reorder", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_ringback(cycles: int = 2, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Audible ringback: 440+480 Hz, 2 s on / 4 s off. `cycles` rings."""
+    pcm = tones.ringback_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("ringback", path), pcm), {"kind": "ringback", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_milliwatt(ms: int = 10000, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """
+    1004 Hz milliwatt test tone, continuous. Every CO had one; CTF authors
+    love them. Older lines used 1000 Hz. See phr34cker5://ctf/milliwatt-testlines.
+    """
+    pcm = tones.milliwatt_bytes(ms, amplitude)
+    return _render_result(tones.write_wav(_tone_path("milliwatt", path), pcm), {"kind": "milliwatt", "freq_hz": 1004})
+
+
+@mcp.tool()
+def generate_modem_carrier(
+    rate: str = "v22",
+    answer_ms: int = 3000,
+    carrier_ms: int = 2000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Synthesize a modem-answer signature: 2100 Hz V.25 answer tone then a
+    rate-appropriate carrier marker. `rate` in {bell103, v21, v22, v32, v34}.
+
+    Audio that *sounds* like a modem for detector tests / CTF flag-matching —
+    it does not demodulate or negotiate. See phr34cker5://modems/README.
+    """
+    pcm = tones.modem_carrier_bytes(rate, answer_ms, carrier_ms, amplitude)
+    return _render_result(
+        tones.write_wav(_tone_path(f"modem-{rate}", path), pcm),
+        {"kind": "modem_carrier", "rate": rate},
+    )
+
+
+@mcp.tool()
+def generate_green_box(signal: str = "collect", ms: int = 900, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """
+    Render a green-box operator coin-control tone: `signal` in
+    {collect, return, ringback}. The operator side of coin signaling — distinct
+    from the red box. Historical only — see phr34cker5://greenboxing/README.
+    """
+    pcm = tones.green_box_bytes(signal, ms, amplitude)
+    return _render_result(
+        tones.write_wav(_tone_path(f"greenbox-{signal}", path), pcm),
+        {"kind": "green_box", "signal": signal},
+    )
+
+
 # --- live telephony (Twilio) -------------------------------------------------
 #
 # Every tool below requires:
@@ -734,6 +801,7 @@ def _call_summary(rt, call_sid: str) -> dict:
         "duration_s": int(api_call.duration or 0),
         "ws_connected": bool(cs and cs.ws_connected),
         "outbound_backlog_ms": cs.outbound_backlog_ms() if cs else 0,
+        "auto_hung_up": call_sid in rt.auto_hung_up,
     }
 
 
@@ -901,14 +969,20 @@ def _wait_for_playout(cs, timeout_s: float = 30.0) -> bool:
 # PCM builders for the injectable actions in play_sequence. Each maps a step
 # dict to raw PCM bytes; keys are the `action` names callers use.
 _SEQUENCE_TONE_BUILDERS = {
-    "dtmf":   lambda s: tones.dtmf_bytes(s["digits"], s.get("tone_ms", 100), s.get("gap_ms", 80)),
-    "mf":     lambda s: tones.mf_bytes(s["digits"], s.get("tone_ms", 68), s.get("gap_ms", 68), s.get("kp_ms", 100)),
-    "tone":   lambda s: tones.sine_bytes(s["freq_hz"], s.get("ms", 1000)),
-    "2600":   lambda s: tones.sf_2600_bytes(s.get("ms", 1000)),
-    "redbox": lambda s: tones.red_box_bytes(s["coins"]),
-    "cng":    lambda s: tones.cng_bytes(s.get("cycles", 4)),
-    "ced":    lambda s: tones.ced_bytes(s.get("ms", 3000)),
-    "wav":    lambda s: _read_wav_pcm(s["path"]),
+    "dtmf":     lambda s: tones.dtmf_bytes(s["digits"], s.get("tone_ms", 100), s.get("gap_ms", 80)),
+    "mf":       lambda s: tones.mf_bytes(s["digits"], s.get("tone_ms", 68), s.get("gap_ms", 68), s.get("kp_ms", 100)),
+    "tone":     lambda s: tones.sine_bytes(s["freq_hz"], s.get("ms", 1000)),
+    "2600":     lambda s: tones.sf_2600_bytes(s.get("ms", 1000)),
+    "redbox":   lambda s: tones.red_box_bytes(s["coins"]),
+    "greenbox": lambda s: tones.green_box_bytes(s.get("signal", "collect"), s.get("ms", 900)),
+    "cng":      lambda s: tones.cng_bytes(s.get("cycles", 4)),
+    "ced":      lambda s: tones.ced_bytes(s.get("ms", 3000)),
+    "busy":     lambda s: tones.busy_bytes(s.get("cycles", 4)),
+    "reorder":  lambda s: tones.reorder_bytes(s.get("cycles", 8)),
+    "ringback": lambda s: tones.ringback_bytes(s.get("cycles", 2)),
+    "milliwatt": lambda s: tones.milliwatt_bytes(s.get("ms", 10000)),
+    "modem":    lambda s: tones.modem_carrier_bytes(s.get("rate", "v22"), s.get("answer_ms", 3000), s.get("carrier_ms", 2000)),
+    "wav":      lambda s: _read_wav_pcm(s["path"]),
 }
 
 
@@ -929,8 +1003,10 @@ def play_sequence(call_sid: str, steps: list[dict], stop_on_error: bool = True) 
         {"action": "mf",     "digits": "K18005551212S"}
         {"action": "tone",   "freq_hz": 440, "ms": 1000}
         {"action": "2600",   "ms": 1000}
-        {"action": "redbox", "coins": "qqq"}
+        {"action": "redbox", "coins": "qqq"}   {"action": "greenbox", "signal": "collect"}
         {"action": "cng",    "cycles": 4}      {"action": "ced", "ms": 3000}
+        {"action": "busy"}   {"action": "reorder"}   {"action": "ringback"}
+        {"action": "milliwatt", "ms": 10000}   {"action": "modem", "rate": "v22"}
         {"action": "wav",    "path": "/path/to.wav"}
       timing / control:
         {"action": "wait", "s": 10}
@@ -1086,6 +1162,44 @@ def play_red_box_into_call(call_sid: str, coins: str) -> dict:
     coins: n/d/q for nickel/dime/quarter. Example: 'qqq' for 75c.
     """
     return _inject(call_sid, tones.red_box_bytes(coins), f"redbox:{coins}")
+
+
+@mcp.tool()
+def play_green_box_into_call(call_sid: str, signal: str = "collect") -> dict:
+    """Inject a green-box operator coin-control tone (collect / return / ringback)."""
+    return _inject(call_sid, tones.green_box_bytes(signal), f"greenbox:{signal}")
+
+
+@mcp.tool()
+def play_busy_into_call(call_sid: str, cycles: int = 4) -> dict:
+    """Inject line-busy tone (480+620 Hz, 500/500 ms) into a live call."""
+    return _inject(call_sid, tones.busy_bytes(cycles), f"busy:{cycles}c")
+
+
+@mcp.tool()
+def play_reorder_into_call(call_sid: str, cycles: int = 8) -> dict:
+    """Inject reorder / fast-busy tone (480+620 Hz, 250/250 ms) into a live call."""
+    return _inject(call_sid, tones.reorder_bytes(cycles), f"reorder:{cycles}c")
+
+
+@mcp.tool()
+def play_ringback_into_call(call_sid: str, cycles: int = 2) -> dict:
+    """Inject audible ringback (440+480 Hz, 2 s on / 4 s off) into a live call."""
+    return _inject(call_sid, tones.ringback_bytes(cycles), f"ringback:{cycles}c")
+
+
+@mcp.tool()
+def play_milliwatt_into_call(call_sid: str, ms: int = 10000) -> dict:
+    """Inject the 1004 Hz milliwatt test tone into a live call."""
+    return _inject(call_sid, tones.milliwatt_bytes(ms), f"milliwatt:{ms}ms")
+
+
+@mcp.tool()
+def play_modem_carrier_into_call(
+    call_sid: str, rate: str = "v22", answer_ms: int = 3000, carrier_ms: int = 2000
+) -> dict:
+    """Inject a synthetic modem-answer signature (2100 Hz answer + rate carrier)."""
+    return _inject(call_sid, tones.modem_carrier_bytes(rate, answer_ms, carrier_ms), f"modem:{rate}")
 
 
 # ---- listening ----
