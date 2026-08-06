@@ -24,7 +24,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from phr34cker5_mcp import detect, tones
+from phr34cker5_mcp import detect, records, tones
 
 URI_SCHEME = "phr34cker5"
 
@@ -205,6 +205,286 @@ def random_lore() -> dict:
         "name": lf.name,
         "uri": lf.uri,
         "content": lf.path.read_text(encoding="utf-8"),
+    }
+
+
+# --- typed-record knowledge repository (KR) ----------------------------------
+#
+# The retrieval tools below answer CTF-grade questions from typed, dated,
+# cited records under knowledge/records/ — not free-text search. See
+# knowledge/records/README.md and plan-knowledge.md for the discipline.
+
+
+_RECORD_STORE: records.RecordStore | None = None
+_RECORD_STORE_ROOT: Path | None = None
+
+
+def _record_store() -> records.RecordStore:
+    """Lazy-load (and cache) the record store rooted at the active corpus."""
+    global _RECORD_STORE, _RECORD_STORE_ROOT
+    root = _resolve_knowledge_root() / "records"
+    if _RECORD_STORE is None or _RECORD_STORE_ROOT != root:
+        _RECORD_STORE = records.RecordStore.load(root)
+        _RECORD_STORE_ROOT = root
+    return _RECORD_STORE
+
+
+@mcp.tool()
+def lookup_tone(name: str) -> dict:
+    """
+    Look up the exact spec for a named tone or signaling code.
+
+    Resolves by id, name, or alias (case/spacing-insensitive) — e.g. `2600`,
+    `KP`, `red box quarter`, `acts_quarter`, `dtmf_a_autovon`, `the whistle`.
+    Returns the numeric `technical_body` (frequencies_hz, tolerance,
+    level_dBm0, on_ms/off_ms), any `disputed` fields, and the common envelope
+    (citations, era_bounds, region, confidence).
+
+    Numbers, not adjectives: this is the tool a DEFCON judge's "what tolerance
+    does the ACTS quarter tone have?" should hit.
+    """
+    store = _record_store()
+    rec = store.resolve(name)
+    if rec is None:
+        # Offer near-matches to guide the caller.
+        suggestions = [
+            r["id"] for r in store.in_category("tone_signal")
+        ][:20]
+        raise ValueError(f"no tone record for {name!r}. Try lookup by id/alias; some ids: {suggestions}")
+    return records.public_view(rec)
+
+
+@mcp.tool()
+def bibliography(cite_id: str | None = None) -> dict:
+    """
+    Return a bibliography entry by id, or list all sources if `cite_id` is omitted.
+
+    Every typed record cites into this table (BSTJ Nov 1960 = `bstj-1960-11`,
+    GR-506-CORE = `gr-506-core`, Phrack 33.9 = `phrack-33-9`, …).
+    """
+    store = _record_store()
+    if cite_id is None:
+        return {"sources": [records.public_view(r) for r in store.in_category("bibliography")]}
+    rec = store.get(cite_id)
+    if rec is None or rec.get("category") != "bibliography":
+        ids = [r["id"] for r in store.in_category("bibliography")]
+        raise ValueError(f"no bibliography entry {cite_id!r}. Known: {ids}")
+    return records.public_view(rec)
+
+
+@mcp.tool()
+def cross_reference(record_id: str) -> dict:
+    """
+    Traverse a record's `see_also` links, returning the linked records' summaries.
+
+    The typed-record analogue of the corpus's `[[topic/name]]` links.
+    """
+    store = _record_store()
+    rec = store.get(record_id)
+    if rec is None:
+        rec = store.resolve(record_id)
+    if rec is None:
+        raise ValueError(f"no record {record_id!r}")
+    linked = []
+    for ref in rec.get("see_also", []):
+        target = store.get(ref) or store.resolve(ref)
+        if target is None:
+            linked.append({"id": ref, "resolved": False})
+        else:
+            linked.append({
+                "id": target["id"],
+                "name": target.get("name"),
+                "category": target.get("category"),
+                "resolved": True,
+            })
+    return {"id": rec["id"], "name": rec.get("name"), "see_also": linked}
+
+
+@mcp.tool()
+def explain_technique(name: str, year: int | None = None, region: str | None = None) -> dict:
+    """
+    Explain a technique step-by-step, with its vulnerability window and citations.
+
+    Composes tones/boxes/network elements into an ordered procedure (e.g.
+    `blueboxing`, `redboxing`). If `year`/`region` are supplied and fall
+    outside the technique's era_bounds/region, this REFUSES with an
+    explanation instead of pretending the trick still works — that refusal is
+    the point at a con.
+    """
+    store = _record_store()
+    rec = store.resolve(name)
+    if rec is None or rec.get("category") != "technique":
+        ids = [r["id"] for r in store.in_category("technique")]
+        raise ValueError(f"no technique {name!r}. Known: {ids}")
+
+    out = records.public_view(rec)
+    out["applicable"] = True
+    out["refusals"] = []
+    if year is not None and not records.era_contains(rec, year):
+        out["applicable"] = False
+        out["refusals"].append(
+            f"{rec['name']} was not effective in {year}: era_bounds={rec.get('era_bounds')}. "
+            f"Retirement cause: {rec.get('retirement_cause', 'see record')}."
+        )
+    if region is not None and rec.get("region") and records._normalize(region) != records._normalize(rec["region"]):
+        out["applicable"] = False
+        out["refusals"].append(
+            f"{rec['name']} is bound to region {rec['region']}, not {region!r}. "
+            "In-band signaling systems are region-specific; a NANP trick does not port to another network."
+        )
+    return out
+
+
+# Trap patterns: natural-language claims whose "obvious" answer is wrong.
+# Each returns a verdict + the correct record to cite. This is the catalog
+# from plan-knowledge.md "Explicitly disputed entries" / "Adversarial corpus".
+_CLAIM_TRAPS = [
+    {
+        "match": [r"2600", r"(international|overseas|no\.?\s*5|c5|ccitt|ccitt)"],
+        "verdict": "false",
+        "because": (
+            "On CCITT No.5 international trunks the SEIZURE tone is 2400 Hz "
+            "(2600 Hz is proceed-to-send). A generator emitting only 2600 Hz "
+            "does not seize a No.5 trunk. 2600 Hz-alone seizure is the "
+            "domestic-NANP SF story, not the international one."
+        ),
+        "cite": ["ccitt5_line_seize", "sf_2600"],
+    },
+    {
+        "match": [r"quarter", r"(66\s*ms|five.*66|5.*66)"],
+        "verdict": "false",
+        "because": (
+            "The ACTS quarter is FIVE 33 ms bursts (GR-506-CORE), not 66 ms. "
+            "66 ms is the nickel/dime cadence. Conflating them is the classic trap."
+        ),
+        "cite": ["acts_quarter", "acts_nickel"],
+    },
+    {
+        "match": [r"\bthe\b.*\banac\b|\banac\b.*\b(is|=)\b.*958|universal.*anac"],
+        "verdict": "needs_qualification",
+        "because": (
+            "There is no universal ANAC. Readback codes are per-CO / per-NPA "
+            "(958 in much of Pacific Bell, 200-222-2222 in some Bell Atlantic, "
+            "etc.). Any 'the ANAC is X' claim needs a region qualifier."
+        ),
+        "cite": [],
+    },
+    {
+        "match": [r"kp2", r"(700.*1700|1700.*700)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The 1700-Hz-paired control codes have three naming schemes. "
+            "'KP2 = 700+1700' is community-canon-wrong-but-widespread; in "
+            "Bellcore notation KP2 = 1300+1700 and 700+1700 = ST3P, while "
+            "BSTJ 1960 calls 700+1700 'Code 11' with no KP2 concept. State the scheme."
+        ),
+        "cite": ["mf_kp2_intl", "mf_kp"],
+    },
+    {
+        "match": [r"(autovon|precedence).*(d\s*=?\s*flash|flash.*override.*\bd\b)|d.*flash override"],
+        "verdict": "false",
+        "because": (
+            "In AUTOVON precedence A=Flash Override (highest), B=Flash, "
+            "C=Immediate, D=Priority (MIL-STD-187-100). D is Priority, the "
+            "LOWEST of the four, not Flash Override."
+        ),
+        "cite": ["dtmf_a_autovon"],
+    },
+]
+
+
+@mcp.tool()
+def verify_claim(text: str) -> dict:
+    """
+    Grade a natural-language phreaking claim: true / false / needs_qualification.
+
+    Checks the claim against the corpus's catalog of known DEFCON traps —
+    the plausible-but-wrong assertions a judge plants (e.g. "a blue box uses
+    2600 Hz to hang up an international trunk" → false; on CCITT No.5 the
+    seizure tone is 2400 Hz). Returns a `verdict`, the reasoning, and the
+    records to cite.
+
+    A conservative rule-based checker, not an oracle: an unmatched claim
+    returns `verdict: "unverified"` with a pointer to look it up, rather than
+    guessing. Better to say "I can't confirm that from the KR" than to bluff.
+    """
+    store = _record_store()
+    lowered = text.lower()
+    for trap in _CLAIM_TRAPS:
+        if all(re.search(pat, lowered) for pat in trap["match"]):
+            cites = []
+            for cid in trap["cite"]:
+                rec = store.get(cid)
+                if rec:
+                    cites.append({"id": cid, "name": rec.get("name"), "citations": rec.get("citations", [])})
+            return {
+                "claim": text,
+                "verdict": trap["verdict"],
+                "reasoning": trap["because"],
+                "records": cites,
+            }
+    return {
+        "claim": text,
+        "verdict": "unverified",
+        "reasoning": (
+            "No matching entry in the trap catalog or typed records. This tool "
+            "only asserts verdicts it can back with a record; use lookup_tone / "
+            "explain_technique / search_lore to research the claim manually."
+        ),
+        "records": [],
+    }
+
+
+@mcp.tool()
+def search_records(
+    query: str | None = None,
+    category: str | None = None,
+    region: str | None = None,
+    year: int | None = None,
+    max_results: int = 20,
+) -> dict:
+    """
+    Search the typed records with category / region / year filters.
+
+    Where `search_lore` greps prose, this scopes the KR: filter to a
+    `category` (`tone_signal`, `box`, `technique`, `bibliography`), a `region`
+    (`NANP`, `CCITT-No5`, `ITU-R2`, `AUTOVON`, `universal`), and/or a `year`
+    (returns only records whose era_bounds contain it) — so you can ask for
+    "NANP tone signals effective in 1998" instead of the whole corpus. The
+    optional `query` substring-matches id / name / aliases.
+
+    Each result carries the common envelope (citations, era_bounds, region,
+    confidence).
+    """
+    store = _record_store()
+    q = records._normalize(query) if query else None
+    reg = records._normalize(region) if region else None
+
+    results = []
+    for rec in store.all_records():
+        if category and rec.get("category") != category:
+            continue
+        if reg and records._normalize(rec.get("region", "")) != reg:
+            continue
+        if year is not None and not records.era_contains(rec, year):
+            continue
+        if q:
+            haystack = records._normalize(
+                " ".join([rec.get("id", ""), rec.get("name", ""), *rec.get("aliases", [])])
+            )
+            if q not in haystack:
+                continue
+        results.append({
+            "id": rec["id"],
+            "name": rec.get("name"),
+            "category": rec.get("category"),
+            **records.envelope(rec),
+        })
+
+    return {
+        "filters": {"query": query, "category": category, "region": region, "year": year},
+        "hit_count": len(results),
+        "results": results[:max_results],
     }
 
 

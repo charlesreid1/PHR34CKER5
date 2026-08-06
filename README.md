@@ -37,7 +37,7 @@ place PSTN calls via Twilio, script sequences, and record.
 
 Three tiers, from knowing to acting:
 
-- **Know** — corpus tools: `list_topics`, `search_lore`, `read_lore`, `random_lore`
+- **Know** — corpus tools: `list_topics`, `search_lore`, `read_lore`, `random_lore`, plus typed-record lookups (`lookup_tone`, `verify_claim`, `explain_technique`)
 - **Synthesize** — tone generators: DTMF, R1 MF, red box, fax CNG/CED, 2600 Hz
 - **Act** — live-call tools: `dial`, `wait_for_answer`, `play_*_into_call`, `listen`, `record`
 - **Perceive** — read the line back: `detect_tone`, `dtmf_decode`, `transcribe`, and `play_sequence` to script a whole call plan
@@ -81,6 +81,26 @@ are separate, and [`docs/`](docs/) for the long-form guides.
 Every markdown file is also exposed as an MCP **resource** at
 `phr34cker5://<topic>/<name>`, plus a `phr34cker5://index` resource with a
 human-readable table of contents.
+
+### Knowledge retrieval (typed records)
+
+The prose corpus is what the assistant *reads*; the typed records under
+[`knowledge/records/`](knowledge/records/) are what it *looks facts up in* —
+numbers, not adjectives, each dated and cited. These are the tools a DEFCON
+judge's precision question should hit.
+
+| tool | what it does |
+|---|---|
+| `lookup_tone(name)` | exact spec for a named tone/code — `frequencies_hz`, `tolerance`, `level_dBm0`, `on_ms/off_ms`, plus `disputed{}` and the citation envelope. Resolves aliases (`2600`, `KP`, `red box quarter`, `the whistle`) |
+| `verify_claim(text)` | grades a claim `true / false / needs_qualification / unverified` against the trap catalog (e.g. "2600 Hz seizes an international trunk" → **false**; No.5 seizure is 2400 Hz). Won't bluff an unmatched claim |
+| `explain_technique(name, year?, region?)` | step-by-step composition with vulnerability window; **refuses** if `year`/`region` fall outside the technique's era/region |
+| `bibliography(cite_id?)` | resolve a source id, or list all |
+| `cross_reference(record_id)` | traverse a record's `see_also` links |
+| `search_records(query?, category?, region?, year?)` | filter the KR — e.g. NANP `tone_signal`s effective in 1998 |
+
+Every response carries the envelope `{citations[], era_bounds, region,
+confidence ∈ {primary, secondary, community, folklore}}`. See
+[`knowledge/records/README.md`](knowledge/records/README.md) for the schema.
 
 ### Tones (actionable)
 

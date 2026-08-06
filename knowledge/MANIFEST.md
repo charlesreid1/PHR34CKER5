@@ -37,6 +37,13 @@ Every `.md` file below is exposed as an MCP resource under
 
 Add files freely. The server picks them up on next startup.
 
+The prose here is the half you *read*. Alongside it, [`records/`](records/)
+is a typed, dated, cited knowledge repository — the half you *look facts up
+in* (exact frequencies, timings, disputes). The retrieval tools
+(`lookup_tone`, `verify_claim`, `explain_technique`, `bibliography`,
+`cross_reference`, `search_records`) bind to those JSON records, not to free
+text. See [`records/README.md`](records/README.md).
+
 ## Topics
 
 - **blueboxing/**   — 2600 Hz, MF signaling, KP/ST, trunk seizure; the full
