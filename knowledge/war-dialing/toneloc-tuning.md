@@ -65,17 +65,16 @@ an oddball status) in a sea of no-answers.
 
 ## Tuning params and what each costs
 
-| Param | What it does | Cost of raising | Cost of lowering |
-|---|---|---|---|
-| **Dial timing / inter-call delay** | pause between attempts | slower scan | overruns the modem / trips telco fraud heuristics; missed answers |
-| **Ring count** (rings before hangup) | how long to wait for answer | more time per dead number | hangs up on slow-answering PBXs (missed hits) |
-| **Carrier wait** (`CARRIERTIME`) | seconds to wait for training after answer | catches slow far-end modems | misses real carriers as RINGOUT |
-| **Nudge / connect string** | text sent after CONNECT to provoke a banner | — | too aggressive can drop a fragile login |
-| **Blacklist / exclude** | numbers never to dial | safety | miss something in-range |
-| **Randomize order** | dial the range out of sequence | — | (mostly a detection-avoidance choice) |
+| Param | Raising it | Lowering it |
+|---|---|---|
+| **Dial timing / inter-call delay** | slower scan | trips fraud heuristics; missed answers |
+| **Ring count** (rings before hangup) | more time per dead number | hangs up on slow PBXs — missed hits |
+| **Carrier wait** (`CARRIERTIME`) | catches slow far-end modems | misses real carriers as RINGOUT |
+| **Nudge / connect string** | provokes a banner | too aggressive drops a fragile login |
+| **Blacklist / randomize order** | safety / detection-avoidance | may skip in-range numbers |
 
-Faster scans skip slow answerers; patient scans take all night. The scan
-is a time-vs-completeness trade the whole way down.
+Faster scans skip slow answerers; patient scans take all night — a
+time-vs-completeness trade the whole way down.
 
 ## Login-banner fingerprints (from what the nudge string pulls back)
 
@@ -100,12 +99,11 @@ Cross-check against `[[ctf/modem-carriers]]` (name-the-stall-stage) and
 ## Modern: WarVOX vs SIP
 
 WarVOX (H. D. Moore, 2009) dropped the carrier obsession and recorded
-**audio**, then classified by signal-processing (voice/fax/modem/
-silence/dialtone) offline — a scan finds *voicemail, IVRs, and humans*,
-not just modems. Against **SIP/VoIP** today the "dial" is an INVITE and
-"answer" is a 200 OK with an RTP stream; you classify the RTP audio the
-same way WarVOX did a WAV. Fax pass-through is the fragile part — G.711
-usually survives, G.729 mangles the handshake (`[[fax/README]]`).
+**audio**, classifying it offline (voice/fax/modem/silence/dialtone) —
+so a scan finds voicemail, IVRs, and humans, not just modems. Against
+**SIP/VoIP** the "dial" is an INVITE and "answer" is a 200 OK with an
+RTP stream you classify like WarVOX did a WAV. Fax pass-through is the
+fragile part: G.711 usually survives, G.729 mangles it (`[[fax/README]]`).
 
 ## See also
 - [[war-dialing/README]] — tools, result categories, modern relevance

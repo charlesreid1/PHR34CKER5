@@ -68,23 +68,20 @@ gate.
 
 ## How the modern descendants differ
 
-CN/A-as-a-phone-service is dead. Its function moved into **databases you
+CN/A-as-a-phone-service is dead; its function moved into **databases you
 dip, not operators you sweet-talk**:
 
 - **LIDB (Line Information Database)** — per-LEC store queried by
-  switches for billing/validation; returns line class, calling-card
-  validation, billing name for operator services.
-- **CNAM** — the Caller-ID *name*. Crucially it is **not sent by the
-  originating switch**; the *terminating* switch performs a dip against
-  the number's LIDB/CNAM record. Whoever controls that record controls
-  the displayed name — which is why CNAM has always been spoofable at
-  the record level, a database-integrity problem rather than a
-  voice-pretext one.
+  switches for billing, calling-card validation, and billing name.
+- **CNAM** — the Caller-ID *name*, **not sent by the originating
+  switch**; the *terminating* switch dips the number's LIDB/CNAM record.
+  Whoever owns that record controls the displayed name — which is why
+  CNAM has always been spoofable at the record level: a
+  database-integrity problem, not a voice-pretext one.
 
-The pretext moved with it: instead of talking a bureau operator into a
-listing, the modern analog is obtaining *access to the dip* (contracted,
-paid, logged). The corpus does not cover live access; see the
-non-goals in `plan-knowledge.md`.
+The pretext moved with it: the modern analog is obtaining *access to the
+dip* (contracted, paid, logged), which the corpus does not cover — see
+the non-goals in `plan-knowledge.md`.
 
 ## See also
 - [[cna/README]] — what CN/A bureaus were and why they worked
