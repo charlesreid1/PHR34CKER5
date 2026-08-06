@@ -384,6 +384,48 @@
     "confidence": "community"
   },
   {
+    "id": "phrack-5-5",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Digital Multiplex System (DMS) 100",
+    "author": "Knight Lightning",
+    "publication": "Phrack Inc. Issue 5, File 5 (Aug 1986)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK-5",
+    "note": "Foundational community reference for the Nortel DMS-100 switch: MAPCI overview, subscriber administration, translation tables. Followed by Control C's 3-part 'Understanding the Digital Multiplexing System' in Phrack 12.4 / 14.5 / 19.3.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-41-7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "How To Build a DMS-10 Switch",
+    "author": "The Cavalier",
+    "publication": "Phrack Inc. Issue 41, File 7 (Dec 1992)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK41",
+    "note": "DMS-10 small-office variant walkthrough. Craft-interface commands, translation-table structure, and provisioning workflow.",
+    "confidence": "community"
+  },
+  {
+    "id": "nortel-ntp-dms",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Nortel NTP 297-1001-129 — DMS-100 Family North American MAPCI User's Guide",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 297-1001-129 (multiple editions through the 1990s)",
+    "note": "Vendor authoritative reference for MAPCI command tree: MTC (maintenance), TRKS (trunks), LNS (lines), TTP (trunk test position), LTP (line test position), SERVORD, TABLE, LOGUTIL.",
+    "confidence": "primary"
+  },
+  {
+    "id": "att-5ess-craft-manual",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "AT&T 5ESS-2000 Switch Craft Interface Reference (235-100-125 series)",
+    "author": "AT&T / Lucent Technologies",
+    "publication": "AT&T 235-100-125 (and related documents in the 5ESS 235-xxx-xxx series)",
+    "note": "Vendor authoritative reference for the 5ESS RCV (Recent Change / Verify) craft interface: menu tree, load-and-verify commands, translation-service commands, and TRACE.",
+    "confidence": "primary"
+  },
+  {
     "id": "itu-t-o-series",
     "category": "bibliography",
     "type": "primary",

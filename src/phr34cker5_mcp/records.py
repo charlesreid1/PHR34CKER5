@@ -35,6 +35,7 @@ RECORD_FILES = (
     "fingerprints",
     "signaling_systems",
     "payphone_systems",
+    "switch_commands",
 )
 
 # Envelope fields every retrieval-tool response carries so the assistant can
