@@ -47,17 +47,24 @@ text. See [`records/README.md`](records/README.md).
 ## Topics
 
 - **blueboxing/**   — 2600 Hz, MF signaling, KP/ST, trunk seizure; the full
-  R1 MF digit table lives in `blueboxing/mf-tones.md`
-- **redboxing/**   — coin-return simulation, ACTS, quarter/dime/nickel tones
+  R1 MF digit table (`mf-tones.md`) + a time-annotated `seizure-walkthrough.md`
+- **redboxing/**   — coin-return simulation, ACTS, quarter/dime/nickel tones;
+  `acts-timing.md` (the GR-506 vs Phrack 33.9 dispute) + a `walkthrough.md`
 - **greenboxing/** — coin collect/return operator tones
-- **cna/**          — Customer Name and Address bureaus, social engineering
-- **2600hz/**       — the whistle, Cap'n Crunch, in-band signaling history
+- **cna/**          — Customer Name and Address bureaus; `pretext-scripts.md`
+  reconstructs the social-engineering dialogue (historical illustration)
+- **2600hz/**       — the whistle, Cap'n Crunch, in-band signaling history;
+  `whistle-tolerances.md` on the SF detector
 - **dtmf/**         — the touch-tone grid, AUTOVON A/B/C/D, twist, misconceptions
 - **modems/**       — carrier handshakes (Bell 103 → V.34), the 2100 Hz answer tone
+- **operator-services/** — 0/00/611/411/950 dialing, TSPS/TOPS/OSPS, ANAC,
+  milliwatt, ringback, loop-arounds
 - **bbs/**          — bulletin board systems, 300/1200/2400 baud culture
-- **war-dialing/**  — ToneLoc, THC-Scan, scanning number ranges
-- **ess/**          — Electronic Switching Systems (1ESS → 5ESS), CCIS/SS7
-- **tandem-stacking/** — chaining tandems, international routing tricks
+- **war-dialing/**  — ToneLoc, THC-Scan, scanning; `toneloc-tuning.md` on the
+  classifier and banner fingerprints
+- **ess/**          — Electronic Switching Systems (1ESS → 5ESS), CCIS/SS7;
+  `audible-tells.md` (identify a switch by ear) + `no-4-ess.md` (the toll switch)
+- **tandem-stacking/** — chaining tandems; `international.md` (C5, overseas loops)
 - **zines/**        — 2600 Magazine, Phrack, TAP — pointers and history
 - **glossary/**     — jargon, acronyms, org names (Ma Bell, CN/A, RBOC…)
 - **fax/**          — T.30 handshake, CNG/CED, Group 3, fax war dialing
