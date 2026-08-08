@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "phr34cker5": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "[ -f \"$PWD/.env\" ] && . \"$PWD/.env\"; exec \"$PWD/.venv/bin/phr34cker5-mcp\""
+      ]
+    }
+  }
+}

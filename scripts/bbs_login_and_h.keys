@@ -1,0 +1,25 @@
+# Log into HackStock BBS, ack all Hit-a-key prompts, then press H
+# ---- SSH banner ack + BBS login sequence ----
+hit 5
+# BBS asks for BBS username/password (ANSI login screen)
+wait 3
+line ch4zm
+wait 2
+line Time4phreaking!
+# Ack Hit-a-key errors after login (mainmenu.msg is broken; still functional)
+hit 8
+# Post-a-oneliner? → N
+send N
+wait 1
+hit 4
+# Read your mail? → N (we already saw it)
+send N
+wait 1
+hit 4
+# Should be at main menu prompt now — the "Command:" prompt on SBBS is bare
+# Send H (secret PloverNet portal from The_Mentor's mail)
+wait 2
+send H
+wait 4
+hit 6
+wait 30

@@ -197,9 +197,21 @@ class TwilioRuntime:
                 log.exception("watchdog failed to hang up %s", sid)
 
     def _init_twilio_client(self) -> None:
+        # Two supported auth styles:
+        #   1. Classic:  TWILIO_ACCOUNT_SID (AC…) + TWILIO_AUTH_TOKEN
+        #   2. API Key:  TWILIO_SID (SK…) + TWILIO_CLIENT_SECRET + TWILIO_ACCOUNT_SID (AC…)
+        # In style 2 the API-key SID is the HTTP username but the Client
+        # still needs to know which account to act on, so account_sid is
+        # required and passed as the third positional arg.
+        self._from_number = _require_env("TWILIO_FROM_NUMBER")
+        api_key_sid = os.environ.get("TWILIO_SID", "").strip()
+        api_key_secret = os.environ.get("TWILIO_CLIENT_SECRET", "").strip()
+        if api_key_sid and api_key_secret:
+            account_sid = os.environ.get("TWILIO_ACCOUNT_SID", "").strip() or api_key_sid
+            self._client = TwilioClient(api_key_sid, api_key_secret, account_sid)
+            return
         sid = _require_env("TWILIO_ACCOUNT_SID")
         tok = _require_env("TWILIO_AUTH_TOKEN")
-        self._from_number = _require_env("TWILIO_FROM_NUMBER")
         self._client = TwilioClient(sid, tok)
 
     def _start_http_server(self) -> None:

@@ -1,0 +1,55 @@
+# SSH into HackStock BBS, log in as ch4zm/Time4phreaking!, press H to jump into
+# PloverNet, register there, hunt for flag, then leave cleanly with G.
+hit 5
+wait 3
+line ch4zm
+wait 2
+line Time4phreaking!
+hit 10
+# Ack any leftover prompts + skip both prompts (post-oneliner? read-mail?)
+send N
+wait 1
+hit 3
+send N
+wait 1
+hit 3
+wait 3
+# ---- At main menu ----
+send H
+wait 5
+hit 6
+# PloverNet NUP prompt
+line MODSUX
+wait 3
+hit 4
+# If it asks for a new username on PloverNet:
+line ch4zm
+wait 2
+line Time4phreaking!
+wait 2
+line Time4phreaking!
+wait 2
+# Common SBBS new-user prompts: real name, location, etc — press enter through
+hit 20
+wait 3
+# Explore: (M)essages, (F)iles, (T)ransfers, then (G)oodbye to logoff cleanly
+send M
+wait 3
+hit 6
+# List all subs
+send L
+wait 3
+hit 6
+send Q
+wait 2
+# Files
+send F
+wait 3
+hit 6
+send Q
+wait 2
+# Now leave cleanly
+send G
+wait 3
+send Y
+wait 3
