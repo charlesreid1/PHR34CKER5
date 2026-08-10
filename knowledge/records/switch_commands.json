@@ -1,0 +1,334 @@
+[
+  {
+    "id": "cmd_5ess_rcv_overview",
+    "name": "5ESS RCV craft interface — overview",
+    "aliases": ["5ESS RCV", "5ESS craft", "Recent Change Verify"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "prompt": "<",
+      "purpose": "Primary craft interface for the 5ESS. Reached via TTY on the SM (Switching Module) or via maintenance modem on the 5ESS's dial-up DID. Menu tree with numeric addressing.",
+      "typical_menu_root": {
+        "1": "Line / subscriber data",
+        "2": "Trunk data",
+        "3": "Announcement data",
+        "4": "Recent Change (RC) session control",
+        "5": "Office data",
+        "8": "Feature data (call-forwarding, custom calling, screening)",
+        "12": "Screening and restrictions"
+      },
+      "load_verify_pattern": {
+        "start_rc_session": "4>0",
+        "verify_pending_changes": "4>2",
+        "execute": "4>3",
+        "notes": "Any change that has not been executed still leaves an audit trail entry in the RC log."
+      }
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["netel_5ess", "cmd_5ess_rcv_1_1_line_data", "cmd_5ess_rcv_1_2_trunk_data", "cmd_5ess_rcv_8_1_call_forward", "cmd_5ess_rcv_8_6_custom_calling", "cmd_5ess_rcv_12_1_screening", "cmd_5ess_rcv_trace"]
+  },
+  {
+    "id": "cmd_5ess_rcv_1_1_line_data",
+    "name": "5ESS RCV 1.1 — line data (subscriber class-of-service)",
+    "aliases": ["5ESS 1.1", "RCV 1.1"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "1.1",
+      "purpose": "View / modify subscriber-line class-of-service and feature membership.",
+      "phreak_relevance": "Set a target line's FGD trunk permissions, lift toll restrictions, or add IN (Intelligent Network) features. Also the entry point for adjusting a line's screening class (see 12.1)."
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview", "cmd_5ess_rcv_12_1_screening"]
+  },
+  {
+    "id": "cmd_5ess_rcv_1_2_trunk_data",
+    "name": "5ESS RCV 1.2 — trunk data",
+    "aliases": ["5ESS 1.2", "RCV 1.2"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "1.2",
+      "purpose": "View / modify trunk-group configuration: FGD, FGB, WATS, DID, tie-lines. Set outgoing signaling type (MF R1, ISUP, PRI).",
+      "phreak_relevance": "Manipulate what signaling a specific trunk group speaks — e.g., configure an outbound MF R1 trunk group for legacy tandem behavior."
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview", "sig_mf_r1"]
+  },
+  {
+    "id": "cmd_5ess_rcv_4_1_translations_audit",
+    "name": "5ESS RCV 4.1 — translations audit",
+    "aliases": ["5ESS 4.1", "RCV 4.1"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "4.1",
+      "purpose": "Query the switch's translation database. Look up how a specific number is currently routed.",
+      "phreak_relevance": "Non-invasive reconnaissance. No changes logged."
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview"]
+  },
+  {
+    "id": "cmd_5ess_rcv_8_1_call_forward",
+    "name": "5ESS RCV 8.1 — call-forwarding features",
+    "aliases": ["5ESS 8.1", "RCV 8.1"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "8.1",
+      "purpose": "Add or modify call-forwarding features on a subscriber line: variable CF, remote-access CF, busy-line CF, don't-answer CF.",
+      "phreak_relevance": "Adding a call-forward pointing at a target number gives you a diverter — a subscribed line becomes a free relay to wherever you point it."
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview", "cmd_5ess_rcv_8_6_custom_calling"]
+  },
+  {
+    "id": "cmd_5ess_rcv_8_6_custom_calling",
+    "name": "5ESS RCV 8.6 — custom-calling features",
+    "aliases": ["5ESS 8.6", "RCV 8.6"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "8.6",
+      "purpose": "Add / modify CLASS custom-calling features: caller ID, call waiting, three-way calling, speed calling, distinctive ringing, anonymous call rejection.",
+      "phreak_relevance": "Toggle CLASS features on a target line without their consent — enable / disable caller ID delivery, block anonymous rejection to defeat *67 blocking."
+    },
+    "citations": ["att-5ess-craft-manual"],
+    "see_also": ["cmd_5ess_rcv_overview", "cmd_5ess_rcv_8_1_call_forward"]
+  },
+  {
+    "id": "cmd_5ess_rcv_12_1_screening",
+    "name": "5ESS RCV 12.1 — screening / restrictions",
+    "aliases": ["5ESS 12.1", "RCV 12.1"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "menu_path": "12.1",
+      "purpose": "Line-class screening: which NPA codes / prefixes a line may dial, toll restrictions, 900/976 blocking.",
+      "phreak_relevance": "Lift a target line's toll restrictions (or add them to a hostile line). Bypass 900/976 blocking without the subscriber knowing."
+    },
+    "citations": ["att-5ess-craft-manual"],
+    "see_also": ["cmd_5ess_rcv_overview", "cmd_5ess_rcv_1_1_line_data"]
+  },
+  {
+    "id": "cmd_5ess_rcv_trace",
+    "name": "5ESS RCV TRACE — live call trace",
+    "aliases": ["5ESS TRACE"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "command": "TRACE",
+      "purpose": "Live-callable command from RCV. Enables real-time call-trace logging on a target DN.",
+      "phreak_relevance": "Hostile from an attacker's viewpoint. Any 5ESS an attacker is touching is capable of logging their session in real time via TRACE, and cover-your-tracks requires knowing whether TRACE is active on your own DN before you begin."
+    },
+    "citations": ["att-5ess-craft-manual", "phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview", "ld_51_mct"]
+  },
+  {
+    "id": "cmd_5ess_default_logins",
+    "name": "5ESS RCV — era-typical default craft logins",
+    "aliases": ["5ESS default logins", "5ESS craft passwords"],
+    "category": "switch_command",
+    "region": "NANP",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1982-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "belongs_to": "netel_5ess",
+      "era_defaults": [
+        "craft / craft",
+        "root / craft",
+        "att / att",
+        "nms / nms",
+        "installer / installer"
+      ],
+      "notes": "These were documented in Phrack 33 and 52, and were widely rotated after ~1995. Any modern 5ESS deployment will have replaced them; era-authentic CTF scenarios reproduce them faithfully."
+    },
+    "citations": ["phrack-43-16"],
+    "see_also": ["cmd_5ess_rcv_overview"]
+  },
+  {
+    "id": "cmd_dms_mapci_overview",
+    "name": "Nortel DMS MAPCI — overview",
+    "aliases": ["MAPCI", "DMS MAPCI", "Nortel DMS craft"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "prompt": "CI:",
+      "purpose": "Maintenance and Administration Position Command Interpreter. The DMS family's craft interface — reached via TTY on the IOC (I/O Controller) or via maintenance modem.",
+      "top_level_command_hierarchy": [
+        "MAPCI — enter",
+        "  MTC — maintenance",
+        "    TRKS — trunks",
+        "      TTP — Trunk Test Position",
+        "    LNS — lines",
+        "      LTP — Line Test Position",
+        "    PM — peripheral modules",
+        "  SERVORD — service order (add/change subscribers)",
+        "  TABLE — direct table access (OFCVAR, OFCENG, OFCOPT, OFCSTD, CLLI, TRKGRP, LENLINES)",
+        "  LOGUTIL — system log utility"
+      ],
+      "backchannel_note": "DMS switches in Canada were historically reachable via NT's private X.25 'Datapac' back-network — a common era-authentic entry point for phreaks."
+    },
+    "citations": ["nortel-ntp-dms", "phrack-5-5", "phrack-41-7"],
+    "see_also": ["netel_dms100", "cmd_dms_servord", "cmd_dms_table", "cmd_dms_ltp", "cmd_dms_ttp", "cmd_dms_logutil"]
+  },
+  {
+    "id": "cmd_dms_servord",
+    "name": "DMS SERVORD — service order",
+    "aliases": ["SERVORD", "DMS SERVORD"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "sub_ci": "SERVORD",
+      "purpose": "Add / change / remove subscriber lines. Analogous to Meridian PBX LD 10/11 but for CO subscribers.",
+      "prompts": ["NEW", "CHF (change features)", "OUT (delete)", "NEWACD", "OUTACD"],
+      "phreak_relevance": "Add a new subscriber line for yourself on the DMS, or CHF a target line's features / class of service."
+    },
+    "citations": ["nortel-ntp-dms", "phrack-5-5"],
+    "see_also": ["cmd_dms_mapci_overview", "cmd_dms_table"]
+  },
+  {
+    "id": "cmd_dms_table",
+    "name": "DMS TABLE — direct translation-table access",
+    "aliases": ["DMS TABLE", "TABLE OFCVAR"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "sub_ci": "TABLE",
+      "purpose": "Direct access to internal translation tables — the raw provisioning database.",
+      "key_tables": {
+        "OFCVAR": "office variables (per-office numeric constants)",
+        "OFCENG": "office engineering",
+        "OFCOPT": "office options",
+        "OFCSTD": "office standards",
+        "CLLI": "Common Language Location Identifier — the office's own CLLI code + all reachable-office CLLIs",
+        "TRKGRP": "trunk group table",
+        "LENLINES": "line equipment number to DN mapping"
+      },
+      "phreak_relevance": "Dump CLLI reachability with `TABLE CLLI; POS 0; NEXT` (etc.). Read OFCVAR to learn the office's carrier-partition constants — critical for understanding what dial-plan tricks are possible on this switch."
+    },
+    "citations": ["nortel-ntp-dms", "phrack-5-5"],
+    "see_also": ["cmd_dms_mapci_overview", "cmd_dms_servord"]
+  },
+  {
+    "id": "cmd_dms_ltp",
+    "name": "DMS LTP — Line Test Position",
+    "aliases": ["LTP", "DMS LTP"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "sub_ci": "LTP (under MAPCI MTC LNS)",
+      "purpose": "Line Test Position. Seize a subscriber line, hang them up, apply milliwatt / balance test / ring the line.",
+      "phreak_relevance": "Test-position access to any subscriber loop. On old generics, this included MONITOR — bridge into an active call. Bell-lawful use case: repair-craft testing; phreak use case: silent line monitoring."
+    },
+    "citations": ["nortel-ntp-dms"],
+    "see_also": ["cmd_dms_mapci_overview", "cmd_dms_ttp"]
+  },
+  {
+    "id": "cmd_dms_ttp",
+    "name": "DMS TTP — Trunk Test Position",
+    "aliases": ["TTP", "DMS TTP"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "sub_ci": "TTP (under MAPCI MTC TRKS)",
+      "purpose": "Trunk Test Position. Seize a specific trunk member and put it in various test states: SEIZE, MB (make busy), BSY (busy-out), RTS (return to service), MONITOR.",
+      "phreak_relevance": "MONITOR seizes a trunk and puts you in the audio path of the current call. On old DMS generics with `permit CI TTP MONITOR` enabled, this was a wiretap. Later generics required a warrant + separate CALEA path."
+    },
+    "citations": ["nortel-ntp-dms"],
+    "see_also": ["cmd_dms_mapci_overview", "cmd_dms_ltp"]
+  },
+  {
+    "id": "cmd_dms_logutil",
+    "name": "DMS LOGUTIL — log utility",
+    "aliases": ["LOGUTIL", "DMS LOGUTIL"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "sub_ci": "LOGUTIL",
+      "purpose": "System log utility — the DMS's log buffer of switch events (subscriber activations, alarms, craft commands run, TRACE hits).",
+      "phreak_relevance": "The thing to disable if you're covering tracks. `LOGUTIL; STOPDEV <log-device>` suppresses log output to a specific device. Analogous to Meridian PBX LD 40 CDR suppression."
+    },
+    "citations": ["nortel-ntp-dms"],
+    "see_also": ["cmd_dms_mapci_overview", "ld_40_cdr"]
+  },
+  {
+    "id": "cmd_dms_default_logins",
+    "name": "DMS MAPCI — era-typical default craft logins",
+    "aliases": ["DMS default logins", "DMS craft passwords"],
+    "category": "switch_command",
+    "region": "universal",
+    "signaling_layer": "co_switch_craft",
+    "era_bounds": ["1979-01-01", "2000-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "belongs_to": "netel_dms100",
+      "era_defaults": [
+        "OPERATOR / OPERATOR",
+        "MAINT / MAINT",
+        "ADMIN / ADMIN"
+      ],
+      "notes": "Documented in vendor training and Phrack 5.5 (Knight Lightning). Widely rotated after ~1995. Bell operating companies rotated first; independent telcos and PTT/incumbent operators in some countries kept defaults longer."
+    },
+    "citations": ["phrack-5-5"],
+    "see_also": ["cmd_dms_mapci_overview"]
+  }
+]

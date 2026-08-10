@@ -24,7 +24,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from phr34cker5_mcp import tones
+from phr34cker5_mcp import detect, records, tones
 
 URI_SCHEME = "phr34cker5"
 
@@ -205,6 +205,607 @@ def random_lore() -> dict:
         "name": lf.name,
         "uri": lf.uri,
         "content": lf.path.read_text(encoding="utf-8"),
+    }
+
+
+# --- typed-record knowledge repository (KR) ----------------------------------
+#
+# The retrieval tools below answer CTF-grade questions from typed, dated,
+# cited records under knowledge/records/ — not free-text search. See
+# knowledge/records/README.md and plan-knowledge.md for the discipline.
+
+
+_RECORD_STORE: records.RecordStore | None = None
+_RECORD_STORE_ROOT: Path | None = None
+
+
+def _record_store() -> records.RecordStore:
+    """Lazy-load (and cache) the record store rooted at the active corpus."""
+    global _RECORD_STORE, _RECORD_STORE_ROOT
+    root = _resolve_knowledge_root() / "records"
+    if _RECORD_STORE is None or _RECORD_STORE_ROOT != root:
+        _RECORD_STORE = records.RecordStore.load(root)
+        _RECORD_STORE_ROOT = root
+    return _RECORD_STORE
+
+
+@mcp.tool()
+def lookup_tone(name: str) -> dict:
+    """
+    Look up the exact spec for a named tone or signaling code.
+
+    Resolves by id, name, or alias (case/spacing-insensitive) — e.g. `2600`,
+    `KP`, `red box quarter`, `acts_quarter`, `dtmf_a_autovon`, `the whistle`.
+    Returns the numeric `technical_body` (frequencies_hz, tolerance,
+    level_dBm0, on_ms/off_ms), any `disputed` fields, and the common envelope
+    (citations, era_bounds, region, confidence).
+
+    Numbers, not adjectives: this is the tool a DEFCON judge's "what tolerance
+    does the ACTS quarter tone have?" should hit.
+    """
+    store = _record_store()
+    rec = store.resolve(name)
+    if rec is None:
+        # Offer near-matches to guide the caller.
+        suggestions = [
+            r["id"] for r in store.in_category("tone_signal")
+        ][:20]
+        raise ValueError(f"no tone record for {name!r}. Try lookup by id/alias; some ids: {suggestions}")
+    return records.public_view(rec)
+
+
+@mcp.tool()
+def bibliography(cite_id: str | None = None) -> dict:
+    """
+    Return a bibliography entry by id, or list all sources if `cite_id` is omitted.
+
+    Every typed record cites into this table (BSTJ Nov 1960 = `bstj-1960-11`,
+    GR-506-CORE = `gr-506-core`, Phrack 33.9 = `phrack-33-9`, …).
+    """
+    store = _record_store()
+    if cite_id is None:
+        return {"sources": [records.public_view(r) for r in store.in_category("bibliography")]}
+    rec = store.get(cite_id)
+    if rec is None or rec.get("category") != "bibliography":
+        ids = [r["id"] for r in store.in_category("bibliography")]
+        raise ValueError(f"no bibliography entry {cite_id!r}. Known: {ids}")
+    return records.public_view(rec)
+
+
+@mcp.tool()
+def cross_reference(record_id: str) -> dict:
+    """
+    Traverse a record's `see_also` links, returning the linked records' summaries.
+
+    The typed-record analogue of the corpus's `[[topic/name]]` links.
+    """
+    store = _record_store()
+    rec = store.get(record_id)
+    if rec is None:
+        rec = store.resolve(record_id)
+    if rec is None:
+        raise ValueError(f"no record {record_id!r}")
+    linked = []
+    for ref in rec.get("see_also", []):
+        target = store.get(ref) or store.resolve(ref)
+        if target is None:
+            linked.append({"id": ref, "resolved": False})
+        else:
+            linked.append({
+                "id": target["id"],
+                "name": target.get("name"),
+                "category": target.get("category"),
+                "resolved": True,
+            })
+    return {"id": rec["id"], "name": rec.get("name"), "see_also": linked}
+
+
+@mcp.tool()
+def explain_technique(name: str, year: int | None = None, region: str | None = None) -> dict:
+    """
+    Explain a technique step-by-step, with its vulnerability window and citations.
+
+    Composes tones/boxes/network elements into an ordered procedure (e.g.
+    `blueboxing`, `redboxing`). ALWAYS returns the full steps — this is a
+    phreaking-CTF tool, and old-school techniques are exactly what you reach
+    for. It never refuses.
+
+    `year`/`region`, if supplied, add non-blocking historical context: a note
+    that the technique was retired from the *production* PSTN outside those
+    bounds. On a CTF's Village-owned gear, a blue box or a Cap'n Crunch
+    whistle can absolutely still work — the note is a heads-up, not a gate.
+    """
+    store = _record_store()
+    rec = store.resolve(name)
+    if rec is None or rec.get("category") != "technique":
+        ids = [r["id"] for r in store.in_category("technique")]
+        raise ValueError(f"no technique {name!r}. Known: {ids}")
+
+    out = records.public_view(rec)
+    # Informational only. Never gates the steps; a CTF target may replicate
+    # any era of the network on purpose.
+    notes = []
+    if year is not None and not records.era_contains(rec, year):
+        notes.append(
+            f"Historical note: on the production PSTN, {rec['name']} was effective "
+            f"{rec.get('era_bounds')} (retirement cause: {rec.get('retirement_cause', 'see record')}). "
+            f"At a CTF it may still work against Village-owned gear that emulates that era."
+        )
+    if region is not None and rec.get("region") and records._normalize(region) != records._normalize(rec["region"]):
+        notes.append(
+            f"Historical note: {rec['name']} is native to region {rec['region']}, not {region!r}. "
+            "In-band signaling was region-specific on the real network; a CTF target may emulate either."
+        )
+    out["context_notes"] = notes
+    return out
+
+
+# Trap patterns: natural-language claims whose "obvious" answer is wrong.
+# Each returns a verdict + the correct record to cite. This is the catalog
+# from plan-knowledge.md "Explicitly disputed entries" / "Adversarial corpus".
+_CLAIM_TRAPS = [
+    {
+        "match": [r"2600", r"(international|overseas|no\.?\s*5|c5|ccitt|ccitt)"],
+        "verdict": "false",
+        "because": (
+            "On CCITT No.5 international trunks the SEIZURE tone is 2400 Hz "
+            "(2600 Hz is proceed-to-send). A generator emitting only 2600 Hz "
+            "does not seize a No.5 trunk. 2600 Hz-alone seizure is the "
+            "domestic-NANP SF story, not the international one."
+        ),
+        "cite": ["ccitt5_line_seize", "sf_2600"],
+    },
+    {
+        "match": [r"quarter", r"(66\s*ms|five.*66|5.*66)"],
+        "verdict": "false",
+        "because": (
+            "The ACTS quarter is FIVE 33 ms bursts (GR-506-CORE), not 66 ms. "
+            "66 ms is the nickel/dime cadence. Conflating them is the classic trap."
+        ),
+        "cite": ["acts_quarter", "acts_nickel"],
+    },
+    {
+        "match": [r"\bthe\b.*\banac\b|\banac\b.*\b(is|=)\b.*958|universal.*anac"],
+        "verdict": "needs_qualification",
+        "because": (
+            "There is no universal ANAC. Readback codes are per-CO / per-NPA "
+            "(958 in much of Pacific Bell, 200-222-2222 in some Bell Atlantic, "
+            "etc.). Any 'the ANAC is X' claim needs a region qualifier."
+        ),
+        "cite": [],
+    },
+    {
+        "match": [r"kp2", r"(700.*1700|1700.*700)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The 1700-Hz-paired control codes have three naming schemes. "
+            "'KP2 = 700+1700' is community-canon-wrong-but-widespread; in "
+            "Bellcore notation KP2 = 1300+1700 and 700+1700 = ST3P, while "
+            "BSTJ 1960 calls 700+1700 'Code 11' with no KP2 concept. State the scheme."
+        ),
+        "cite": ["mf_kp2_intl", "mf_kp"],
+    },
+    {
+        "match": [r"(autovon|precedence).*(d\s*=?\s*flash|flash.*override.*\bd\b)|d.*flash override"],
+        "verdict": "false",
+        "because": (
+            "In AUTOVON precedence A=Flash Override (highest), B=Flash, "
+            "C=Immediate, D=Priority (MIL-STD-187-100). D is Priority, the "
+            "LOWEST of the four, not Flash Override."
+        ),
+        "cite": ["dtmf_a_autovon"],
+    },
+    {
+        "match": [r"red.?box(ing)?", r"(cocot|customer.owned)"],
+        "verdict": "false",
+        "because": (
+            "Red-boxing never worked against COCOTs. A COCOT validates "
+            "coins LOCALLY on the phone's own electronics; the CO sees a "
+            "plain subscriber loop with no ACTS supervision. Red-boxing "
+            "worked against Bell 1C/1D single-slot fortress phones because "
+            "coin tones were reported to the toll switch — a different "
+            "signaling path COCOTs do not use."
+        ),
+        "cite": ["pay_cocot", "pay_bell_1c_1d", "pay_acts"],
+    },
+    {
+        "match": [r"(blue.?box|2600)", r"(subscriber|local\s+loop|residential|inside\s+wire)"],
+        "verdict": "false",
+        "because": (
+            "Blue-boxing attacks SF supervision on CO-to-CO inter-office "
+            "trunks (sig_sf). It does NOT attack the subscriber loop. A "
+            "2600 Hz tone on a customer's local loop is just audio — the "
+            "subscriber loop uses loop-start supervision (DC loop closure), "
+            "not tone signaling. This is the #1 cross-layer confusion."
+        ),
+        "cite": ["sig_sf", "sig_loop_start", "sig_mf_r1"],
+    },
+    {
+        "match": [r"(blue.?box|mf|r1).*r2|r2.*(blue.?box|mf|r1|compatible)"],
+        "verdict": "false",
+        "because": (
+            "R1 MF (NANP, 700-1700 Hz two-of-six) and R2 MFC (ITU, forward "
+            "1140-1980 Hz / backward 540-1140 Hz, compelled) are different "
+            "signaling systems. A US blue box does NOT work on an R2 trunk. "
+            "R2 also uses different line-signaling tones (3825 Hz, not "
+            "2400/2600 Hz), and R2's inter-register signaling is compelled "
+            "with group-dependent semantics that R1 doesn't have."
+        ),
+        "cite": ["sig_mf_r1", "sig_r2"],
+    },
+    {
+        "match": [r"(a5[/_.\-]?1|gsm.*encryption).*(broken|cracked|practical).*(1998|1999|200[0-4])"],
+        "verdict": "false",
+        "because": (
+            "A5/1 was NOT practically broken by 2003. The Biryukov/Shamir/"
+            "Wagner 2000 attack required precomputation few had done in the "
+            "wild. Practical rainbow-table attacks (Karsten Nohl et al.) "
+            "landed 2008-2010. COMP128-1 (the SIM authentication algorithm) "
+            "WAS broken in 1998 (Wagner/Goldberg/Briceno), but that's a "
+            "different primitive — cloning a SIM, not decrypting over-the-air."
+        ),
+        "cite": ["cellular_gsm"],
+    },
+    {
+        "match": [r"(radio.?shack|tone\s*dialer|red.?box).*(colorburst|3\.579|3\.58|ntsc)"],
+        "verdict": "false",
+        "because": (
+            "The Radio Shack tone-dialer red-box mod REPLACES the 3.579545 MHz "
+            "colorburst crystal with a 6.5536 MHz crystal, not the other way "
+            "around. The colorburst crystal is the stock part; the 6.5536 MHz "
+            "is the swap. The scaling ratio (~1.831) is what retunes the '*' "
+            "key to ~1723+2213 Hz, inside ACTS ±1.5% tolerance."
+        ),
+        "cite": ["box_red", "acts_quarter"],
+    },
+    {
+        "match": [r"cap['’]?n\s*crunch|captain\s*crunch"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The Cap'n Crunch whistle produced 2600 Hz — the SF-supervision "
+            "carrier tone on CO-to-CO in-band trunks. Any claim about the "
+            "whistle must specify (a) the frequency (2600 Hz), (b) the layer "
+            "it attacked (co_to_co_inband_trunk, NOT subscriber loop), and "
+            "(c) the region (NANP; a US 2600 Hz whistle does not seize a "
+            "CCITT No.5 international trunk, which needs 2400 Hz)."
+        ),
+        "cite": ["sf_2600", "sig_sf", "ccitt5_line_seize"],
+    },
+    {
+        # NOTE: the second pattern deliberately excludes the substring "mf"
+        # inside "dtmf" — use \bmf\b or a distinguishing keyword.
+        "match": [r"\bdtmf\b", r"(\bmf\b|\bmf\s*r1\b|\br1\b|blue\s*box|inter.?office|\btrunk\b)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "DTMF (Q.23, 697/770/852/941 x 1209/1336/1477/1633 Hz) is a "
+            "SUBSCRIBER-LOOP signaling system. MF R1 (700/900/1100/1300/"
+            "1500/1700 Hz, two-of-six) is the CO-to-CO in-band trunk system. "
+            "They are separate namespaces at separate layers with different "
+            "frequency grids. A blue box does not send DTMF; a touch-tone "
+            "phone does not send MF."
+        ),
+        "cite": ["sig_dtmf", "sig_mf_r1", "mf_kp"],
+    },
+    {
+        "match": [r"(acts|red.?box).*(dollar|\$1).*(5|five).*66"],
+        "verdict": "false",
+        "because": (
+            "The 'dollar = 5 x 66 ms' claim is wrong. Per Bellcore GR-506-"
+            "CORE, the dollar tone is a SINGLE 650 ms burst, and it wasn't "
+            "universally implemented on ACTS installations. Phrack 33.9 "
+            "does not document a dollar tone at all. Five 66 ms bursts is "
+            "not the dollar cadence in any documented spec."
+        ),
+        "cite": ["acts_dollar", "acts_quarter", "acts_nickel"],
+    },
+    {
+        "match": [r"green.?box(ing)?.*(work|effective|use).*(modern|today|2020|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "Green-boxing operator coin-control tones only worked in specific "
+            "four-wire operator-trunk topologies with poor filtering, and the "
+            "operator platforms (TSPS/TOPS/OSPS) that consumed them are "
+            "digital or decommissioned. Coin-control signaling on modern "
+            "payphones is out-of-band or nonexistent."
+        ),
+        "cite": ["box_green", "pay_tsps_operator"],
+    },
+    {
+        "match": [r"red.?box", r"(all|every|any)\s*(payphone|coin\s*phone)"],
+        "verdict": "false",
+        "because": (
+            "Red-boxing only worked against ACTS-supervised Bell 1C/1D "
+            "single-slot 'fortress' payphones. It never worked against "
+            "COCOTs (local validation) or Nortel Millennium smart phones "
+            "(local DSP validation). Any generic 'red-box works on payphones' "
+            "claim needs the platform qualifier."
+        ),
+        "cite": ["pay_acts", "pay_bell_1c_1d", "pay_cocot", "pay_millennium"],
+    },
+    {
+        "match": [r"(comp128|sim.*clon).*(200[0-9]|201[0-9]|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "COMP128-1 was broken in 1998 (Wagner, Goldberg, Briceno), not "
+            "in the 2000s. Physical SIM cloning was tractable via ~150k "
+            "challenge-response queries after the 1998 disclosure. COMP128-"
+            "2 and -3 followed and were harder."
+        ),
+        "cite": ["cellular_gsm"],
+    },
+    {
+        "match": [r"amps.*(shut\s*off|shutoff|sunset|retired|end.of.life|decommission).*(2001|2002|2003|2004|2005|2006|2007)"],
+        "verdict": "false",
+        "because": (
+            "The FCC-authorized AMPS sunset was Feb 18, 2008 in the US. "
+            "Analog was largely obsolete in urban markets by 2003, but the "
+            "regulatory shutoff did not happen until 2008. Rural retention "
+            "ran even longer in some regions."
+        ),
+        "cite": ["cellular_amps"],
+    },
+    {
+        "match": [r"\b888\b", r"(198[0-9]|199[0-5])"],
+        "verdict": "false",
+        "because": (
+            "888 launched on 1996-03-01. Before that, the only toll-free NPA "
+            "was 800. Claims of 888 numbers in the 1980s or early 1990s are "
+            "wrong. Subsequent additions: 877 in 1998, 866 in 2000, 855 in "
+            "2010, 844 in 2013, 833 in 2017."
+        ),
+        "cite": ["npl_toll_free_evolution"],
+    },
+    {
+        "match": [r"\b555\b", r"(any|arbitrary|all)\s+(555\s+)?number", r"(work|real|active|routable|dial)"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The 555 prefix is NOT generally routable. 555-1212 is directory "
+            "assistance NANP-wide. 555-0100 through 555-0199 are reserved "
+            "for fictional use in movies/TV since 1994. Other 555 numbers "
+            "can be allocated by NANPA but few are active."
+        ),
+        "cite": ["npl_555"],
+    },
+    {
+        "match": [r"(10[- ]?xxx|101[- ]?xxxx|cic|dial.?around).*(199[0-7]|198[0-9])"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The CIC format changed on 1998-07-01 per FCC Order 97-402. "
+            "Pre-1998: 10-XXX (3-digit CIC). Post-1998: 101-XXXX (4-digit "
+            "CIC, informally '10-10-XXX'). A claim about dialaround CIC "
+            "must specify the era."
+        ),
+        "cite": ["npl_10xxx_101xxxx_cic", "fcc-97-402"],
+    },
+    {
+        "match": [
+            r"(interchangeable\s*npa|area\s*code\s*\b(2[0-9][0-9]|3[0-9][0-9]|4[0-9][0-9]|5[0-9][0-9]|6[0-9][0-9]|7[0-9][0-9]|8[0-9][0-9]|9[0-9][0-9])\b|\b(334|360|520|530|541|561|562|573|602)\b\s*(area\s*code|launched|introduced))",
+            r"(198[0-9]|199[0-4])"
+        ],
+        "verdict": "false",
+        "because": (
+            "Interchangeable NPAs (second digit 2-9 allowed) went live on "
+            "1995-01-15. Pre-1995 area codes were N0X or N1X only; the "
+            "first new-format codes (334, 360, 520) appeared then."
+        ),
+        "cite": ["nanp_1995_transition"],
+    },
+    {
+        "match": [r"resporg.*(198[0-9]|199[0-2])|toll.?free.*portab.*(198[0-9]|199[0-2])"],
+        "verdict": "false",
+        "because": (
+            "RESPORG portability (SMS/800 database) launched on 1993-05-01. "
+            "Before that, toll-free numbers were owned by the terminating "
+            "carrier — the '800 number lock-in' era. Claims of portability "
+            "pre-1993 are wrong."
+        ),
+        "cite": ["npl_toll_free_evolution"],
+    },
+    {
+        "match": [r"ss7.*(deployment|rollout|introduced|standardized).*(197[0-9])"],
+        "verdict": "false",
+        "because": (
+            "SS7 (No.7) rollout began 1980. ANSI SS7 was standardized 1988. "
+            "The 1970s predecessor was CCIS No.6 (deployed 1976); SS7 "
+            "replaced it starting 1980 and became ubiquitous on North "
+            "American interoffice trunks by ~1992."
+        ),
+        "cite": ["sig_ss7_no7", "sig_ccis_no6"],
+    },
+    {
+        "match": [r"(t.?1|ds1|dial.?up.*modem).*(64\s*k|64\s*000|full\s*rate)"],
+        "verdict": "false",
+        "because": (
+            "T-1 robbed-bit CAS steals the LSB of every 6th frame of each "
+            "channel for supervision. The clear data rate per DS0 is 56 kbps, "
+            "not 64. This is why dial-up modems topped out at 56 k on TDM "
+            "channels. ISDN PRI (23B+D / 30B+D) uses out-of-band signaling "
+            "and gets the full 64 kbps per B channel."
+        ),
+        "cite": ["sig_t1_cas"],
+    },
+    {
+        "match": [r"(pocsag|flex).*(encrypt|secure|protected)"],
+        "verdict": "false",
+        "because": (
+            "POCSAG (512/1200/2400 bps FSK) and FLEX (1600-6400 bps 4-level "
+            "FSK) both broadcast cap codes and message bodies UNENCRYPTED. "
+            "A mid-90s eavesdrop stack (ICOM PCR-1000 + PDW or POC32) could "
+            "log every message in a metro. WHCA / hospital / on-call pages "
+            "all traveled in the clear for a decade."
+        ),
+        "cite": ["cellular_pagers_flex", "cellular_pagers_pocsag"],
+    },
+    {
+        "match": [r"(esn|min|amps).*(encrypt|authenticate|secure).*(pre.?a.?key|before.*1996|198[0-9])"],
+        "verdict": "false",
+        "because": (
+            "AMPS transmitted MIN + ESN in the CLEAR on the RECC (Reverse "
+            "Control Channel) as 10 kbps Manchester. A-Key authentication "
+            "was added by IS-54B / IS-136 (TDMA) starting ~1996-1998. "
+            "Pre-A-Key AMPS registration leaked identity to any scanner in "
+            "range — the foundation of clone-fraud economics."
+        ),
+        "cite": ["cellular_amps"],
+    },
+    {
+        "match": [r"r2.*(2400|2600).*(seize|seizure|line\s*signal)"],
+        "verdict": "false",
+        "because": (
+            "R2 (ITU-T Q.400/Q.441) uses 3825 Hz compelled tones for line "
+            "signaling, NOT 2400/2600 Hz. 2400/2600 Hz is CCITT No.5 "
+            "international MF (2400 = seizure, 2600 = proceed-to-send). "
+            "R1, R2, and No.5 are three separate signaling systems."
+        ),
+        "cite": ["sig_r2", "sig_ccitt5"],
+    },
+    {
+        "match": [r"ground.?start.*(subscriber.*residential|home.*phone|single.?line.*pots)"],
+        "verdict": "false",
+        "because": (
+            "Ground-start is a PBX-to-CO trunk supervision method, not a "
+            "residential subscriber-loop method. Home POTS lines use loop-"
+            "start (DC loop closure). Ground-start's purpose is to reduce "
+            "glare on shared trunks — irrelevant for a single-line home phone."
+        ),
+        "cite": ["sig_ground_start", "sig_loop_start"],
+    },
+    {
+        "match": [r"bernie\s*s|ed\s*cummings"],
+        "verdict": "needs_qualification",
+        "because": (
+            "The Bernie S (Ed Cummings) 1995 USSS case turned on possession "
+            "of a Radio Shack tone dialer with a 6.5536 MHz crystal — used "
+            "as USSS proof of 'device to defraud' intent under 18 USC 1029. "
+            "Cummings was convicted and imprisoned. This is a canonical "
+            "reason NOT to physically carry a modified dialer through "
+            "security. Any claim about the case should state (a) the year "
+            "(1995), (b) the specific evidence (6.5536 crystal), and (c) "
+            "the statute (18 USC 1029 counterfeit access device)."
+        ),
+        "cite": ["box_red", "2600-autumn-1990"],
+    },
+    {
+        "match": [r"(disa|meridian.*(pbx|fraud|abuse)).*(dead|obsolete|no\s*longer).*(2020|202[0-9])"],
+        "verdict": "false",
+        "because": (
+            "DISA abuse on Meridian / SL-1 / CS1000 PBXs remains effective "
+            "in 2026 against abandoned or default-credentialed installs "
+            "(small hotels, warehouses, orphaned enterprise gear). What "
+            "killed it as a mass fraud target was enterprise credential "
+            "rotation, real-time SS7-side fraud analytics, and IP-PBX "
+            "migration — not any change to the SL-1 attack itself."
+        ),
+        "cite": ["technique_meridian_disa_abuse", "netel_sl1", "def_ss7_fraud_analytics"],
+    },
+    {
+        "match": [r"(coin.?box|three.?slot|3.?slot).*(acts|toll.?switch|red.?box)"],
+        "verdict": "false",
+        "because": (
+            "The Western Electric three-slot payphone (pre-1975) was NOT "
+            "ACTS-signaled. It was operator-attended: coins triggered "
+            "mechanical bells/gongs (one gong = nickel, two = dime, one "
+            "long = quarter) that a human operator listened for. ACTS came "
+            "in 1978 with the single-slot fortress phone (1C/1D). Red-"
+            "boxing attacked ACTS specifically."
+        ),
+        "cite": ["pay_three_slot", "pay_bell_1c_1d", "pay_acts"],
+    },
+]
+
+
+@mcp.tool()
+def verify_claim(text: str) -> dict:
+    """
+    Grade a natural-language phreaking claim: true / false / needs_qualification.
+
+    Checks the claim against the corpus's catalog of known DEFCON traps —
+    the plausible-but-wrong assertions a judge plants (e.g. "a blue box uses
+    2600 Hz to hang up an international trunk" → false; on CCITT No.5 the
+    seizure tone is 2400 Hz). Returns a `verdict`, the reasoning, and the
+    records to cite.
+
+    A conservative rule-based checker, not an oracle: an unmatched claim
+    returns `verdict: "unverified"` with a pointer to look it up, rather than
+    guessing. Better to say "I can't confirm that from the KR" than to bluff.
+    """
+    store = _record_store()
+    lowered = text.lower()
+    for trap in _CLAIM_TRAPS:
+        if all(re.search(pat, lowered) for pat in trap["match"]):
+            cites = []
+            for cid in trap["cite"]:
+                rec = store.get(cid)
+                if rec:
+                    cites.append({"id": cid, "name": rec.get("name"), "citations": rec.get("citations", [])})
+            return {
+                "claim": text,
+                "verdict": trap["verdict"],
+                "reasoning": trap["because"],
+                "records": cites,
+            }
+    return {
+        "claim": text,
+        "verdict": "unverified",
+        "reasoning": (
+            "No matching entry in the trap catalog or typed records. This tool "
+            "only asserts verdicts it can back with a record; use lookup_tone / "
+            "explain_technique / search_lore to research the claim manually."
+        ),
+        "records": [],
+    }
+
+
+@mcp.tool()
+def search_records(
+    query: str | None = None,
+    category: str | None = None,
+    region: str | None = None,
+    year: int | None = None,
+    max_results: int = 20,
+) -> dict:
+    """
+    Search the typed records with category / region / year filters.
+
+    Where `search_lore` greps prose, this scopes the KR: filter to a
+    `category` (`tone_signal`, `box`, `technique`, `bibliography`), a `region`
+    (`NANP`, `CCITT-No5`, `ITU-R2`, `AUTOVON`, `universal`), and/or a `year`
+    (returns only records whose era_bounds contain it) — so you can ask for
+    "NANP tone signals effective in 1998" instead of the whole corpus. The
+    optional `query` substring-matches id / name / aliases.
+
+    Each result carries the common envelope (citations, era_bounds, region,
+    confidence).
+    """
+    store = _record_store()
+    q = records._normalize(query) if query else None
+    reg = records._normalize(region) if region else None
+
+    results = []
+    for rec in store.all_records():
+        if category and rec.get("category") != category:
+            continue
+        if reg and records._normalize(rec.get("region", "")) != reg:
+            continue
+        if year is not None and not records.era_contains(rec, year):
+            continue
+        if q:
+            haystack = records._normalize(
+                " ".join([rec.get("id", ""), rec.get("name", ""), *rec.get("aliases", [])])
+            )
+            if q not in haystack:
+                continue
+        results.append({
+            "id": rec["id"],
+            "name": rec.get("name"),
+            "category": rec.get("category"),
+            **records.envelope(rec),
+        })
+
+    return {
+        "filters": {"query": query, "category": category, "region": region, "year": year},
+        "hit_count": len(results),
+        "results": results[:max_results],
     }
 
 
@@ -416,6 +1017,73 @@ def generate_red_box(
     )
 
 
+@mcp.tool()
+def generate_busy(cycles: int = 4, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Line-busy tone: 480+620 Hz, 500 ms on / 500 ms off. `cycles` on/off periods."""
+    pcm = tones.busy_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("busy", path), pcm), {"kind": "busy", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_reorder(cycles: int = 8, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Reorder / fast-busy (all-trunks-busy): 480+620 Hz, 250 ms on / 250 ms off."""
+    pcm = tones.reorder_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("reorder", path), pcm), {"kind": "reorder", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_ringback(cycles: int = 2, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """Audible ringback: 440+480 Hz, 2 s on / 4 s off. `cycles` rings."""
+    pcm = tones.ringback_bytes(cycles, amplitude)
+    return _render_result(tones.write_wav(_tone_path("ringback", path), pcm), {"kind": "ringback", "cycles": cycles})
+
+
+@mcp.tool()
+def generate_milliwatt(ms: int = 10000, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """
+    1004 Hz milliwatt test tone, continuous. Every CO had one; CTF authors
+    love them. Older lines used 1000 Hz. See phr34cker5://ctf/milliwatt-testlines.
+    """
+    pcm = tones.milliwatt_bytes(ms, amplitude)
+    return _render_result(tones.write_wav(_tone_path("milliwatt", path), pcm), {"kind": "milliwatt", "freq_hz": 1004})
+
+
+@mcp.tool()
+def generate_modem_carrier(
+    rate: str = "v22",
+    answer_ms: int = 3000,
+    carrier_ms: int = 2000,
+    amplitude: float = tones.AMPLITUDE,
+    path: str | None = None,
+) -> dict:
+    """
+    Synthesize a modem-answer signature: 2100 Hz V.25 answer tone then a
+    rate-appropriate carrier marker. `rate` in {bell103, v21, v22, v32, v34}.
+
+    Audio that *sounds* like a modem for detector tests / CTF flag-matching —
+    it does not demodulate or negotiate. See phr34cker5://modems/README.
+    """
+    pcm = tones.modem_carrier_bytes(rate, answer_ms, carrier_ms, amplitude)
+    return _render_result(
+        tones.write_wav(_tone_path(f"modem-{rate}", path), pcm),
+        {"kind": "modem_carrier", "rate": rate},
+    )
+
+
+@mcp.tool()
+def generate_green_box(signal: str = "collect", ms: int = 900, amplitude: float = tones.AMPLITUDE, path: str | None = None) -> dict:
+    """
+    Render a green-box operator coin-control tone: `signal` in
+    {collect, return, ringback}. The operator side of coin signaling — distinct
+    from the red box. Historical only — see phr34cker5://greenboxing/README.
+    """
+    pcm = tones.green_box_bytes(signal, ms, amplitude)
+    return _render_result(
+        tones.write_wav(_tone_path(f"greenbox-{signal}", path), pcm),
+        {"kind": "green_box", "signal": signal},
+    )
+
+
 # --- live telephony (Twilio) -------------------------------------------------
 #
 # Every tool below requires:
@@ -449,6 +1117,7 @@ def _call_summary(rt, call_sid: str) -> dict:
         "duration_s": int(api_call.duration or 0),
         "ws_connected": bool(cs and cs.ws_connected),
         "outbound_backlog_ms": cs.outbound_backlog_ms() if cs else 0,
+        "auto_hung_up": call_sid in rt.auto_hung_up,
     }
 
 
@@ -516,6 +1185,47 @@ def call_status(call_sid: str) -> dict:
     return _call_summary(rt, call_sid)
 
 
+def _call_log(rt, call_sid: str) -> dict:
+    """Assemble the full local timeline for a call (helper; used by tool + resource)."""
+    cs = rt.get_call(call_sid)  # raises KeyError if unknown
+    events = cs.get_events()
+    t0 = cs.started_at
+    timeline = [
+        {
+            "offset_ms": int((e["t"] - t0) * 1000),
+            "kind": e["kind"],
+            **{k: v for k, v in e.items() if k not in ("t", "kind")},
+        }
+        for e in events
+    ]
+    return {
+        "call_sid": call_sid,
+        "direction": cs.direction,
+        "to": cs.to_number,
+        "from": cs.from_number,
+        "started_at": cs.started_at,
+        "connected_at": cs.connected_at,
+        "ended_at": cs.ended_at,
+        "ws_connected": cs.ws_connected,
+        "auto_hung_up": call_sid in rt.auto_hung_up,
+        "event_count": len(timeline),
+        "timeline": timeline,
+    }
+
+
+@mcp.tool()
+def call_log(call_sid: str) -> dict:
+    """
+    Full local timeline for a call — for post-mortem after a puzzle.
+
+    Every notable moment we recorded, with millisecond offsets from call
+    start: registered, twiml_hit, ws_connect, each tone/audio injection,
+    marks acked, ws_stop, and any MAX_CALL_MINUTES auto-hangup. Complements
+    Twilio-side data (recordings, status) with what *we* did and when.
+    """
+    return _call_log(_rt(), call_sid)
+
+
 @mcp.tool()
 def wait_for_answer(call_sid: str, timeout_s: int = 60) -> dict:
     """
@@ -548,6 +1258,73 @@ def wait(seconds: float) -> dict:
     return {"waited_s": seconds}
 
 
+@mcp.tool()
+def wait_for_inbound(timeout_s: int = 120, since_sid: str | None = None) -> dict:
+    """
+    Block until an inbound call arrives and its media WebSocket connects.
+
+    For CTFs where the target calls *you*. Point your Twilio number's "A Call
+    Comes In" webhook at `<PUBLIC_URL>/twiml/inbound` (see docs/twilio_setup);
+    when a call hits it, this returns that call's summary. Then drive it with
+    listen / detect_tone / play_*_into_call / play_sequence just like an
+    outbound call.
+
+    `since_sid`: ignore a specific already-seen call (pass the last one you
+    handled) so you catch the *next* arrival, not the current one.
+    """
+    import time as _t
+
+    rt = _rt()
+    deadline = _t.time() + timeout_s
+    while _t.time() < deadline:
+        with rt._calls_lock:
+            candidates = [
+                sid for sid, cs in rt.calls.items()
+                if cs.direction == "inbound" and cs.ws_connected and sid != since_sid
+            ]
+        if candidates:
+            return _call_summary(rt, candidates[-1])
+        _t.sleep(0.5)
+    return {"error": "timeout", "waited_s": timeout_s,
+            "hint": "Is the number's inbound webhook pointed at <PUBLIC_URL>/twiml/inbound?"}
+
+
+@mcp.tool()
+def multi_call_bridge(call_sids: list[str], announce: str | None = None) -> dict:
+    """
+    Bridge two or more live calls into one conference (Twilio-native).
+
+    Redirects each call to TwiML that joins a shared `<Conference>` room, so
+    the parties hear each other — a loop-around, a conference-bridge puzzle, or
+    just patching two legs together. This ends each call's Media Stream (they
+    move into the conference), so inject/listen won't work on them afterward;
+    use start_recording on a leg first if you want the audio.
+
+    `announce`: optional text spoken into the room on join (via <Say>).
+    """
+    rt = _rt()
+    room = f"phr34-{call_sids[0][-8:]}" if call_sids else "phr34-bridge"
+    say = f"<Say>{announce}</Say>" if announce else ""
+    twiml = (
+        f'<?xml version="1.0" encoding="UTF-8"?><Response>{say}'
+        f'<Dial><Conference startConferenceOnEnter="true" '
+        f'endConferenceOnExit="false">{room}</Conference></Dial></Response>'
+    )
+    joined, errors = [], []
+    for sid in call_sids:
+        try:
+            rt.client.calls(sid).update(twiml=twiml)
+            joined.append(sid)
+            try:
+                rt.get_call(sid).add_event("bridged", room=room)
+            except KeyError:
+                pass
+        except Exception as e:  # noqa: BLE001
+            errors.append({"call_sid": sid, "error": f"{e.__class__.__name__}: {e}"})
+    return {"conference": room, "joined": joined, "errors": errors,
+            "note": "Bridged legs left our Media Stream for the conference; inject/listen no longer apply to them."}
+
+
 # ---- audio injection ----
 
 
@@ -555,12 +1332,33 @@ def _inject(call_sid: str, pcm: bytes, label: str) -> dict:
     rt = _rt()
     cs = rt.get_call(call_sid)
     cs.enqueue_outbound_pcm(pcm)
+    queued_ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+    cs.add_event("inject", label=label, queued_ms=queued_ms)
     return {
         "call_sid": call_sid,
-        "queued_ms": (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE,
+        "queued_ms": queued_ms,
         "backlog_ms": cs.outbound_backlog_ms(),
         "kind": label,
     }
+
+
+def _read_wav_pcm(path: str) -> bytes:
+    """
+    Read a mono 8kHz signed-16 WAV file into raw PCM bytes.
+
+    Enforces the canonical telephony format shared by tones.py, the Twilio
+    bridge, and the detectors — so callers never feed a 44.1kHz stereo file
+    into an 8kHz mono pipeline and get garbage.
+    """
+    import wave
+
+    with wave.open(path, "rb") as w:
+        if w.getnchannels() != 1 or w.getsampwidth() != 2 or w.getframerate() != tones.SAMPLE_RATE:
+            raise ValueError(
+                f"{path}: expected mono, 16-bit, {tones.SAMPLE_RATE}Hz "
+                f"(got {w.getnchannels()}ch, {w.getsampwidth()*8}-bit, {w.getframerate()}Hz)"
+            )
+        return w.readframes(w.getnframes())
 
 
 @mcp.tool()
@@ -571,16 +1369,164 @@ def play_wav_into_call(call_sid: str, path: str) -> dict:
     Use this to replay files produced by any of the generate_* tone tools
     without re-synthesizing.
     """
-    import wave
+    return _inject(call_sid, _read_wav_pcm(path), f"wav:{path}")
 
-    with wave.open(path, "rb") as w:
-        if w.getnchannels() != 1 or w.getsampwidth() != 2 or w.getframerate() != tones.SAMPLE_RATE:
-            raise ValueError(
-                f"{path}: expected mono, 16-bit, {tones.SAMPLE_RATE}Hz "
-                f"(got {w.getnchannels()}ch, {w.getsampwidth()*8}-bit, {w.getframerate()}Hz)"
-            )
-        pcm = w.readframes(w.getnframes())
-    return _inject(call_sid, pcm, f"wav:{path}")
+
+def _wait_for_playout(cs, timeout_s: float = 30.0) -> bool:
+    """
+    Block until queued outbound audio has been shipped to Twilio (backlog ~0).
+
+    This is what makes a scripted sequence sequential: an inject step isn't
+    "done" until the tones have actually gone out, so the next step (e.g.
+    listen) doesn't start mid-tone. Returns False if it timed out.
+    """
+    import time as _t
+
+    deadline = _t.time() + timeout_s
+    while _t.time() < deadline:
+        if cs.outbound_backlog_ms() <= 0:
+            # Small settle so the pump ships the final partial frame.
+            _t.sleep(0.05)
+            return cs.outbound_backlog_ms() <= 0
+        _t.sleep(0.02)
+    return False
+
+
+# PCM builders for the injectable actions in play_sequence. Each maps a step
+# dict to raw PCM bytes; keys are the `action` names callers use.
+_SEQUENCE_TONE_BUILDERS = {
+    "dtmf":     lambda s: tones.dtmf_bytes(s["digits"], s.get("tone_ms", 100), s.get("gap_ms", 80)),
+    "mf":       lambda s: tones.mf_bytes(s["digits"], s.get("tone_ms", 68), s.get("gap_ms", 68), s.get("kp_ms", 100)),
+    "tone":     lambda s: tones.sine_bytes(s["freq_hz"], s.get("ms", 1000)),
+    "2600":     lambda s: tones.sf_2600_bytes(s.get("ms", 1000)),
+    "redbox":   lambda s: tones.red_box_bytes(s["coins"]),
+    "greenbox": lambda s: tones.green_box_bytes(s.get("signal", "collect"), s.get("ms", 900)),
+    "cng":      lambda s: tones.cng_bytes(s.get("cycles", 4)),
+    "ced":      lambda s: tones.ced_bytes(s.get("ms", 3000)),
+    "busy":     lambda s: tones.busy_bytes(s.get("cycles", 4)),
+    "reorder":  lambda s: tones.reorder_bytes(s.get("cycles", 8)),
+    "ringback": lambda s: tones.ringback_bytes(s.get("cycles", 2)),
+    "milliwatt": lambda s: tones.milliwatt_bytes(s.get("ms", 10000)),
+    "modem":    lambda s: tones.modem_carrier_bytes(s.get("rate", "v22"), s.get("answer_ms", 3000), s.get("carrier_ms", 2000)),
+    "wav":      lambda s: _read_wav_pcm(s["path"]),
+}
+
+
+@mcp.tool()
+def play_sequence(call_sid: str, steps: list[dict], stop_on_error: bool = True) -> dict:
+    """
+    Run a scripted sequence of call actions atomically, in order.
+
+    One tool call instead of five, and the single place timing is handled:
+    every audio-injection step blocks until its tones have actually played out
+    before the next step runs, so "send digits, then listen" listens *after*
+    the digits go out — not during.
+
+    Each step is a dict with an `action`:
+
+      inject audio (blocks until played out):
+        {"action": "dtmf",   "digits": "1234", "tone_ms": 100, "gap_ms": 80}
+        {"action": "mf",     "digits": "K18005551212S"}
+        {"action": "tone",   "freq_hz": 440, "ms": 1000}
+        {"action": "2600",   "ms": 1000}
+        {"action": "redbox", "coins": "qqq"}   {"action": "greenbox", "signal": "collect"}
+        {"action": "cng",    "cycles": 4}      {"action": "ced", "ms": 3000}
+        {"action": "busy"}   {"action": "reorder"}   {"action": "ringback"}
+        {"action": "milliwatt", "ms": 10000}   {"action": "modem", "rate": "v22"}
+        {"action": "wav",    "path": "/path/to.wav"}
+      timing / control:
+        {"action": "wait", "s": 10}
+        {"action": "wait_for_answer", "timeout_s": 60}
+        {"action": "hangup"}
+      perception (captures inbound audio):
+        {"action": "listen",      "s": 5}          -> WAV path
+        {"action": "detect_tone", "s": 3, "targets": ["dial-tone","busy"]}
+        {"action": "dtmf_decode", "s": 5}          -> digits
+        {"action": "transcribe",  "s": 10}         -> speech-to-text
+
+    Example — dial handled elsewhere; here we wait for answer, pause, deposit
+    75c, and listen:
+        play_sequence(sid, [
+            {"action": "wait_for_answer"},
+            {"action": "wait", "s": 10},
+            {"action": "redbox", "coins": "qqq"},
+            {"action": "listen", "s": 5},
+        ])
+
+    Returns per-step results and an overall `ok`. With stop_on_error (default),
+    the sequence halts at the first failing step and reports which one.
+    """
+    rt = _rt()
+    results: list[dict] = []
+    ok = True
+
+    for i, step in enumerate(steps):
+        action = (step.get("action") or "").lower()
+        entry: dict = {"index": i, "action": action}
+        try:
+            if action in _SEQUENCE_TONE_BUILDERS:
+                cs = rt.get_call(call_sid)
+                pcm = _SEQUENCE_TONE_BUILDERS[action](step)
+                cs.enqueue_outbound_pcm(pcm)
+                queued_ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+                played = _wait_for_playout(cs, timeout_s=max(30.0, queued_ms / 1000 + 10))
+                entry.update({"queued_ms": queued_ms, "played_out": played})
+                if not played:
+                    raise TimeoutError("audio did not finish playing out")
+
+            elif action == "wait":
+                secs = float(step.get("s", step.get("seconds", 1.0)))
+                wait(secs)
+                entry["waited_s"] = secs
+
+            elif action == "wait_for_answer":
+                summary = wait_for_answer(call_sid, int(step.get("timeout_s", 60)))
+                entry["status"] = summary.get("twilio_status")
+                entry["ws_connected"] = summary.get("ws_connected")
+                if not (summary.get("twilio_status") == "in-progress" and summary.get("ws_connected")):
+                    raise RuntimeError(f"call not answered/connected: {summary.get('twilio_status')}")
+
+            elif action == "hangup":
+                entry.update(hangup(call_sid))
+
+            elif action == "listen":
+                secs = float(step.get("s", step.get("seconds", 5.0)))
+                entry.update(listen(call_sid, seconds=secs))
+
+            elif action == "detect_tone":
+                secs = float(step.get("s", step.get("seconds", 3.0)))
+                entry.update(detect_tone(call_sid, seconds=secs, targets=step.get("targets")))
+
+            elif action == "dtmf_decode":
+                secs = float(step.get("s", step.get("seconds", 5.0)))
+                entry.update(dtmf_decode(call_sid, seconds=secs))
+
+            elif action == "transcribe":
+                secs = float(step.get("s", step.get("seconds", 10.0)))
+                entry.update(transcribe(call_sid, seconds=secs))
+
+            else:
+                raise ValueError(f"unknown action: {action!r}")
+
+            entry["ok"] = True
+        except Exception as e:  # noqa: BLE001 — record and optionally stop
+            entry["ok"] = False
+            entry["error"] = f"{e.__class__.__name__}: {e}"
+            ok = False
+            results.append(entry)
+            if stop_on_error:
+                break
+            continue
+
+        results.append(entry)
+
+    return {
+        "call_sid": call_sid,
+        "ok": ok,
+        "steps_run": len(results),
+        "steps_total": len(steps),
+        "results": results,
+    }
 
 
 @mcp.tool()
@@ -644,6 +1590,91 @@ def play_red_box_into_call(call_sid: str, coins: str) -> dict:
     return _inject(call_sid, tones.red_box_bytes(coins), f"redbox:{coins}")
 
 
+@mcp.tool()
+def play_green_box_into_call(call_sid: str, signal: str = "collect") -> dict:
+    """Inject a green-box operator coin-control tone (collect / return / ringback)."""
+    return _inject(call_sid, tones.green_box_bytes(signal), f"greenbox:{signal}")
+
+
+@mcp.tool()
+def play_busy_into_call(call_sid: str, cycles: int = 4) -> dict:
+    """Inject line-busy tone (480+620 Hz, 500/500 ms) into a live call."""
+    return _inject(call_sid, tones.busy_bytes(cycles), f"busy:{cycles}c")
+
+
+@mcp.tool()
+def play_reorder_into_call(call_sid: str, cycles: int = 8) -> dict:
+    """Inject reorder / fast-busy tone (480+620 Hz, 250/250 ms) into a live call."""
+    return _inject(call_sid, tones.reorder_bytes(cycles), f"reorder:{cycles}c")
+
+
+@mcp.tool()
+def play_ringback_into_call(call_sid: str, cycles: int = 2) -> dict:
+    """Inject audible ringback (440+480 Hz, 2 s on / 4 s off) into a live call."""
+    return _inject(call_sid, tones.ringback_bytes(cycles), f"ringback:{cycles}c")
+
+
+@mcp.tool()
+def play_milliwatt_into_call(call_sid: str, ms: int = 10000) -> dict:
+    """Inject the 1004 Hz milliwatt test tone into a live call."""
+    return _inject(call_sid, tones.milliwatt_bytes(ms), f"milliwatt:{ms}ms")
+
+
+@mcp.tool()
+def play_modem_carrier_into_call(
+    call_sid: str, rate: str = "v22", answer_ms: int = 3000, carrier_ms: int = 2000
+) -> dict:
+    """Inject a synthetic modem-answer signature (2100 Hz answer + rate carrier)."""
+    return _inject(call_sid, tones.modem_carrier_bytes(rate, answer_ms, carrier_ms), f"modem:{rate}")
+
+
+@mcp.tool()
+def send_dtmf_via_twilio(call_sid: str, digits: str) -> dict:
+    """
+    Send DTMF digits using Twilio's native `<Play digits="...">` TwiML.
+
+    Unlike play_dtmf_into_call (which injects synthesized tone audio over the
+    media stream), this asks Twilio to generate clean, spec-perfect DTMF on
+    the far side — the better choice for a picky IVR that rejects our audio.
+
+    `digits` accepts 0-9, *, #, w (0.5s pause). Note: this redirects the call
+    to fresh TwiML, which tears down the current Media Stream; use it when you
+    don't need the live WS during the send. Returns the new call status.
+    """
+    rt = _rt()
+    safe = "".join(ch for ch in digits if ch in "0123456789*#w")
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play digits="{safe}"/></Response>'
+    call = rt.client.calls(call_sid).update(twiml=twiml)
+    try:
+        rt.get_call(call_sid).add_event("send_dtmf_twilio", digits=safe)
+    except KeyError:
+        pass
+    return {"call_sid": call_sid, "digits_sent": safe, "status": call.status,
+            "note": "Twilio-generated DTMF; the live Media Stream was torn down by the TwiML redirect."}
+
+
+@mcp.tool()
+def play_recording_into_call(call_sid: str, recording_url: str) -> dict:
+    """
+    Play a previously-captured Twilio recording (or any public audio URL) into
+    a live call via `<Play>` TwiML.
+
+    Great for reverse-engineering an IVR: capture its menu with
+    start_recording, get the URL from get_recording_url, then replay it into a
+    fresh call. Like send_dtmf_via_twilio, the TwiML redirect ends the current
+    Media Stream. Pass a `.wav`/`.mp3` URL Twilio can reach.
+    """
+    rt = _rt()
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play>{recording_url}</Play></Response>'
+    call = rt.client.calls(call_sid).update(twiml=twiml)
+    try:
+        rt.get_call(call_sid).add_event("play_recording", url=recording_url)
+    except KeyError:
+        pass
+    return {"call_sid": call_sid, "played": recording_url, "status": call.status,
+            "note": "TwiML redirect ended the live Media Stream for the duration of playback."}
+
+
 # ---- listening ----
 
 
@@ -666,6 +1697,128 @@ def listen(call_sid: str, seconds: float = 5.0, save_wav: bool = True) -> dict:
     out = _tone_path(f"listen-{call_sid[:8]}", None)
     rt_info = tones.write_wav(out, pcm)
     return _render_result(rt_info, {"call_sid": call_sid, "captured_ms": ms})
+
+
+def _capture_inbound_pcm(call_sid: str, seconds: float) -> tuple[bytes, int]:
+    """Sleep `seconds`, then drain that much inbound audio. Returns (pcm, ms)."""
+    import time as _t
+
+    rt = _rt()
+    cs = rt.get_call(call_sid)
+    _t.sleep(max(0.0, seconds))
+    pcm = cs.drain_inbound_pcm(max_ms=int(seconds * 1000) + 500)
+    ms = (len(pcm) // 2) * 1000 // tones.SAMPLE_RATE
+    return pcm, ms
+
+
+# ---- perception (detect / decode / transcribe) ----
+
+
+@mcp.tool()
+def detect_tone(
+    call_sid: str,
+    seconds: float = 3.0,
+    targets: list[str] | None = None,
+) -> dict:
+    """
+    Listen to a live call and classify what tone(s) are on the line.
+
+    Goertzel power at named telephony frequencies plus a cadence estimate, so
+    you can tell busy (~1s period) from reorder (~0.5s), or spot dial tone,
+    ringback, 2600 Hz, fax CNG/CED, a modem answer tone, or a milliwatt test
+    tone. Use it to gate a sequence: "wait until dial tone, then send digits."
+
+    Args:
+        call_sid: the live call to listen on.
+        seconds: how long to sample.
+        targets: subset of {dial-tone, busy, reorder, ringback, 2600, cng,
+                 ced, modem, milliwatt} to score against. Default: the common
+                 set (all but reorder, which overlaps busy).
+
+    Returns dominant frequencies, the cadence estimate, per-target matches,
+    and `best` — the highest-scoring present target (or null if the line is
+    silent / unrecognized).
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    result = detect.detect_tones(pcm, targets)
+    result["call_sid"] = call_sid
+    return result
+
+
+@mcp.tool()
+def dtmf_decode(call_sid: str, seconds: float = 5.0) -> dict:
+    """
+    Decode DTMF digits the far end is sending on a live call.
+
+    Frames the inbound audio, classifies each frame with twist and
+    relative-power validation, and collapses runs into a digit string.
+    Critical for IVR / DISA puzzles where the far end plays digits back.
+
+    Returns {"digits": "...", "detail": [{digit, start_ms, duration_ms}, ...]}.
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    result = detect.decode_dtmf(pcm)
+    result["call_sid"] = call_sid
+    result["captured_ms"] = ms
+    return result
+
+
+@mcp.tool()
+def dtmf_decode_wav(path: str) -> dict:
+    """
+    Decode DTMF digits from a WAV file (mono 8kHz signed-16).
+
+    Same decoder as dtmf_decode(), but on a file — e.g. a WAV produced by
+    listen() earlier, or one of the generate_dtmf() outputs.
+    """
+    pcm = _read_wav_pcm(path)
+    result = detect.decode_dtmf(pcm)
+    result["path"] = path
+    return result
+
+
+@mcp.tool()
+def transcribe(call_sid: str, seconds: float = 10.0) -> dict:
+    """
+    Speech-to-text on a live call's inbound audio.
+
+    Captures `seconds` of audio and transcribes it. Uses Twilio's transcription
+    if the optional dependency for a local recognizer isn't available; either
+    way you get text back for "listen to the IVR menu and tell me the options."
+
+    Currently this captures to a WAV and hands off to Twilio's recording +
+    transcription pipeline. Returns the captured WAV path, and the transcript
+    once available (transcription is async on Twilio's side — poll
+    get_recording_url / the returned transcription_sid if pending).
+    """
+    pcm, ms = _capture_inbound_pcm(call_sid, seconds)
+    out = _tone_path(f"transcribe-{call_sid[:8]}", None)
+    tones.write_wav(out, pcm)
+
+    rt = _rt()
+    # Kick off a Twilio recording+transcription on the live call so we get a
+    # server-side transcript. The captured WAV is the local fallback / evidence.
+    transcription_sid = None
+    status = "captured"
+    try:
+        rec = rt.client.calls(call_sid).recordings.create()
+        transcription_sid = rec.sid
+        status = "recording_started"
+    except Exception as e:  # noqa: BLE001 — surface the reason, don't crash
+        status = f"local_only: {e.__class__.__name__}"
+
+    return {
+        "call_sid": call_sid,
+        "captured_ms": ms,
+        "wav_path": out,
+        "status": status,
+        "recording_sid": transcription_sid,
+        "note": (
+            "Twilio transcription is asynchronous; fetch the recording via "
+            "get_recording_url() and run STT, or enable Voice Intelligence on "
+            "the account for automatic transcripts."
+        ),
+    }
 
 
 # ---- Twilio-native recording ----
@@ -716,6 +1869,23 @@ def _index() -> str:
             lines.append(f"- [{lf.name}]({lf.uri})")
         lines.append("")
     return "\n".join(lines)
+
+
+@mcp.resource(f"{URI_SCHEME}://calls/{{call_sid}}/events")
+def _call_events_resource(call_sid: str) -> str:
+    """
+    Serve a call's event timeline as a subscribable JSON resource.
+
+    An alternative to polling call_log(): the assistant can read (and, in
+    clients that support it, subscribe to) phr34cker5://calls/<sid>/events.
+    """
+    import json as _json
+
+    rt = _rt()
+    try:
+        return _json.dumps(_call_log(rt, call_sid), indent=2)
+    except KeyError:
+        return _json.dumps({"call_sid": call_sid, "error": "unknown call_sid"})
 
 
 @mcp.resource(URI_SCHEME + "://{topic}/{name}")

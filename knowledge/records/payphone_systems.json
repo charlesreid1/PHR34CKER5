@@ -1,0 +1,133 @@
+[
+  {
+    "id": "pay_acts",
+    "name": "ACTS (Automated Coin Toll Service)",
+    "aliases": ["ACTS", "coin toll service"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "payphone_coin",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Bell system's automated pre-payment platform for coin-toll transactions. Removed operators from most coin-toll calls; the payphone reports coin deposits to the toll switch via in-band tones.",
+      "coin_tones": {
+        "frequencies_hz": [1700, 2200],
+        "tolerance": "±1.5%",
+        "level_dBm0": -7,
+        "nickel_66ms": "one 66 ms burst",
+        "dime_66ms": "two 66 ms bursts separated by 66 ms",
+        "quarter_33ms": "five 33 ms bursts separated by 33 ms",
+        "dollar_650ms": "one 650 ms burst (rare, not universally implemented)"
+      },
+      "path": "1700+2200 Hz coin-tones injected by the payphone's coin-signal generator onto the 4-wire toll trunk; the toll switch's coin-signal receiver credits the deposit.",
+      "attack_surface": "The red-box attack. Any tone generator emitting the 1700+2200 Hz pair with correct pulse timing will be credited by an ACTS receiver, regardless of whether a coin was actually deposited. Receivers tolerated ±10-20% timing slop, so both the GR-506 66/33 ms spec and Phrack 33.9's 60/35 ms homebrew timing worked.",
+      "consumes_tones": ["acts_nickel", "acts_dime", "acts_quarter", "acts_dollar"],
+      "died_because": "1) T1/robbed-bit trunks stripped in-band ACTS supervision from the coin-signal path. 2) Bell 1C/1D single-slot payphones were retrofitted or replaced by 'smart' phones with local coin validation (Millennium, COCOT) starting mid-90s. 3) RBOC divestitures of payphone operations 2000-2007 accelerated retirement. 4) By 2002 red box attacks were largely inert in North America.",
+      "still_effective_2026": false
+    },
+    "citations": ["gr-506-core", "phrack-33-9", "bell-labs-record-fortress"],
+    "see_also": ["pay_bell_1c_1d", "pay_cocot", "pay_millennium", "acts_quarter", "box_red", "technique_red_box_fortress"]
+  },
+  {
+    "id": "pay_bell_1c_1d",
+    "name": "Bell 1C / 1D single-slot 'fortress' payphone",
+    "aliases": ["fortress phone", "single-slot payphone", "1C", "1D", "Western Electric fortress"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "payphone_hardware",
+    "era_bounds": ["1965-01-01", "2001-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "The Western Electric single-slot payphone that replaced the older three-slot design. Coin escrow, magnetic sensor, and coin-tone oscillator all in one armored steel housing.",
+      "supervisor": "toll switch (via ACTS 1700+2200 Hz)",
+      "coin_validation": "electromagnetic sensor detects coin size + composition; oscillator emits ACTS tone bursts to the toll switch",
+      "coin_control": "TSPS operator or ACTS can send coin-collect / coin-return signals back to the phone; a local coin relay routes the escrowed coin into the vault or the return chute.",
+      "attack_surface_summary": "The prototypical red-box target. Because coin validation ran the tone up to the toll switch, injecting synthesized 1700+2200 Hz tones bypassed the coin sensor entirely.",
+      "died_because": "Retrofitted with locally-validating smart terminals 1996-2001; by 2001 most Bell single-slots were retired or converted. Physical fortress-phone housings remained in service as chassis for the replacement smart electronics for another few years."
+    },
+    "citations": ["bell-labs-record-fortress", "gr-506-core"],
+    "see_also": ["pay_acts", "pay_millennium", "pay_cocot", "box_red"]
+  },
+  {
+    "id": "pay_millennium",
+    "name": "Nortel Millennium 'smart' payphone",
+    "aliases": ["Millennium", "Nortel Millennium", "smart payphone"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "payphone_hardware",
+    "era_bounds": ["1994-01-01", "2015-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Nortel's DSP-based smart payphone. Local coin validation via optical + mass sensor; generates ACTS-look-alike tones internally for backward compatibility with any legacy monitoring, but the tones are ceremonial — the actual coin decision is local.",
+      "coin_validation": "local, in the payphone's own DSP + optical/mass sensor. Deposits are recorded before any tone is sent.",
+      "signaling_to_CO": "Standard POTS loop + DTMF for dialing. Management link back to the 'Millennium Manager' central server via periodic modem call to a maintenance number.",
+      "attack_surface": "Immune to red-boxing — the receiver is local, not on the toll switch. Attack surface shifted to the maintenance modem interface and to physical/vault attacks on the phone itself. Common in Canada (Bell Canada deployed Millennium heavily) and select US Bell operating companies.",
+      "died_because": "Not fully retired — some Millennium phones remain in service as of 2026. Payphones overall are largely gone due to mobile ubiquity, not to attacks on Millennium specifically.",
+      "still_effective_2026": true
+    },
+    "citations": ["nortel-millennium-manual"],
+    "see_also": ["pay_acts", "pay_bell_1c_1d", "pay_cocot"]
+  },
+  {
+    "id": "pay_cocot",
+    "name": "COCOT (Customer-Owned Coin-Operated Telephone)",
+    "aliases": ["COCOT", "customer-owned payphone"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "payphone_hardware",
+    "era_bounds": ["1984-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "Non-Bell-owned payphone — installed by a private operator (bar, hotel lobby, laundromat, gas station) on a plain residential POTS loop. Validates coins LOCALLY; the CO sees only a subscriber-loop origination.",
+      "signaling_to_CO": "Ordinary POTS loop; no ACTS supervision. From the CO's viewpoint the COCOT is a subscriber, not a coin phone.",
+      "coin_validation": "local, in the COCOT's own electronics — never on the toll switch. This is why red-boxing never worked against COCOTs.",
+      "service_mode_attack": {
+        "entry": "dial the phone's own number, then enter a 4-digit password",
+        "default_passwords": ["0000", "1234"],
+        "boards_affected": ["Elcotel", "Protel", "Intellicall"],
+        "capabilities_once_inside": ["reprogram per-call rates", "redirect coin-return", "dial out on the trunk the phone answered on (variant of the diverter attack applied to the payphone chassis)"]
+      },
+      "phreak_relevance": "COCOTs became phreak-visible in the mid-1990s — the default admin passwords made them soft targets even without red-box tones. Discussed extensively in Phrack 48 (COCOT Frequencies) and 2600 Spring 1994 (The COCOT Files).",
+      "still_effective_2026": true
+    },
+    "citations": ["phrack-48-cocot"],
+    "see_also": ["pay_acts", "pay_bell_1c_1d", "pay_millennium"]
+  },
+  {
+    "id": "pay_tsps_operator",
+    "name": "TSPS / TOPS / OSPS operator-attended coin handling",
+    "aliases": ["TSPS", "TOPS", "OSPS", "operator coin", "attended coin"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "operator_platform",
+    "era_bounds": ["1969-01-01", "2005-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "The operator platform behind coin/toll/collect operations that ACTS didn't handle. TSPS = Traffic Service Position System (Western Electric, 1969). Later succeeded by TOPS (Nortel DMS-based) and OSPS (5ESS-based).",
+      "operator_functions": ["place coin/toll calls", "collect-call setup", "third-party billing", "person-to-person", "busy verify (into any subscriber's line)", "emergency interrupt (bridge into any active call)"],
+      "coin_control_signals_from_operator_side": "coin collect 700+1100 Hz for 900 ms, coin return 1100+1700 Hz for 900 ms, ringback 700+1700 Hz — see green_coin_collect / green_coin_return records",
+      "attack_surface": "Green-box: spoof the coin-collect / coin-return tones from the caller side to make the payphone believe the operator has released it. Rarely worked in practice — the operator platform normally sent these tones from the toll switch toward the coin phone, and injecting them into the calling loop only succeeded in specific four-wire topologies with poor filtering.",
+      "died_because": "Digital operator platforms (TOPS on DMS, OSPS on 5ESS) migrated coin control to out-of-band messaging; the standalone operator tones survived but the phreak-relevant injection paths closed."
+    },
+    "citations": ["bstj-1960-11"],
+    "see_also": ["pay_acts", "green_coin_collect", "green_coin_return", "box_green"]
+  },
+  {
+    "id": "pay_three_slot",
+    "name": "Western Electric three-slot payphone (pre-fortress)",
+    "aliases": ["three-slot", "3-slot payphone", "pre-fortress"],
+    "category": "payphone_system",
+    "region": "NANP",
+    "signaling_layer": "payphone_hardware",
+    "era_bounds": ["1911-01-01", "1975-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "purpose": "The pre-ACTS three-slot Western Electric payphone. Distinct coin slots for nickel, dime, quarter; each coin triggered a mechanical bell or gong that the operator listened for (one gong = nickel, two = dime, one long = quarter).",
+      "coin_validation": "operator-attended — the operator heard the gong pattern over the line and manually credited the deposit before completing the call",
+      "phreak_relevance_historic": "The predecessor era to the red box. Some phreaks recorded the bell/gong patterns and played them into the mouthpiece; effective against inattentive operators in the 1960s. This is the origin of the phrase 'coin box' attack.",
+      "died_because": "Replaced by Bell 1C/1D single-slot fortress phones starting 1965; last widespread three-slot units retired by mid-1970s."
+    },
+    "citations": ["bstj-1960-11", "bell-labs-record-fortress"],
+    "see_also": ["pay_bell_1c_1d", "pay_tsps_operator"]
+  }
+]

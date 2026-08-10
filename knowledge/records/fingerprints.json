@@ -1,0 +1,477 @@
+[
+  {
+    "id": "fp_rolm_phonemail",
+    "name": "Rolm PhoneMail welcome banner",
+    "aliases": [
+      "Rolm PhoneMail banner"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1985-01-01",
+      "2005-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Modem carrier + text",
+      "banner_text": "Welcome to the ROLM PhoneMail system",
+      "identifies": "Rolm PhoneMail voicemail platform",
+      "typical_rate": [
+        "1200",
+        "2400"
+      ],
+      "next_step": "Try mailbox 0 / password 1234, or mailbox 88 / password 8756 (era defaults)."
+    },
+    "citations": [
+      "phrack-47-15"
+    ],
+    "see_also": [
+      "vmb_rolm_phonemail"
+    ]
+  },
+  {
+    "id": "fp_vax_vms",
+    "name": "DEC VAX/VMS login prompt",
+    "aliases": [
+      "VAX login",
+      "VMS Username:"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1978-01-01",
+      "2000-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Terminal-style connect at 1200-9600 bps",
+      "banner_text": "Username: (then) Password: \u2014 both with capital first letter, in that order",
+      "identifies": "DEC VAX/VMS system",
+      "notes": "The canonical mid-90s war-dial hit. Common attack path: guess service accounts (SYSTEM, FIELD, DECNET) with well-known era defaults."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_at_ok_modem",
+    "name": "AT / OK modem echo",
+    "aliases": [
+      "AT command echo",
+      "another modem"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1980-01-01",
+      null
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Post-CONNECT echo of an AT probe",
+      "banner_text": "'AT' typed by the scanner is echoed and 'OK' returned",
+      "identifies": "Another modem on the other end (Hayes-compatible), no OS behind it \u2014 likely a maintenance dial-in that has been dialed with the wrong ATO/ATA sequence, or a modem test loop."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_sunos_bsd",
+    "name": "SunOS / BSD Unix login banner",
+    "aliases": [
+      "login: incorrect banner",
+      "SunOS getty"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1983-01-01",
+      "2005-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Terminal connect at 1200-9600 bps",
+      "banner_text": "login: (lowercase); wrong-password prompt is 'login: incorrect'",
+      "identifies": "SunOS, BSD, or Ultrix Unix system (getty-driven)",
+      "distinguish_from": "'Login:' (capital L, no colon variance) more typical of MPE/iX or PICK."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_hpux",
+    "name": "HP-UX banner",
+    "aliases": [
+      "HP-UX login"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1985-01-01",
+      "2015-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "HP-UX <version> login:",
+      "identifies": "HP 9000 series running HP-UX"
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_hp3000_mpe",
+    "name": "HP3000 MPE/iX",
+    "aliases": [
+      "HP3000",
+      "MPE HELLO",
+      "MPE/iX"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1978-01-01",
+      "2010-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Terminal connect at 300-9600 bps",
+      "banner_text": "Blank blob (or garbage) then 'HELLO,' \u2014 or 'Enter Terminal Type:' as a preamble",
+      "identifies": "HP 3000 running MPE/iX",
+      "next_step": "The HELLO command syntax is HELLO USER.ACCOUNT. Try MANAGER.SYS/MPE, OPERATOR.SYS/OPERATOR (era defaults, long since rotated)."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_aix",
+    "name": "IBM AIX banner",
+    "aliases": [
+      "AIX login",
+      "RS/6000 login"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1990-01-01",
+      "2015-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "IBM AIX Version <version>",
+      "identifies": "IBM RS/6000 running AIX"
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_sl1_sdi",
+    "name": "SL-1 SDI port",
+    "aliases": [
+      "SL-1 modem prompt",
+      "Meridian SDI"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1980-01-01",
+      "2015-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Modem connect at 300-9600 bps, often 1200",
+      "banner_text": "'[Ctrl-C to abort, Enter to continue]' or bare '>' prompt after auth prompt",
+      "identifies": "Northern Telecom SL-1 / Meridian 1 SDI or MSDL craft port",
+      "next_step": "Login defaults ADMIN1/0000, ADMIN2/0000, PWD1/0000, MAINT/0000. Then 'LD 22' to inventory packages."
+    },
+    "citations": [
+      "phrack-44-19"
+    ],
+    "see_also": [
+      "netel_sl1",
+      "ld_22_packages"
+    ]
+  },
+  {
+    "id": "fp_msdl",
+    "name": "Nortel MSDL card",
+    "aliases": [
+      "MSDL card banner"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1992-01-01",
+      "2015-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "NT-1 MSDL v2.0",
+      "identifies": "Nortel Multi-purpose Serial Data Link card fronting an SL-1 or Meridian 1",
+      "next_step": "Same behavior as SL-1 SDI once you're through the MSDL \u2014 see fp_sl1_sdi."
+    },
+    "citations": [
+      "phrack-44-19"
+    ],
+    "see_also": [
+      "netel_sl1",
+      "fp_sl1_sdi"
+    ]
+  },
+  {
+    "id": "fp_dms_mapci",
+    "name": "Nortel DMS MAPCI",
+    "aliases": [
+      "MAPCI prompt",
+      "CI: prompt"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1979-01-01",
+      null
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "'CI:' prompt after login",
+      "identifies": "Nortel DMS-100 / DMS-200 / DMS-250 MAPCI (Maintenance and Administration Position Command Interpreter)",
+      "next_step": "Login era-defaults OPERATOR/OPERATOR, MAINT/MAINT, ADMIN/ADMIN. Then 'MAPCI', 'MTC', 'TRKS', 'TTP' to reach the trunk test position."
+    },
+    "citations": [
+      "phrack-40-6"
+    ],
+    "see_also": [
+      "netel_dms100"
+    ]
+  },
+  {
+    "id": "fp_5ess_rcv",
+    "name": "AT&T 5ESS RCV",
+    "aliases": [
+      "5ESS prompt",
+      "< prompt"
+    ],
+    "category": "system_fingerprint",
+    "region": "NANP",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1982-01-01",
+      null
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "Bare '<' prompt after login",
+      "identifies": "AT&T 5ESS RCV (Recent Change / Verify) craft interface",
+      "next_step": "Login era-defaults craft/craft, root/craft, att/att. Menu tree via 1.1 (line data), 1.2 (trunk data), 8.6 (custom calling)."
+    },
+    "citations": [
+      "phrack-43-16"
+    ],
+    "see_also": [
+      "netel_5ess"
+    ]
+  },
+  {
+    "id": "fp_tops20",
+    "name": "DEC TOPS-20 Monitor",
+    "aliases": [
+      "TOPS-20 login",
+      "DEC-20"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1976-01-01",
+      "1997-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "'TOPS-20 Monitor <version>'",
+      "identifies": "DEC-20 running TOPS-20",
+      "notes": "Rare by the mid-90s; most TOPS-20 systems were retired 1988-1990. A hit was almost always a university legacy install."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_pick_os",
+    "name": "PICK OS 'Enter class:' prompt",
+    "aliases": [
+      "PICK login",
+      "Ultimate",
+      "Prime INFORMATION"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1978-01-01",
+      "2010-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "'Enter class:' after CONNECT",
+      "identifies": "PICK operating system (Ultimate, Prime INFORMATION, D3, jBASE, or a rebadged variant)",
+      "notes": "PICK ran a lot of unusual verticals \u2014 small-business ERP, retail POS, healthcare \u2014 through the 90s. Frequently found on scanned modems belonging to specialty regional operations."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_gte_telemail",
+    "name": "GTE Telemail '%' login",
+    "aliases": [
+      "Telemail login"
+    ],
+    "category": "system_fingerprint",
+    "region": "US",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1980-01-01",
+      "1995-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "Bare '%' as the first login prompt",
+      "identifies": "GTE Telemail early-era mailbox system",
+      "notes": "Extensive coverage in Phrack 18.3."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": []
+  },
+  {
+    "id": "fp_tymnet_nui",
+    "name": "Tymnet 'Enter your NUI:' prompt",
+    "aliases": [
+      "Tymnet login",
+      "NUI prompt"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1976-01-01",
+      "2004-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Post-CONNECT on a Tymnet dial-in PAD",
+      "banner_text": "'please log in:' \u2014 respond with the Network User Identifier",
+      "post_connect": "Send single lowercase 'a' (no CR) to elicit the banner",
+      "identifies": "Tymnet X.25 PAD"
+    },
+    "citations": [
+      "tymnet-directory"
+    ],
+    "see_also": [
+      "x25_dnic_3106_tymnet"
+    ]
+  },
+  {
+    "id": "fp_sprintnet_at",
+    "name": "Sprintnet '@' PAD prompt",
+    "aliases": [
+      "Sprintnet PAD prompt",
+      "@ prompt"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1975-01-01",
+      "2004-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "trigger": "Post-CONNECT on a Sprintnet dial-in PAD",
+      "banner_text": "Bare '@' after two carriage returns",
+      "post_connect": "Send <CR><CR>. TERM=D1 sets VT100. C <NUA> to connect to a host.",
+      "identifies": "Sprintnet / Telenet X.25 PAD"
+    },
+    "citations": [
+      "sprintnet-directory"
+    ],
+    "see_also": [
+      "x25_dnic_3110_sprintnet"
+    ]
+  },
+  {
+    "id": "fp_terminal_type",
+    "name": "'Enter Terminal Type:' prompt",
+    "aliases": [
+      "Enter Terminal Type"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1978-01-01",
+      "2005-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "'Enter Terminal Type:' after CONNECT",
+      "identifies": "Ambiguous \u2014 most often HP3000 MPE/iX (see fp_hp3000_mpe), but some VAX terminal servers and Datapoint systems produced the same prompt. Follow-up: send 'HP2392' \u2014 if accepted, it's MPE."
+    },
+    "citations": [
+      "wardial-community-fingerprints"
+    ],
+    "see_also": [
+      "fp_hp3000_mpe"
+    ]
+  },
+  {
+    "id": "fp_ctrl_c_abort",
+    "name": "'[Ctrl-C to abort, Enter to continue]' prompt",
+    "aliases": [
+      "Ctrl-C abort banner"
+    ],
+    "category": "system_fingerprint",
+    "region": "universal",
+    "signaling_layer": "war_dial_banner",
+    "era_bounds": [
+      "1990-01-01",
+      "2015-12-31"
+    ],
+    "confidence": "community",
+    "technical_body": {
+      "banner_text": "'[Ctrl-C to abort, Enter to continue]'",
+      "identifies": "Nortel SL-1 SDI port (early handshake banner). Very reliable fingerprint \u2014 no other vendor of the era used this exact phrasing.",
+      "next_step": "Send Enter, then log in with SL-1 defaults."
+    },
+    "citations": [
+      "phrack-44-19"
+    ],
+    "see_also": [
+      "fp_sl1_sdi",
+      "netel_sl1"
+    ]
+  }
+]

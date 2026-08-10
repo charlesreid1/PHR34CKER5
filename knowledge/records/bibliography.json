@@ -1,0 +1,502 @@
+[
+  {
+    "id": "bstj-1960-11",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "In-Band Single-Frequency Signaling; Signaling Systems for Control of Telephone Switching (Multifrequency Pulsing)",
+    "author": "Weaver, A. & Newell, N. A., et al.",
+    "publication": "Bell System Technical Journal, Vol. 39 No. 6 (Nov 1960), pp. 1319-1408",
+    "note": "The primary source for R1 MF and 2600 Hz SF supervision. BSTJ 1960 defines one KP and one ST; the 700+1700 and 900+1700 combinations are 'Code 11' / 'Code 12' with no semantic names.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-506-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "GR-506-CORE, LSSGR: Signaling for Analog Interfaces",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-506-CORE (1996)",
+    "note": "Authoritative telco-side ACTS coin-signal timing: nickel 1x66ms, dime 2x66/66ms, quarter 5x33/33ms, dollar 1x650ms. p.249.",
+    "confidence": "primary"
+  },
+  {
+    "id": "tr-npl-000275",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "TR-NPL-000275, MF Signaling",
+    "author": "Bellcore",
+    "publication": "Bellcore TR-NPL-000275",
+    "note": "Later Bell notation promoting the paired KP1/KP2 + ST/ST2P/ST3P scheme; MF tolerance +/-1.5%, level -7 dBm0/freq.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-blue-1988",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Blue Book (1988): Q.310-Q.332 (No.5), Q.400-Q.490 (R2), Q.140/Q.180 (No.6), Q.700 (No.7), Q.23/Q.24 (DTMF)",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT Blue Book, 1988",
+    "note": "International signaling. No.5 line signals use 2400 Hz and 2600 Hz; DTMF timing and twist per Q.24.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-33-9",
+    "category": "bibliography",
+    "type": "community",
+    "title": "A REAL Functioning RED BOX Schematic",
+    "author": "J.R. \"Bob\" Dobbs",
+    "publication": "Phrack Inc., Issue 33, File 9 (Sept 1991)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK33",
+    "note": "Community-canon ACTS timing that homebrew red boxes actually emitted: nickel 60ms, dime 2x60/60ms, quarter 5x35/35ms. Widely repeated 1985-2005.",
+    "confidence": "community"
+  },
+  {
+    "id": "2600-autumn-1990",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Converting a Tone Dialer into a Red Box",
+    "author": "Noah Clayton",
+    "publication": "2600 Magazine, Vol. 7 No. 3 (Autumn 1990)",
+    "note": "Original publication of the Radio Shack 43-141 crystal-swap (3.579545 MHz -> 6.5536 MHz) red-box procedure.",
+    "confidence": "community"
+  },
+  {
+    "id": "esquire-1971",
+    "category": "bibliography",
+    "type": "journalism",
+    "title": "Secrets of the Little Blue Box",
+    "author": "Ron Rosenbaum",
+    "publication": "Esquire, Oct 1971",
+    "note": "Historical framing, not a technical primary source.",
+    "confidence": "secondary"
+  },
+  {
+    "id": "milstd-187-100",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "MIL-STD-187-100, Military Communications System Technical Standards (AUTOVON precedence)",
+    "author": "US Department of Defense",
+    "publication": "MIL-STD-187-100",
+    "note": "Authoritative AUTOVON precedence mapping: A=Flash Override, B=Flash, C=Immediate, D=Priority. Some community sources reverse C and D.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-x121",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Recommendation X.121 — International numbering plan for public data networks",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT X.121 (1980, revised 1988 Blue Book, 1996)",
+    "note": "Assigns 4-digit Data Network Identification Codes (DNICs). Format ZZZZ, where the first digit gives the zone and the remaining three identify the network within it. Full 14-digit NUA = DNIC(4) + Network Terminal Number(up to 10).",
+    "confidence": "primary"
+  },
+  {
+    "id": "sprintnet-directory",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Sprintnet / Telenet PC Pursuit Outdial + Public Dialup Directory",
+    "author": "Amadeus (transcription), various",
+    "publication": "Phrack Inc. Issue 35, File 4 (1991); GTE/Sprint operator handbooks; Phrack 42 Files 8-10 (Skylar, Sprintnet Directory Parts I-III)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK35",
+    "note": "Consolidated Sprintnet/Telenet PAD dial-ups, area-code-mapped local PADs, and outdial hosts. Post-CONNECT: <CR><CR>, then @ prompt; TERM=D1 to set VT100; C <NUA> to connect.",
+    "confidence": "community"
+  },
+  {
+    "id": "tymnet-directory",
+    "category": "bibliography",
+    "type": "community",
+    "title": "BT Tymnet directory + diagnostic tools",
+    "author": "Toucan Jones (BT Tymnet 1-3); Professor Falken (Tymnet Diagnostic Tools)",
+    "publication": "Phrack Inc. Issue 40 Files 8-10 (Jan 1993); Issue 42 File 5",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "Tymnet PAD dial-ups, login banner, 'please log in:' NUI prompt. Post-CONNECT single letter 'a' triggers banner. NUA form differs from Sprintnet: 5-digit host address after login.",
+    "confidence": "community"
+  },
+  {
+    "id": "gr-317-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "GR-317-CORE, Switching System Requirements for Call Control Using the Integrated Services Digital Network User Part (ISDNUP)",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-317-CORE",
+    "note": "Feature Group D signaling including the KP + II + KP + ANI + ST inband ANI spill format used to deliver ANI-II 'info digits' to 8YY and IXC terminations. SS7 OLI (Originating Line Information) parameter, hex 00-63.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nanpa-ani-ii",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "NANPA ANI II Digits Assignments",
+    "author": "North American Numbering Plan Administration (NANPA) / ATIS INC",
+    "publication": "NANPA ANI-II Assignments Letter (living document)",
+    "mirror_url": "https://www.nationalnanpa.com/number_resource_info/ani_ii_assignments.html",
+    "note": "Authoritative assignment table for the 100 two-digit ANI info digit codes 00-99. Original assignments 1980s; splits (23 -> 27/70) and additions (60-63, 66-67, 78, 93) tracked by NANPA letter with effective dates.",
+    "confidence": "primary"
+  },
+  {
+    "id": "sr-tsv-002275",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "SR-TSV-002275, BOC Notes on the LEC Networks",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore SR-TSV-002275 (BOC Notes on LATA Switching Systems Generic Requirements)",
+    "note": "Cross-reference for ANI-II delivery on Feature Group D and 8YY, and for CO subscriber-line classes (coin, cellular, prison, hotel, TRS, VPN) that map to the two-digit info-digit prefix.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-ntp-553-3001-311",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Northern Telecom NTP 553-3001-311 — Meridian 1 / SL-1 X11 Input/Output Reference (Administration)",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 553-3001-311 (X11 releases 15-25)",
+    "note": "The authoritative overlay-by-overlay reference for the SL-1 / Meridian 1 / CS1000 family. Documents every LD (Load) program with its prompts, defaults, and side-effects. Later editions superseded by the CS1000 R4/R5/R6 Software Input/Output Guide.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-ntp-553-3001-365",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Northern Telecom NTP 553-3001-365 — Meridian 1 / SL-1 Features and Services",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 553-3001-365",
+    "note": "Feature-package inventory. Cross-references LD 22 PKG output — tells you what packages a target PBX has enabled (DISA = pkg 26, ISDN, MCT = pkg 107, CDR = pkg 51, etc.).",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-40-6",
+    "category": "bibliography",
+    "type": "community",
+    "title": "The Nortel SL-1 Overview",
+    "author": "unknown (community)",
+    "publication": "Phrack Inc. Issue 40, File 6 (Jan 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "Community walkthrough of SL-1 craft-interface access. First widely-mirrored phreak-scene reference for the LD overlay language.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-44-19",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Northern Telecom's SL-1",
+    "author": "Iceman",
+    "publication": "Phrack Inc. Issue 44, File 19 (Nov 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK44",
+    "note": "The canonical mid-90s community reference for SL-1 abuse. Documents LD 88 (auth codes), LD 15 (customer DISA), LD 16 (route), LD 40 (CDR turn-off), and the SDI modem entry point.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-47-15",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Complete Guide to Hacking Meridian Voice Mail",
+    "author": "Substance",
+    "publication": "Phrack Inc. Issue 47, File 15 (Apr 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK47",
+    "note": "Meridian Mail admin mailbox 999999 / password 0000, greeting-record abuse, DISA-out via voicemail 'outcall notification'. Companion to Phrack 44.19.",
+    "confidence": "community"
+  },
+  {
+    "id": "2600-autumn-1997-meridian",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Inside a Meridian",
+    "author": "unknown",
+    "publication": "2600 Magazine, Vol. 14 No. 3 (Autumn 1997)",
+    "note": "Zine-level walkthrough of a live SL-1 craft session — LD numbers referenced by task, not by number. Useful pairing with NTP 553-3001-311.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-43-16",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Guide to the 5ESS",
+    "author": "Firm G.R.A.S.P.",
+    "publication": "Phrack Inc. Issue 43, File 16 (July 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK43",
+    "note": "The canonical community reference for AT&T 5ESS RCV (Recent Change / Verify) craft interface. Documents the menu tree, common login banners, and the trap/trace surface.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-45-26",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Debug Mode Commands",
+    "author": "various (Phrack compilation)",
+    "publication": "Phrack Inc. Issue 45, File 26 (Mar 1994)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK45",
+    "note": "Canonical community catalog of AMPS/TDMA handset test-mode entry sequences (Motorola, Nokia, OKI, Ericsson).",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-48-6",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Motorola Command Mode Information",
+    "author": "Cherokee",
+    "publication": "Phrack Inc. Issue 48, File 6 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "Motorola AMPS/TDMA handset service-menu entry sequences and command syntax.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-48-7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Tandy / Radio Shack Cellular Phones",
+    "author": "Damien Thorn",
+    "publication": "Phrack Inc. Issue 48, File 7 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "Companion to Phrack 48.6 — Tandy-branded (OKI 900 series and rebrands) NAM programming.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-38-9",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Telephony",
+    "author": "Brian Oblivion",
+    "publication": "Phrack Inc. Issue 38, File 9 (Nov 1991)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK38",
+    "note": "Foundational AMPS overview: FOCC/RECC framing, MIN/ESN registration, cloning economics.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-40-6-cellular",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Cellular Telephony, Part II",
+    "author": "Brian Oblivion",
+    "publication": "Phrack Inc. Issue 40, File 6 (Jan 1993)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK40",
+    "note": "AMPS follow-up. Note: same file number as 'The Nortel SL-1 Overview' — Phrack issues sometimes recycled the number after re-releases; verify via mirror.",
+    "confidence": "community"
+  },
+  {
+    "id": "is-553-amps",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "EIA/TIA IS-553 — Mobile Station-Land Station Compatibility Specification (AMPS)",
+    "author": "EIA/TIA (Electronic Industries Alliance / Telecommunications Industry Association)",
+    "publication": "IS-553 (later ANSI/TIA/EIA-553)",
+    "note": "Authoritative spec for AMPS control-channel signaling: FOCC / RECC Manchester encoding at 10 kbps, SAT tones (5970/6000/6030 Hz), signaling tone (10 kHz), MIN encoding.",
+    "confidence": "primary"
+  },
+  {
+    "id": "wardial-community-fingerprints",
+    "category": "bibliography",
+    "type": "community",
+    "title": "War-dial banner fingerprints (aggregate community folklore)",
+    "author": "aggregate — Phrack 16 (BBS lists), Phrack 18.3 (Packet Switched Networks, Epsilon), Phrack 42.4 (PSN Security, Goggans), Phrack 43.16 (5ESS Guide), Phrack 44.19 (SL-1), ToneLoc/THC-Scan/PhoneSweep result-classification manuals",
+    "publication": "Distributed across Phrack issues 1985-1998 and scanner-tool documentation",
+    "note": "The set of 'if a war-dialer hit shows banner X, it is system Y' mappings that circulated in the phreak scene from the mid-1980s onward. No single canonical source; assembled from operator experience across dozens of scans.",
+    "confidence": "community"
+  },
+  {
+    "id": "ansi-t1-113",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ANSI T1.113 — Signalling System No. 7 (SS7) ISDN User Part",
+    "author": "ANSI T1 Committee",
+    "publication": "ANSI T1.113 (1988, revised 1995 and later)",
+    "note": "North American ISUP profile; the '1988' date is when ANSI SS7 was standardized. Companion to ITU Q.767 for international interworking.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ansi-t1-403",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ANSI T1.403 — Network and Customer Installation Interfaces — DS1 Metallic Interface",
+    "author": "ANSI T1 Committee",
+    "publication": "ANSI T1.403 (multiple revisions 1989-1999)",
+    "note": "The DS1 (T-carrier / T1) spec: 1.544 Mbps, 24 DS0 x 64 kbps + 8 kbps framing. Robbed-bit signaling steals the LSB of every 6th frame per channel for CAS (Channel-Associated Signaling), yielding 56 kbps clear data per DS0.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-317-core-cas",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Bellcore GR-506-CORE — LSSGR: Signaling for Analog Interfaces (E&M types)",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-506-CORE, Section 12 (Trunk Signaling)",
+    "note": "Documents E&M types I-V trunk-signaling arrangements: DC E-lead / M-lead states across the interface with battery/ground/loop options.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-700",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT / ITU-T Q.700 series — Specifications of Signalling System No. 7",
+    "author": "CCITT / ITU-T",
+    "publication": "CCITT Q.700 series (1988 Blue Book; ITU-T revisions through Q.700 series 1993+)",
+    "note": "The SS7 protocol stack: Q.700 overview, Q.701-Q.709 MTP, Q.711-Q.716 SCCP, Q.721-Q.725 TUP, Q.761-Q.766 ISUP, Q.771-Q.775 TCAP, Q.781-Q.782 test specs.",
+    "confidence": "primary"
+  },
+  {
+    "id": "ccitt-q-140",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "CCITT Q.140/Q.180 — Signalling System No. 6 (CCIS)",
+    "author": "CCITT",
+    "publication": "CCITT Q.140 / Q.180 series (Yellow/Red/Blue Books)",
+    "note": "CCIS = Common Channel Interoffice Signalling. The out-of-band predecessor to SS7. Deployed by AT&T on major routes starting 1976; the transition from CCIS to No.7 (SS7) began 1980 and completed on interoffice trunks by ~1992.",
+    "confidence": "primary"
+  },
+  {
+    "id": "gr-303-core",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Bellcore GR-303-CORE — Integrated Digital Loop Carrier System Generic Requirements",
+    "author": "Bellcore / Telcordia",
+    "publication": "Bellcore GR-303-CORE",
+    "note": "SLC (Subscriber Loop Carrier) generic requirements. Governed how digital SLC-96 / SLC-2000 terminals interworked with the CO switch — relevant because SLC concentrated subscribers onto a T1 back to the CO, changing what signaling the phreak's local loop actually spoke.",
+    "confidence": "primary"
+  },
+  {
+    "id": "bell-labs-record-fortress",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "The Fortress Phone and Coin Toll Service (Bell Labs Record + Bellcore Technical Publication series)",
+    "author": "Bell Labs / Bellcore",
+    "publication": "Bell Labs Record, various issues 1970-1985; Bellcore Technical Publication SR-TSV-000318 (Coin Telephone Signaling)",
+    "note": "Describes the 1C/1D single-slot ('fortress') payphone hardware and the ACTS coin-supervision protocol. Companion documentation to GR-506-CORE.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nortel-millennium-manual",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Nortel Millennium Payphone Reference Manual",
+    "author": "Northern Telecom",
+    "publication": "Northern Telecom Millennium Payphone documentation set (1990s)",
+    "note": "Vendor documentation for the Millennium 'smart' payphone: local coin validation via optical/mass sensor, DTMF/DSP-generated ACTS-look-alike tones for backward compatibility, modem-based management link back to a central Millennium Manager server.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-48-cocot",
+    "category": "bibliography",
+    "type": "community",
+    "title": "COCOT Frequencies and Info",
+    "author": "community (Phrack 48)",
+    "publication": "Phrack Inc. Issue 48 (Sept 1996)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK48",
+    "note": "COCOT service-mode entry (dial the phone's own number + 4-digit password) and default passwords for Elcotel, Protel, Intellicall boards. Companion piece: 2600 Magazine Spring 1994 'The COCOT Files'.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-5-5",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Digital Multiplex System (DMS) 100",
+    "author": "Knight Lightning",
+    "publication": "Phrack Inc. Issue 5, File 5 (Aug 1986)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK-5",
+    "note": "Foundational community reference for the Nortel DMS-100 switch: MAPCI overview, subscriber administration, translation tables. Followed by Control C's 3-part 'Understanding the Digital Multiplexing System' in Phrack 12.4 / 14.5 / 19.3.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-41-7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "How To Build a DMS-10 Switch",
+    "author": "The Cavalier",
+    "publication": "Phrack Inc. Issue 41, File 7 (Dec 1992)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK41",
+    "note": "DMS-10 small-office variant walkthrough. Craft-interface commands, translation-table structure, and provisioning workflow.",
+    "confidence": "community"
+  },
+  {
+    "id": "nortel-ntp-dms",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "Nortel NTP 297-1001-129 — DMS-100 Family North American MAPCI User's Guide",
+    "author": "Northern Telecom / Nortel Networks",
+    "publication": "Nortel NTP 297-1001-129 (multiple editions through the 1990s)",
+    "note": "Vendor authoritative reference for MAPCI command tree: MTC (maintenance), TRKS (trunks), LNS (lines), TTP (trunk test position), LTP (line test position), SERVORD, TABLE, LOGUTIL.",
+    "confidence": "primary"
+  },
+  {
+    "id": "att-5ess-craft-manual",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "AT&T 5ESS-2000 Switch Craft Interface Reference (235-100-125 series)",
+    "author": "AT&T / Lucent Technologies",
+    "publication": "AT&T 235-100-125 (and related documents in the 5ESS 235-xxx-xxx series)",
+    "note": "Vendor authoritative reference for the 5ESS RCV (Recent Change / Verify) craft interface: menu tree, load-and-verify commands, translation-service commands, and TRACE.",
+    "confidence": "primary"
+  },
+  {
+    "id": "fcc-97-402",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "FCC Order 97-402 — Carrier Identification Code Expansion",
+    "author": "US Federal Communications Commission",
+    "publication": "FCC Order 97-402, released Dec 1997; effective July 1, 1998",
+    "note": "Expanded the CIC (Carrier Identification Code) from 3 to 4 digits, changing subscriber-dialed carrier-access format from '10-XXX' to '101-XXXX'.",
+    "confidence": "primary"
+  },
+  {
+    "id": "nanpa-inc-guidelines",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "NANPA / ATIS Industry Numbering Committee Guidelines",
+    "author": "North American Numbering Plan Administration + ATIS INC",
+    "publication": "NANPA guideline series (living documents)",
+    "mirror_url": "https://www.nationalnanpa.com/",
+    "note": "Authoritative source for N11 assignments, NPA opening dates (500/888/877/866/855/844/833), 555 sub-block assignments, and the 1995 interchangeable-NPA transition.",
+    "confidence": "primary"
+  },
+  {
+    "id": "att-greenstar",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "AT&T greenstar / blueflag toll-fraud detection program",
+    "author": "AT&T Long Lines / Bell Labs",
+    "publication": "Internal AT&T documents 1970-1985; referenced in BSTJ articles on 4ESS and 1AESS",
+    "note": "AT&T's toll-fraud detection program. Greenstar (later blueflag) logged suspicious 2600 Hz hold-time patterns on interoffice trunks from the 1970s onward. Not publicly documented in a single primary source — referenced in Bell Labs Record trunk-signaling articles.",
+    "confidence": "primary"
+  },
+  {
+    "id": "phrack-9-9-lmos",
+    "category": "bibliography",
+    "type": "community",
+    "title": "Loop Maintenance Operations System (LMOS)",
+    "author": "Phantom Phreaker & Doom Prophet",
+    "publication": "Phrack Inc. Issue 9, File 9 (Feb 1987)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK-9",
+    "note": "Foundational community reference for LMOS — the Bell system for tracking loop-plant trouble tickets. Extended in Phrack 18.8 (Control C).",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-51-15-ccs7",
+    "category": "bibliography",
+    "type": "community",
+    "title": "A Brief Introduction to CCS7",
+    "author": "Narbo",
+    "publication": "Phrack Inc. Issue 51, File 15 (Sept 1997)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK51",
+    "note": "Community-era introduction to Common Channel Signaling No. 7 (SS7). Bridges classic in-band phreaking with the modern SS7 attack surface.",
+    "confidence": "community"
+  },
+  {
+    "id": "phrack-14-4-remobs",
+    "category": "bibliography",
+    "type": "community",
+    "title": "The Reality of the Myth: REMOBS",
+    "author": "Taran King",
+    "publication": "Phrack Inc. Issue 14, File 4 (Aug 1987)",
+    "mirror_url": "http://www.textfiles.com/magazines/PHRACK/PHRACK14",
+    "note": "Community documentation of Remote Observation System — Bell's remote line-monitoring capability. The article that anchored the phreak-scene understanding of what wiretap-adjacent tooling actually existed inside Ma Bell.",
+    "confidence": "community"
+  },
+  {
+    "id": "itu-t-o-series",
+    "category": "bibliography",
+    "type": "primary",
+    "title": "ITU-T O-series (transmission measuring equipment)",
+    "author": "ITU-T",
+    "publication": "ITU-T O-series Recommendations",
+    "note": "Test-tone and level-measurement practice; the 1004/1020 Hz reference tone family.",
+    "confidence": "primary"
+  }
+]

@@ -1,0 +1,458 @@
+[
+  {
+    "id": "sf_2600",
+    "name": "2600 Hz SF supervision",
+    "aliases": ["2600", "SF", "single-frequency supervision", "the whistle"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "frequencies_hz": [2600],
+      "tolerance": "±15 Hz",
+      "level_dBm0": -20,
+      "level_note": "-20 dBm0 idle guard; -8 dBm0 during pulsing (some carriers -6 to -10)",
+      "on_ms": 700,
+      "on_ms_note": "seizure hold time varied by switch: 4ESS wanted >=400 ms, some 1ESS ~650 ms, 750-1000 ms cited as safe",
+      "pattern": "continuous tone = trunk idle; removal = seizure; reapplication after answer = disconnect"
+    },
+    "disputed": {
+      "seizure_duration_ms": "No single value. 4ESS >=400 ms, some 1ESS ~650 ms; community canon 750-1000 ms. Bind the number to a switch."
+    },
+    "citations": ["bstj-1960-11"],
+    "see_also": ["mf_kp", "technique_blue_box_domestic", "ccitt5_line_seize"]
+  },
+  {
+    "id": "mf_1",
+    "name": "MF R1 digit 1",
+    "aliases": ["MF 1"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [700, 900], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_2",
+    "name": "MF R1 digit 2",
+    "aliases": ["MF 2"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [700, 1100], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_3",
+    "name": "MF R1 digit 3",
+    "aliases": ["MF 3"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [900, 1100], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_4",
+    "name": "MF R1 digit 4",
+    "aliases": ["MF 4"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [700, 1300], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_5",
+    "name": "MF R1 digit 5",
+    "aliases": ["MF 5"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [900, 1300], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_6",
+    "name": "MF R1 digit 6",
+    "aliases": ["MF 6"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1100, 1300], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_7",
+    "name": "MF R1 digit 7",
+    "aliases": ["MF 7"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [700, 1500], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_8",
+    "name": "MF R1 digit 8",
+    "aliases": ["MF 8"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [900, 1500], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_9",
+    "name": "MF R1 digit 9",
+    "aliases": ["MF 9"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1100, 1500], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_0",
+    "name": "MF R1 digit 0",
+    "aliases": ["MF 0"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1300, 1500], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "mf_kp",
+    "name": "MF R1 KP (Key Pulse)",
+    "aliases": ["KP", "KP1", "key pulse", "start of address"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1100, 1700], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 100, "off_ms": 68, "pattern": "start-of-address; longer than a data digit to prime the far register"},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_st", "mf_kp2_intl", "sf_2600"]
+  },
+  {
+    "id": "mf_st",
+    "name": "MF R1 ST (Start)",
+    "aliases": ["ST", "start", "end of address"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1500, 1700], "tolerance": "±1.5%", "level_dBm0": -7, "on_ms": 68, "off_ms": 68, "pattern": "end-of-address terminator; tells the tandem to route"},
+    "citations": ["bstj-1960-11", "tr-npl-000275"],
+    "see_also": ["mf_kp"]
+  },
+  {
+    "id": "mf_kp2_intl",
+    "name": "MF R1 control code at 1300+1700 Hz (KP2 / international)",
+    "aliases": ["KP2", "international KP", "KP prime"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "co_to_co_inband_trunk",
+    "era_bounds": ["1960-01-01", "1992-12-31"],
+    "confidence": "secondary",
+    "technical_body": {"frequencies_hz": [1300, 1700], "tolerance": "±1.5%", "level_dBm0": -7, "pattern": "international / special-routing key pulse in Bellcore/later-Bell notation"},
+    "disputed": {
+      "naming": "1300+1700 Hz is 'KP2' (international) in Bellcore TR-NPL-000275 notation, but BSTJ 1960 does not name it (has only one KP). Community canon sometimes calls it KP' or mislabels 700+1700 as 'KP2'. Never assert 'KP2 is X Hz' without stating the naming scheme.",
+      "competing_values": "BSTJ 1960: 700+1700 = Code 11, 900+1700 = Code 12, no KP2 concept. Bellcore: KP2 = 1300+1700, ST2P = 900+1700, ST3P = 700+1700."
+    },
+    "citations": ["tr-npl-000275", "bstj-1960-11"],
+    "see_also": ["mf_kp", "mf_st"]
+  },
+  {
+    "id": "ccitt5_line_seize",
+    "name": "CCITT No.5 line seizure tone",
+    "aliases": ["C5 seizure", "2400 Hz seizure", "international seizure"],
+    "category": "tone_signal",
+    "region": "CCITT-No5",
+    "signaling_layer": "co_to_co_inband_trunk_international",
+    "era_bounds": ["1964-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "frequencies_hz": [2400],
+      "pattern": "2400 Hz = seizure; 2600 Hz = proceed-to-send; answer/clear-back/clear-forward encoded as pulse patterns of 2400 and 2600 used singly and combined",
+      "note": "Inter-register (address) signals reuse the R1 MF set (700-1700). A tone generator that only emits 2600 Hz will NOT seize a No.5 international trunk."
+    },
+    "disputed": {
+      "persistence": "Community memory reports vulnerable No.5 gateways on Caribbean/West African routes into the mid-1990s; primary ITU switching-plan confirmation is spotty. Mark community-provenance."
+    },
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["sf_2600", "mf_kp"]
+  },
+  {
+    "id": "dtmf_1",
+    "name": "DTMF digit 1",
+    "aliases": ["touch-tone 1"],
+    "category": "tone_signal",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1963-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [697, 1209], "tolerance": "±1.5%", "twist_db_max": 4, "on_ms": 40, "off_ms": 40, "on_ms_note": "min 40 ms on/off per Q.24; receiver accepts up to 100 ms"},
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon"]
+  },
+  {
+    "id": "dtmf_5",
+    "name": "DTMF digit 5",
+    "aliases": ["touch-tone 5"],
+    "category": "tone_signal",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1963-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [770, 1336], "tolerance": "±1.5%", "twist_db_max": 4, "on_ms": 40, "off_ms": 40},
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["dtmf_1"]
+  },
+  {
+    "id": "dtmf_a_autovon",
+    "name": "DTMF A (AUTOVON Flash Override)",
+    "aliases": ["DTMF A", "FO", "Flash Override", "1633 Hz column"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [697, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz). A/B/C/D = precedence: A=Flash Override, B=Flash, C=Immediate, D=Priority"},
+    "disputed": {"precedence_order": "MIL-STD-187-100 is authoritative (A=FO, B=F, C=I, D=P); some community sources reverse C and D."},
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_1", "dtmf_b_autovon", "dtmf_c_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_b_autovon",
+    "name": "DTMF B (AUTOVON Flash)",
+    "aliases": ["DTMF B", "F", "Flash", "AUTOVON Flash"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [770, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), second row. AUTOVON precedence 'Flash' — three-star / high-priority military; preempts Immediate and Priority calls on shared trunks."},
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_c_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_c_autovon",
+    "name": "DTMF C (AUTOVON Immediate)",
+    "aliases": ["DTMF C", "I", "Immediate", "AUTOVON Immediate"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [852, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), third row. AUTOVON precedence 'Immediate' — preempts Priority and Routine calls."},
+    "disputed": {
+      "precedence_order": "MIL-STD-187-100 assigns C=Immediate, D=Priority. Some community sources (and a few tutorials) reverse C and D. Answer per MIL-STD-187-100 unless the questioner explicitly cites the reversed source."
+    },
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_d_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "dtmf_d_autovon",
+    "name": "DTMF D (AUTOVON Priority)",
+    "aliases": ["DTMF D", "P", "Priority", "AUTOVON Priority"],
+    "category": "tone_signal",
+    "region": "AUTOVON",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1966-01-01", "1990-12-31"],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [941, 1633], "tolerance": "±1.5%", "pattern": "fourth DTMF column (1633 Hz), fourth row. AUTOVON precedence 'Priority' — the LOWEST of the four precedence keys; preempts only Routine (unmarked)."},
+    "disputed": {
+      "precedence_order": "D is Priority per MIL-STD-187-100 — NOT Flash Override. A claim that 'D = Flash Override' is a common DEFCON trap; the authoritative mapping is A=FO, B=F, C=I, D=P."
+    },
+    "citations": ["milstd-187-100", "ccitt-q-blue-1988"],
+    "see_also": ["dtmf_a_autovon", "dtmf_b_autovon", "dtmf_c_autovon", "technique_autovon_precedence"]
+  },
+  {
+    "id": "acts_nickel",
+    "name": "ACTS coin tone — nickel (5 cents)",
+    "aliases": ["red box nickel", "nickel tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "payphone_coin",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "frequencies_hz": [1700, 2200],
+      "tolerance": "±1.5%",
+      "level_dBm0": -7,
+      "on_ms": 66,
+      "pattern": "one 66 ms burst (GR-506-CORE)"
+    },
+    "disputed": {
+      "timing": "GR-506-CORE (primary, telco-side): 66 ms. Phrack 33.9 (community canon, what homebrew red boxes emitted): 60 ms. Real ACTS receivers tolerate +/-10-20% slop, so both worked. Cite the source with the number."
+    },
+    "citations": ["gr-506-core", "phrack-33-9"],
+    "see_also": ["acts_dime", "acts_quarter", "box_red"]
+  },
+  {
+    "id": "acts_dime",
+    "name": "ACTS coin tone — dime (10 cents)",
+    "aliases": ["red box dime", "dime tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "payphone_coin",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "frequencies_hz": [1700, 2200],
+      "tolerance": "±1.5%",
+      "level_dBm0": -7,
+      "on_ms": 66,
+      "off_ms": 66,
+      "pattern": "two 66 ms bursts separated by 66 ms (GR-506-CORE)"
+    },
+    "disputed": {
+      "timing": "GR-506-CORE: 2x66/66 ms. Phrack 33.9: 2x60/60 ms."
+    },
+    "citations": ["gr-506-core", "phrack-33-9"],
+    "see_also": ["acts_nickel", "acts_quarter", "box_red"]
+  },
+  {
+    "id": "acts_quarter",
+    "name": "ACTS coin tone — quarter (25 cents)",
+    "aliases": ["red box quarter", "quarter tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "payphone_coin",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "frequencies_hz": [1700, 2200],
+      "tolerance": "±1.5%",
+      "level_dBm0": -7,
+      "on_ms": 33,
+      "off_ms": 33,
+      "pattern": "FIVE 33 ms bursts separated by 33 ms (GR-506-CORE). NOT five 66 ms bursts — that is the nickel/dime cadence; conflating them is the classic DEFCON trap."
+    },
+    "disputed": {
+      "timing": "GR-506-CORE (primary): 5x33/33 ms. Phrack 33.9 (community): 5x35/35 ms. Both worked within receiver slop."
+    },
+    "citations": ["gr-506-core", "phrack-33-9"],
+    "see_also": ["acts_nickel", "acts_dime", "box_red"]
+  },
+  {
+    "id": "acts_dollar",
+    "name": "ACTS coin tone — dollar",
+    "aliases": ["red box dollar", "dollar tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "payphone_coin",
+    "era_bounds": ["1978-01-01", "2002-12-31"],
+    "confidence": "secondary",
+    "technical_body": {
+      "frequencies_hz": [1700, 2200],
+      "tolerance": "±1.5%",
+      "on_ms": 650,
+      "pattern": "one 650 ms burst (GR-506-CORE) — rare, not universally implemented on all ACTS installations"
+    },
+    "disputed": {
+      "existence": "Per GR-506-CORE the dollar is a single 650 ms tone; it wasn't universally implemented. Phrack 33.9 does not document it. The myth '5x66 ms = dollar' is wrong."
+    },
+    "citations": ["gr-506-core"],
+    "see_also": ["acts_quarter"]
+  },
+  {
+    "id": "green_coin_collect",
+    "name": "Green box — coin collect",
+    "aliases": ["coin collect tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "operator_to_payphone",
+    "era_bounds": ["1970-01-01", "1995-12-31"],
+    "confidence": "secondary",
+    "technical_body": {"frequencies_hz": [700, 1100], "on_ms": 900, "pattern": "operator-side coin-collect signal from TSPS to the payphone"},
+    "citations": ["bstj-1960-11"],
+    "see_also": ["green_coin_return", "box_green"]
+  },
+  {
+    "id": "green_coin_return",
+    "name": "Green box — coin return",
+    "aliases": ["coin return tone"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "operator_to_payphone",
+    "era_bounds": ["1970-01-01", "1995-12-31"],
+    "confidence": "secondary",
+    "technical_body": {"frequencies_hz": [1100, 1700], "on_ms": 900, "pattern": "operator-side coin-return signal"},
+    "citations": ["bstj-1960-11"],
+    "see_also": ["green_coin_collect", "box_green"]
+  },
+  {
+    "id": "milliwatt_1004",
+    "name": "Milliwatt test tone",
+    "aliases": ["milliwatt", "1004 Hz", "1000 Hz test tone", "1004"],
+    "category": "tone_signal",
+    "region": "NANP",
+    "signaling_layer": "test_and_measurement",
+    "era_bounds": ["1950-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1004], "level_dBm0": 0, "pattern": "continuous 1004 Hz (older lines 1000 Hz) at 0 dBm0 = one milliwatt reference, for line-loss measurement"},
+    "citations": ["itu-t-o-series"],
+    "see_also": ["sf_2600"]
+  },
+  {
+    "id": "fax_cng",
+    "name": "T.30 CNG (fax calling tone)",
+    "aliases": ["CNG", "fax calling tone", "1100 Hz"],
+    "category": "tone_signal",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [1100], "on_ms": 500, "off_ms": 3000, "pattern": "0.5 s on / 3 s off, repeated by the calling fax until answered"},
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["fax_ced"]
+  },
+  {
+    "id": "fax_ced",
+    "name": "T.30 CED (called-station ID) / V.25 answer tone",
+    "aliases": ["CED", "2100 Hz", "answer tone", "modem answer tone"],
+    "category": "tone_signal",
+    "region": "universal",
+    "signaling_layer": "subscriber_loop",
+    "era_bounds": ["1980-01-01", null],
+    "confidence": "primary",
+    "technical_body": {"frequencies_hz": [2100], "on_ms": 3000, "on_ms_note": "standard 2.6-4.0 s continuous", "pattern": "answering fax/modem 'I am a machine, proceed' reply; shares 2100 Hz with the V.25 modem answer tone"},
+    "citations": ["ccitt-q-blue-1988"],
+    "see_also": ["fax_cng", "sf_2600"]
+  }
+]

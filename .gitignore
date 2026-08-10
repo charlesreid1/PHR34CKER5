@@ -1,4 +1,12 @@
-# Python
+# SECRETS — never commit
+.env
+*.key
+*.pem
+
+# Regenerated locally per machine
+.venv/
+venv/
+.tones/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -6,9 +14,6 @@ __pycache__/
 .eggs/
 build/
 dist/
-.venv/
-venv/
-.env
 
 # Tooling caches
 .ruff_cache/
@@ -24,3 +29,9 @@ venv/
 
 # uv
 uv.lock
+
+# Generated tone fixtures — regenerate with scripts/generate-tone-fixtures.py
+tests/fixtures/tones/*.wav
+
+# Recordings are per-machine, per-run, and huge — never commit.
+.recordings/

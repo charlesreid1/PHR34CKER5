@@ -1,0 +1,258 @@
+[
+  {
+    "id": "x25_dnic_3020_datapac",
+    "name": "Datapac (Canada) — DNIC 3020",
+    "aliases": ["Datapac", "DNIC 3020"],
+    "category": "data_network",
+    "region": "Canada",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1976-01-01", "2010-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3020",
+      "operator": "Bell Canada / Nortel",
+      "nua_format": "3020 + up to 10 digit NTN",
+      "notable": "First public X.25 packet network in North America (in service 1977)."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_3110_sprintnet", "x25_dnic_3106_tymnet"]
+  },
+  {
+    "id": "x25_dnic_3103_ittudts",
+    "name": "ITT UDTS (US) — DNIC 3103",
+    "aliases": ["ITT UDTS", "DNIC 3103"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1978-01-01", "1995-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3103",
+      "operator": "ITT World Communications — Universal Data Transmission Service"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_3104_rca"]
+  },
+  {
+    "id": "x25_dnic_3104_rca",
+    "name": "RCA Global Communications (US) — DNIC 3104",
+    "aliases": ["RCA Global Comm", "DNIC 3104"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1978-01-01", "1995-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3104",
+      "operator": "RCA Global Communications (record-carrier, later absorbed into MCI International)"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_3103_ittudts"]
+  },
+  {
+    "id": "x25_dnic_3106_tymnet",
+    "name": "Tymnet (US) — DNIC 3106",
+    "aliases": ["Tymnet", "DNIC 3106", "BT Tymnet"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1971-01-01", "2004-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3106",
+      "operator": "Tymshare / McDonnell Douglas / BT North America / MCI",
+      "public_pads": ["1-800-937-2862", "1-800-336-0149"],
+      "post_connect": "Send single letter 'a' (no CR). Banner appears, followed by 'please log in:' — respond with the NUI.",
+      "notable": "Not strictly X.25 in early years — Tymnet's internal 'Tymes' protocol predated X.25 and offered CCITT X.25 as a gateway. Retained a distinctive login prompt long after X.25 gatewaying."
+    },
+    "citations": ["ccitt-x121", "tymnet-directory"],
+    "see_also": ["x25_dnic_3110_sprintnet", "x25_dnic_3020_datapac"]
+  },
+  {
+    "id": "x25_dnic_3110_sprintnet",
+    "name": "Sprintnet / Telenet (US) — DNIC 3110",
+    "aliases": ["Telenet", "Sprintnet", "DNIC 3110", "PC Pursuit"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1975-01-01", "2004-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3110",
+      "operator": "Bolt Beranek & Newman — Telenet; sold to GTE 1979; sold to Sprint 1986 (renamed Sprintnet); MCI/Verizon Business era 2000s",
+      "public_pads": ["1-800-546-1000", "1-800-877-5045"],
+      "post_connect": "Send <CR><CR>. '@' prompt appears. TERM=D1 sets VT100 emulation. `C <NUA>` connects to a host.",
+      "local_address_format": "AAAB-CCC where AAA = area code, B = 0-9 area suffix, CCC = host index. Scanners like Ranger and Scan-o-matic walked this space.",
+      "notable": "Backed Compuserve, dozens of BBS and mainframe outdials; the 'PC Pursuit' service (~$30/mo flat) turned it into a national free-dial network for hobbyists 1987-1993."
+    },
+    "citations": ["ccitt-x121", "sprintnet-directory"],
+    "see_also": ["x25_dnic_3106_tymnet", "x25_dnic_3125_accunet"]
+  },
+  {
+    "id": "x25_dnic_3125_accunet",
+    "name": "AT&T Accunet Packet Service (US) — DNIC 3125",
+    "aliases": ["Accunet Packet", "DNIC 3125"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1984-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "3125",
+      "operator": "AT&T",
+      "notable": "AT&T's post-divestiture public packet service; competed against Telenet/Tymnet, less phreak-visible."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_3110_sprintnet"]
+  },
+  {
+    "id": "x25_dnic_3126_zapmail",
+    "name": "FedEx Zapmail (US) — DNIC 3126",
+    "aliases": ["Zapmail", "DNIC 3126"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1984-01-01", "1986-09-30"],
+    "confidence": "secondary",
+    "technical_body": {
+      "dnic": "3126",
+      "operator": "Federal Express — Zapmail electronic-document courier service",
+      "notable": "Discontinued September 1986 (~$300M loss). DNIC assignment persisted in ITU tables long after the service died."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_2342_pss",
+    "name": "British Telecom PSS (UK) — DNIC 2342",
+    "aliases": ["PSS", "DNIC 2342", "IPSS"],
+    "category": "data_network",
+    "region": "UK",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1980-01-01", "2007-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "2342",
+      "operator": "British Telecom Packet SwitchStream",
+      "notable": "The UK end of the transatlantic X.25 gateway (IPSS); heavily scanned via Sprintnet <-> IPSS gateway."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_3110_sprintnet"]
+  },
+  {
+    "id": "x25_dnic_2624_datexp",
+    "name": "Deutsche Bundespost Datex-P (Germany) — DNIC 2624",
+    "aliases": ["Datex-P", "DNIC 2624"],
+    "category": "data_network",
+    "region": "Germany",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1980-01-01", "2005-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "2624",
+      "operator": "Deutsche Bundespost / Telekom",
+      "notable": "Extensively documented in Phrack 27 File 4 (Oberdaemon, 'NUA List for Datex-P and X.25 Networks'). CCC / Chaos Computer Club era hosts."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": ["x25_dnic_2342_pss"]
+  },
+  {
+    "id": "x25_dnic_2080_transpac",
+    "name": "France Telecom Transpac — DNIC 2080",
+    "aliases": ["Transpac", "DNIC 2080"],
+    "category": "data_network",
+    "region": "France",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1978-01-01", "2011-06-30"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "2080",
+      "operator": "France Telecom / Orange Business Services",
+      "notable": "Backing infrastructure for the French Minitel system. Notable for enormously wider consumer reach than any other X.25 network."
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_4400_ddxp",
+    "name": "NTT DDX-P (Japan) — DNIC 4400",
+    "aliases": ["DDX-P", "DNIC 4400"],
+    "category": "data_network",
+    "region": "Japan",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1980-01-01", "2000-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "4400",
+      "operator": "Nippon Telegraph and Telephone"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_5052_austpac",
+    "name": "Telecom Australia Austpac — DNIC 5052",
+    "aliases": ["Austpac", "DNIC 5052"],
+    "category": "data_network",
+    "region": "Australia",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1982-01-01", "2004-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "dnic": "5052",
+      "operator": "Telecom Australia / Telstra"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_7241_renpac",
+    "name": "RENPAC (Argentina) — DNIC 7241",
+    "aliases": ["RENPAC", "DNIC 7241"],
+    "category": "data_network",
+    "region": "Argentina",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1985-01-01", "2000-12-31"],
+    "confidence": "secondary",
+    "technical_body": {
+      "dnic": "7241",
+      "operator": "ENTel / Startel Argentina"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_7220_interdata",
+    "name": "Interdata (Brazil) — DNIC 7220",
+    "aliases": ["Interdata", "DNIC 7220"],
+    "category": "data_network",
+    "region": "Brazil",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1985-01-01", "2000-12-31"],
+    "confidence": "secondary",
+    "technical_body": {
+      "dnic": "7220",
+      "operator": "Embratel Interdata"
+    },
+    "citations": ["ccitt-x121"],
+    "see_also": []
+  },
+  {
+    "id": "x25_dnic_compuserve",
+    "name": "CompuServe Packet Network (US)",
+    "aliases": ["CIS Packet", "CompuServe Information Service"],
+    "category": "data_network",
+    "region": "US",
+    "signaling_layer": "x25_packet",
+    "era_bounds": ["1979-01-01", "1999-12-31"],
+    "confidence": "community",
+    "technical_body": {
+      "dnic": "n/a (used gateway DNICs, not a public X.121 assignment)",
+      "operator": "CompuServe",
+      "public_pads": ["1-800-848-4480"],
+      "notable": "Reached its own hosts + Telenet/Tymnet gateways. Login prompt: 'User ID:' after CONNECT."
+    },
+    "citations": ["sprintnet-directory"],
+    "see_also": ["x25_dnic_3110_sprintnet"]
+  }
+]

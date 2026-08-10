@@ -1,56 +1,93 @@
 # PHR34CKER5
 
-```
-          _____                    _____                    _____                    _____                    _____                    _____
-         /\    \                  /\    \                  /\    \                  /\    \                  /\    \                  /\    \
-        /::\    \                /::\____\                /::\    \                /::\    \                /::\    \                /::\____\
-       /::::\    \              /:::/    /               /::::\    \              /::::\    \              /::::\    \              /:::/    /
-      /::::::\    \            /:::/    /               /::::::\    \            /::::::\    \            /::::::\    \            /:::/    /
-     /:::/\:::\    \          /:::/    /               /:::/\:::\    \          /:::/\:::\    \          /:::/\:::\    \          /:::/    /
-    /:::/__\:::\    \        /:::/____/               /:::/__\:::\    \        /:::/__\:::\    \        /:::/__\:::\    \        /:::/____/
-   /::::\   \:::\    \      /::::\    \              /::::\   \:::\    \      /::::\   \:::\    \      /::::\   \:::\    \      /::::\    \
-  /::::::\   \:::\    \    /::::::\    \   _____    /::::::\   \:::\    \    /::::::\   \:::\    \    /::::::\   \:::\    \    /::::::\____\________
- /:::/\:::\   \:::\____\  /:::/\:::\    \ /\    \  /:::/\:::\   \:::\____\  /:::/\:::\   \:::\    \  /:::/\:::\   \:::\    \  /:::/\:::::::::::\    \
-/:::/  \:::\   \:::|    |/:::/  \:::\    /::\____\/:::/  \:::\   \:::|    |/:::/__\:::\   \:::\____\/:::/  \:::\   \:::\____\/:::/  |:::::::::::\____\
-\::/    \:::\  /:::|____|\::/    \:::\  /:::/    /\::/   |::::\  /:::|____|\:::\   \:::\   \::/    /\::/    \:::\  /:::/    /\::/   |::|~~~|~~~~~
- \/_____/\:::\/:::/    /  \/____/ \:::\/:::/    /  \/____|:::::\/:::/    /  \:::\   \:::\   \/____/  \/____/ \:::\/:::/    /  \/____|::|   |
-          \::::::/    /            \::::::/    /         |:::::::::/    /    \:::\   \:::\    \               \::::::/    /         |::|   |
-           \::::/    /              \::::/    /          |::|\::::/    /      \:::\   \:::\____\               \::::/    /          |::|   |
-            \::/____/               /:::/    /           |::| \::/____/        \:::\   \::/    /               /:::/    /           |::|   |
-             ~~                    /:::/    /            |::|  ~|               \:::\   \/____/               /:::/    /            |::|   |
-                                  /:::/    /             |::|   |                \:::\    \                  /:::/    /             |::|   |
-                                 /:::/    /              \::|   |                 \:::\____\                /:::/    /              \::|   |
-                                 \::/    /                \:|   |                  \::/    /                \::/    /                \:|   |
-                                  \/____/                  \|___|                   \/____/                  \/____/                  \|___|
-```
+**PHR34CKER5** is a CTF phreaking co-pilot: a corpus of lore *and* a
+live-telephony toolbox exposed over the Model Context Protocol (MCP), plus
+a companion **Skill** that teaches any MCP-capable assistant (Claude Desktop,
+Claude Code, opencode) to use it. It knows the history — blueboxing,
+red-boxing, ACTS, ESS, CN/A, T.30 — and it can act on it: synthesize tones,
+place PSTN calls via Twilio, script sequences, and record.
 
-> A time machine to 1997.
-
-**PHR34CKER5** is a Model Context Protocol (MCP) server plus a companion
-**Skill** that turns any MCP-capable assistant (Claude Desktop, Claude Code,
-opencode) into a knowledgeable phreaking historian and CTF cohort.
-
-This repo is a **font of phreaking knowledge** — not a "generate DTMF tones"
-utility. It curates lore: blueboxing, redboxing, CN/A social engineering,
-2600 Hz, BBS culture, ESS switch generations, war dialing, tandem stacking,
-the zines (2600, Phrack, TAP), the jargon. The MCP server exposes the corpus
-as resources and search tools. The Skill teaches the assistant to consult
-the corpus before answering.
-
-## What's in the box
+Captain Crunch whistle? You got it. 
+Blue box? Yep. Red box? Can confirm. Green box? Check.
+You'll find all the bells and whistles here.
 
 ```
-phr34cker5/
-├── pyproject.toml           # uv/pipx/uvx-installable Python package
-├── src/phr34cker5_mcp/      # the MCP server
-├── knowledge/               # the corpus — markdown, one idea per file
-│   ├── MANIFEST.md
-│   ├── blueboxing/  redboxing/  greenboxing/  cna/  2600hz/
-│   ├── bbs/  war-dialing/  ess/  tandem-stacking/  zines/  glossary/
-├── skills/
-│   └── phreaking/SKILL.md   # Claude Code / opencode skill
-└── README.md                # you are here
+===============================================================================
+||                                                                           ||
+||                            B L U E   B O X                                ||
+||                                                                           ||
+===============================================================================
+
+ 2600  1   2   3   4   5   6   7   8   9   0  KP  ST
+  o    o   o   o   o   o   o   o   o   o   o   o   o  (Switches)
+  |    |   |   |   |   |   |   |   |   |   |   |   |
+  |    +---+---+---+---+---+---+---+---+---+---+---+
+  |    |   |   |   |   |   |   |   |   |   |   |   |
+  |    V   V   V   V   V   V   V   V   V   V   V   V  (Diodes)
+  |  +-|---|---|---|---|---|---|---|---|---|---|---|-+
+  |  | |   |   |   |   |   |   |   |   |   |   |   | |
+  |  | +---+---+---+---+---+---+---+---+---+---+---|-|--> [ R ] -->  700 Hz
+  |  |     |       |       |       |       |       | |--> [ R ] -->  900 Hz
+  |  |     +-------+-------+-------+-------+-------|-|--> [ R ] --> 1100 Hz
+  |  |             |               |               | |--> [ R ] --> 1300 Hz
+  |  |             +---------------+---------------|-|--> [ R ] --> 1500 Hz
+  |  +---------------------------------------------+ |--> [ R ] --> 1700 Hz
+  |                                                  |
+  |                 +-----------------------+        |
+  |                 |    8038 OSCILLATOR    |<-------+
+  |                 |     (Top / High)      |
+  |                 +-----------+-----------+
+  +-----------------------+     |
+                          |     |   +-----------------------+
+  +-------------------+   |     |   |       741 OP-AMP      |      .-.
+  |   8038 OSCILLATOR |<--+     +-->| V+               OUT  |-----( O )
+  |    (Bottom / Low) |             |          >            |      '-'
+  +---------+---------+             | V-                    |   Telephone
+            |                       +-----------+-----------+    Earpiece
+            |                                   |
+            +-----------------+-----------------+
+                              |
+  +-------+      +------------+------------+
+  |  18V  |      |         LM-100          |
+  |  BAT  |----->|    VOLTAGE REGULATOR    |-----------> ( V+ / V- Bus )
+  +-------+      +-------------------------+
+===============================================================================
 ```
+
+## What can it do?
+
+Three tiers, from knowing to acting:
+
+- **Know** — corpus tools: `list_topics`, `search_lore`, `read_lore`, `random_lore`, plus typed-record lookups (`lookup_tone`, `verify_claim`, `explain_technique`)
+- **Synthesize** — tone generators: DTMF, R1 MF, red box, fax CNG/CED, 2600 Hz
+- **Act** — live-call tools: `dial`, `wait_for_answer`, `play_*_into_call`, `listen`, `record`
+- **Perceive** — read the line back: `detect_tone`, `dtmf_decode`, `transcribe`, and `play_sequence` to script a whole call plan
+
+The canonical move is to script all three together — "dial X, wait for
+answer, wait 10s, deposit 75¢, listen for 5s, hang up":
+
+```
+call = dial("+14155551212")
+wait_for_answer(call["call_sid"])
+wait(10)
+play_red_box_into_call(call["call_sid"], "qqq")
+listen(call["call_sid"], seconds=5)
+hangup(call["call_sid"])
+```
+
+## Repo map
+
+```
+src/phr34cker5_mcp/    the MCP server (installable Python package)
+knowledge/             prose corpus (one topic per dir) + records/ (typed, cited facts)
+skills/phreaking/      the SKILL.md that tells assistants to use the MCP
+scripts/               user-facing shell helpers (credential setup, etc.)
+docs/                  long-form guides that don't fit in the README
+tests/                 pytest suite (pure-DSP + fake-runtime; no network)
+```
+
+See [`scripts/README.md`](scripts/README.md) for why `scripts/` and `src/`
+are separate, and [`docs/`](docs/) for the long-form guides.
 
 ## MCP tools
 
@@ -67,6 +104,26 @@ Every markdown file is also exposed as an MCP **resource** at
 `phr34cker5://<topic>/<name>`, plus a `phr34cker5://index` resource with a
 human-readable table of contents.
 
+### Knowledge retrieval (typed records)
+
+The prose corpus is what the assistant *reads*; the typed records under
+[`knowledge/records/`](knowledge/records/) are what it *looks facts up in* —
+numbers, not adjectives, each dated and cited. These are the tools a DEFCON
+judge's precision question should hit.
+
+| tool | what it does |
+|---|---|
+| `lookup_tone(name)` | exact spec for a named tone/code — `frequencies_hz`, `tolerance`, `level_dBm0`, `on_ms/off_ms`, plus `disputed{}` and the citation envelope. Resolves aliases (`2600`, `KP`, `red box quarter`, `the whistle`) |
+| `verify_claim(text)` | grades a claim `true / false / needs_qualification / unverified` against the trap catalog (e.g. "2600 Hz seizes an international trunk" → **false**; No.5 seizure is 2400 Hz). Won't bluff an unmatched claim |
+| `explain_technique(name, year?, region?)` | step-by-step composition with vulnerability window; **always returns the steps** (old-school techniques are the point at a CTF). `year`/`region` add a non-blocking historical note, never a refusal |
+| `bibliography(cite_id?)` | resolve a source id, or list all |
+| `cross_reference(record_id)` | traverse a record's `see_also` links |
+| `search_records(query?, category?, region?, year?)` | filter the KR — e.g. NANP `tone_signal`s effective in 1998 |
+
+Every response carries the envelope `{citations[], era_bounds, region,
+confidence ∈ {primary, secondary, community, folklore}}`. See
+[`knowledge/records/README.md`](knowledge/records/README.md) for the schema.
+
 ### Tones (actionable)
 
 Pure Python (stdlib `wave` + `math`, no numpy). Every tool writes a mono
@@ -82,8 +139,19 @@ Pure Python (stdlib `wave` + `math`, no numpy). Every tool writes a mono
 | `generate_mf(digits, tone_ms=68, gap_ms=68, kp_ms=100, ...)` | R1 MF: 0-9, K (KP), S (ST) |
 | `generate_sf_2600(ms=1000, ...)` | the 2600 Hz supervision tone |
 | `generate_red_box(coins, ...)` | ACTS coin bursts: n / d / q |
+| `generate_green_box(signal="collect", ...)` | operator coin control: collect / return / ringback |
 | `generate_fax_cng(cycles=4, ...)` | T.30 CNG (1100 Hz, 0.5s on / 3s off) |
 | `generate_fax_ced(ms=3000, ...)` | T.30 CED (2100 Hz continuous) |
+| `generate_busy(cycles=4, ...)` | line-busy tone (480+620 Hz, 500/500 ms) |
+| `generate_reorder(cycles=8, ...)` | reorder / fast-busy (480+620 Hz, 250/250 ms) |
+| `generate_ringback(cycles=2, ...)` | audible ringback (440+480 Hz, 2s on / 4s off) |
+| `generate_milliwatt(ms=10000, ...)` | 1004 Hz test tone — every CO had one |
+| `generate_modem_carrier(rate="v22", ...)` | synthetic modem answer+carrier (bell103/v21/v22/v32/v34) |
+
+The call-progress tones (`busy`, `reorder`, `ringback`, `milliwatt`,
+`modem`) round-trip through `detect_tone` to the same classification, so
+they double as detector fixtures. Each also has a `play_*_into_call`
+injector and a `play_sequence` action.
 
 Example — dial 1-820 as DTMF, then blue-box a `KP 1 800 555 1212 ST`
 sequence:
@@ -102,35 +170,68 @@ opens an ngrok tunnel so Twilio can reach it.
 
 **Requires Python 3.10–3.12** (uses stdlib `audioop` for μ-law).
 
+> See [docs/twilio_setup.md](docs/twilio_setup.md) for the full CTF-focused
+> Twilio playbook — buying a number, verifying credentials, VPS vs. laptop
+> topologies, and the stuck-call budget footgun.
+
 | tool | what it does |
 |---|---|
 | `dial(to, from_=None, record=False)` | place outbound PSTN call, returns `CallSid` |
 | `hangup(call_sid)` | end call via REST |
 | `list_calls()` | every call this MCP instance has seen |
 | `call_status(call_sid)` | fresh Twilio status + local WS state |
+| `call_log(call_sid)` | full local timeline (injects, marks, auto-hangup) with ms offsets — post-mortem |
 | `wait_for_answer(call_sid, timeout_s=60)` | block until answered + WS connected |
+| `wait_for_inbound(timeout_s=120, since_sid=None)` | block for an incoming call (target dials *you*; point the number's inbound webhook at `/twiml/inbound`) |
 | `wait(seconds)` | sleep in a scripted sequence |
 | `play_wav_into_call(call_sid, path)` | inject any mono 8kHz WAV |
 | `play_tone_into_call(call_sid, freq_hz, ms)` | inject a single sine |
-| `play_dtmf_into_call(call_sid, digits, ...)` | live DTMF |
+| `play_dtmf_into_call(call_sid, digits, ...)` | live DTMF (synthesized audio) |
+| `send_dtmf_via_twilio(call_sid, digits)` | clean Twilio-generated DTMF for picky IVRs (ends the media stream) |
 | `play_mf_into_call(call_sid, digits, ...)` | live blue-box MF |
 | `play_2600_into_call(call_sid, ms=1000)` | live 2600 Hz |
 | `play_red_box_into_call(call_sid, coins)` | live ACTS coin tones |
+| `play_green_box_into_call(call_sid, signal="collect")` | live operator coin-control tones |
 | `play_fax_cng_into_call(call_sid, cycles=4)` | live fax CNG |
 | `play_fax_ced_into_call(call_sid, ms=3000)` | live fax CED |
+| `play_busy_into_call` / `play_reorder_into_call` / `play_ringback_into_call` | live call-progress tones |
+| `play_milliwatt_into_call(call_sid, ms=10000)` | live 1004 Hz test tone |
+| `play_modem_carrier_into_call(call_sid, rate="v22", ...)` | live synthetic modem answer+carrier |
+| `play_recording_into_call(call_sid, recording_url)` | replay a captured recording / any audio URL |
+| `multi_call_bridge(call_sids, announce=None)` | bridge live calls into a Twilio conference |
 | `listen(call_sid, seconds, save_wav=True)` | pull inbound audio to WAV |
 | `start_recording(call_sid)` / `stop_recording` / `get_recording_url` | Twilio-native recording |
 
-Canonical "dial X, wait 10s, deposit 75c" sequence:
+#### Perceive & orchestrate
+
+The tools above are primitives. These compose and interpret them — script a
+whole call plan, or figure out what's on the line.
+
+| tool | what it does |
+|---|---|
+| `play_sequence(call_sid, steps)` | run a scripted call plan atomically; injection steps block until played out, so "send digits then listen" listens *after* the digits |
+| `detect_tone(call_sid, seconds=3, targets=None)` | Goertzel classifier: dial-tone, busy, reorder, ringback, 2600, cng, ced, modem, milliwatt — with a cadence estimate to split busy from reorder |
+| `dtmf_decode(call_sid, seconds=5)` | pull DTMF digits out of inbound audio (IVR / DISA playback) |
+| `dtmf_decode_wav(path)` | same decoder, on a WAV file |
+| `transcribe(call_sid, seconds=10)` | capture audio + start a Twilio recording/transcription for speech-to-text |
+
+`play_sequence` steps are dicts keyed by `action` — `dtmf`, `mf`, `tone`,
+`2600`, `redbox`, `cng`, `ced`, `wav`, `wait`, `wait_for_answer`, `hangup`,
+`listen`, `detect_tone`, `dtmf_decode`, `transcribe`. The canonical
+"deposit 75¢" flow as one call:
 
 ```
-call = dial("+14155551212")
-wait_for_answer(call["call_sid"])
-wait(10)
-play_red_box_into_call(call["call_sid"], "qqq")
-listen(call["call_sid"], seconds=5)
-hangup(call["call_sid"])
+play_sequence(sid, [
+    {"action": "wait_for_answer"},
+    {"action": "wait", "s": 10},
+    {"action": "redbox", "coins": "qqq"},
+    {"action": "listen", "s": 5},
+    {"action": "hangup"},
+])
 ```
+
+(For the primitive-by-primitive version of that sequence, see
+[What can it do?](#what-can-it-do) at the top.)
 
 #### Env vars
 
@@ -143,6 +244,7 @@ hangup(call["call_sid"])
 | `PHR34CKER5_BIND_HOST` | VPS mode | interface uvicorn binds to. Default `127.0.0.1`. Set `0.0.0.0` on a VPS. |
 | `PHR34CKER5_BIND_PORT` | VPS mode | pin the local port so your reverse proxy has a stable upstream. Default: random ephemeral. |
 | `NGROK_AUTHTOKEN` | laptop mode | free at ngrok.com. Only used when `PHR34CKER5_PUBLIC_URL` is unset. Requires `pip install "phr34cker5-mcp[ngrok]"`. |
+| `MAX_CALL_MINUTES` | no | cost guardrail. Any call older than this is auto-hung-up by a watchdog — belt-and-suspenders on the 1-hour `<Pause>`. Unset/0 disables. Fractional OK. `call_status` reports `auto_hung_up`. |
 
 Two deployment topologies:
 
@@ -376,12 +478,22 @@ conventions in [`knowledge/MANIFEST.md`](knowledge/MANIFEST.md). Restart the
 server; the file becomes readable, searchable, and available as a resource
 under `phr34cker5://<topic>/<slug>`.
 
+For precise, dated facts (frequencies, timings, disputes), add a typed
+record under `knowledge/records/` instead — the `lookup_tone` /
+`verify_claim` / `explain_technique` tools bind to those. See
+[`knowledge/records/README.md`](knowledge/records/README.md) for the schema
+(every record needs `era_bounds` and a `citations[]` that resolves into the
+bibliography, or the server won't load it).
+
 ## Ethos
 
-This corpus is a **history and CTF resource**, not an operations manual. It
-documents how phone signaling *used to work* and why the tricks of the era
-don't work on modern networks. Frame everything historically; do not
-instruct operating against live production infrastructure.
+This is a **CTF and history resource**. At a phreaking village the target is
+built to replay the golden-era network, so old-school techniques — blue box,
+red box, the 2600 Hz whistle — are exactly what you reach for, and the tools
+never refuse one for being "obsolete." The corpus records *when and where*
+each trick worked (and why it left the production PSTN) as context, not as a
+gate. The one hard line: use it against CTF/Village gear and lines you own or
+are authorized to test — not to defraud live production infrastructure.
 
 ## License
 

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "netel_sl1",
+    "name": "Northern Telecom SL-1 / Meridian 1 / CS1000",
+    "aliases": ["SL-1", "Meridian 1", "M1", "CS1000", "Communication Server 1000", "Nortel PBX"],
+    "category": "network_element",
+    "region": "universal",
+    "signaling_layer": "pbx",
+    "era_bounds": ["1975-01-01", "2015-12-31"],
+    "confidence": "primary",
+    "technical_body": {
+      "manufacturer": "Northern Telecom / Nortel Networks / Avaya",
+      "family": "SL-1 (1975) -> Meridian 1 (1990) -> CS1000 (2001)",
+      "os": "X11 (release 15-25 covered classical era); Linux-underlay 'PDT' on CS1000 R4+",
+      "craft_interface": "Numbered overlays ('LD nn' -> loads program nn). Prompt is '>'. Commands are 3-4 letter mnemonics: PRT, NEW, CHG, OUT, END. Exit an overlay with '****'.",
+      "access_channels": [
+        "SDI (Serial Data Interface) TTY port on the CPU — direct RS-232",
+        "MSDL (Multi-purpose Serial Data Link) card — successor to SDI, often at 9600 baud",
+        "Dial-in modem on the SDI/MSDL — 300/1200/2400 bps typical, sometimes 9600. Frequently on an unpublished DID range. This is the phreak-relevant entry point.",
+        "MERSAT (Meridian remote diagnostic dial-in, pre-2000)",
+        "Optivity Telephony Manager remote (2000+)",
+        "PDT (Problem Determination Tool) via SSH on CS1000 R4+ (era 2005+, out of classic-phreak scope)"
+      ],
+      "default_admin_logins_era_x11_r15_to_r25": [
+        "ADMIN1 / 0000",
+        "ADMIN2 / 0000",
+        "PWD1 / 0000",
+        "BUG1 / 0000 (very old generics)",
+        "MAINT / 0000 (very old generics)"
+      ],
+      "notes": "Newer generics forced password change on first login but many sites did not. LD 22 dumps installed packages so an attacker knows which features are licensed."
+    },
+    "citations": ["nortel-ntp-553-3001-311", "phrack-40-6", "phrack-44-19", "2600-autumn-1997-meridian"],
+    "see_also": [
+      "ld_15_customer",
+      "ld_16_route",
+      "ld_22_packages",
+      "ld_40_cdr",
+      "ld_88_authcodes",
+      "technique_meridian_disa_abuse"
+    ]
+  },
+  {
+    "id": "netel_5ess",
+    "name": "AT&T / Lucent 5ESS",
+    "aliases": ["5ESS", "AT&T 5ESS", "Lucent 5ESS"],
+    "category": "network_element",
+    "region": "NANP",
+    "signaling_layer": "co_switch",
+    "era_bounds": ["1982-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "manufacturer": "AT&T / Lucent / Alcatel-Lucent / Nokia",
+      "role": "Class-5 (local) and Class-4/5 combo digital switch. Dominant AT&T local switch of the 1980s-2000s.",
+      "craft_interface": "RC/V (Recent Change / Verify) terminal. Prompt '<'. Menu tree navigated by numeric codes: 1.1 = line data, 1.2 = trunk data, 8.1 = call-forwarding features, 8.6 = custom calling, 12.1 = screening/restrictions.",
+      "load_verify_pattern": "'4>0' starts a recent-change session, '4>2' verifies, '4>3' executes. Unexecuted changes leave an audit trail.",
+      "default_craft_logins_era": [
+        "craft / craft",
+        "root / craft",
+        "att / att",
+        "nms / nms",
+        "installer / installer"
+      ],
+      "trap_trace": "The 5ESS TRACE command is live-callable from RCV. A 5ESS you're touching can log your session in real time.",
+      "notes": "The '<' prompt on a scanned modem line is the strongest single fingerprint for a 5ESS RCV port."
+    },
+    "citations": ["phrack-43-16"],
+    "see_also": ["netel_dms100"]
+  },
+  {
+    "id": "netel_dms100",
+    "name": "Nortel DMS-100 (and DMS-10 / 200 / 250 family)",
+    "aliases": ["DMS-100", "DMS-10", "DMS-200", "DMS-250", "DMS", "MAPCI"],
+    "category": "network_element",
+    "region": "universal",
+    "signaling_layer": "co_switch",
+    "era_bounds": ["1979-01-01", null],
+    "confidence": "primary",
+    "technical_body": {
+      "manufacturer": "Northern Telecom / Nortel Networks",
+      "role": "DMS-10 (small local), DMS-100 (Class-5 local), DMS-200 (Class-4 toll/access-tandem), DMS-250 (IXC toll switch — Sprint's backbone).",
+      "craft_interface": "MAPCI (Maintenance and Administration Position Command Interpreter). Prompt 'CI:'. Navigated by nested menus + commands: MAPCI -> MTC (maintenance) -> TRKS (trunks) -> TTP (trunk test position).",
+      "key_sub_cis": [
+        "SERVORD — service order (add/change subscriber lines). Commands: NEW, CHF (change features), OUT, NEWACD.",
+        "TABLE — direct access to translation tables (OFCVAR, OFCENG, OFCOPT, OFCSTD, CLLI, TRKGRP, LENLINES).",
+        "LTP (Line Test Position) — seize/test a subscriber line, apply milliwatt.",
+        "TTP — seize/test a trunk; can monitor active calls on old generics with 'permit CI TTP MONITOR'.",
+        "LOGUTIL — the switch's log. Also the thing to disable to cover tracks."
+      ],
+      "default_craft_logins_era": [
+        "OPERATOR / OPERATOR",
+        "MAINT / MAINT",
+        "ADMIN / ADMIN"
+      ],
+      "backchannel": "DMS switches in Canada were reachable via NT's private X.25 'Datapac' back-network."
+    },
+    "citations": ["phrack-40-6", "ccitt-x121"],
+    "see_also": ["netel_5ess", "x25_dnic_3020_datapac"]
+  }
+]

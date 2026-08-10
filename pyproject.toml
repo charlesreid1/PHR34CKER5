@@ -15,7 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "mcp>=1.2.0",
+    # mcp 2.0 dropped mcp.server.fastmcp, which server.py imports. Pin <2
+    # until the code is ported to the 2.x API.
+    "mcp>=1.2.0,<2",
     "twilio>=9.0.0",
     "fastapi>=0.110.0",
     "uvicorn[standard]>=0.29.0",
@@ -28,6 +30,8 @@ dependencies = [
 ngrok = ["pyngrok>=7.0.0"]
 # Reserved for future: run only offline corpus/tone tools.
 minimal = []
+# Test + lint tooling.
+dev = ["pytest>=7.0"]
 
 [project.scripts]
 phr34cker5-mcp = "phr34cker5_mcp.__main__:main"
@@ -53,3 +57,7 @@ include = [
     "README.md",
     "pyproject.toml",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

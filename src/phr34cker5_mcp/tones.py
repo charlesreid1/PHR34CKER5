@@ -169,6 +169,93 @@ def sf_2600_bytes(ms: int = 1000, amplitude: float = AMPLITUDE) -> bytes:
     return sine_bytes(2600, ms, amplitude)
 
 
+# --- call-progress / ambient network tones ----------------------------------
+#
+# The tones the network plays *at* the caller. Frequencies and cadences follow
+# the US "precise tone plan" and match the detector targets in detect.py, so a
+# generated tone round-trips through detect_tone() to the same classification.
+
+
+def _cadenced_dual_tone_bytes(
+    f1: float, f2: float, on_ms: int, off_ms: int, cycles: int,
+    amplitude: float = AMPLITUDE,
+) -> bytes:
+    """`cycles` repetitions of (dual tone on, silence off) — a call-progress tone."""
+    on = dual_tone_bytes(f1, f2, on_ms, amplitude)
+    off = silence_bytes(off_ms)
+    out = bytearray()
+    for _ in range(max(1, cycles)):
+        out += on
+        out += off
+    return bytes(out)
+
+
+def busy_bytes(cycles: int = 4, amplitude: float = AMPLITUDE) -> bytes:
+    """Line-busy tone: 480 + 620 Hz, 500 ms on / 500 ms off (60 IPM)."""
+    return _cadenced_dual_tone_bytes(480, 620, 500, 500, cycles, amplitude)
+
+
+def reorder_bytes(cycles: int = 8, amplitude: float = AMPLITUDE) -> bytes:
+    """Reorder / fast-busy (all-trunks-busy): 480 + 620 Hz, 250 ms on / 250 ms off (120 IPM)."""
+    return _cadenced_dual_tone_bytes(480, 620, 250, 250, cycles, amplitude)
+
+
+def ringback_bytes(cycles: int = 2, amplitude: float = AMPLITUDE) -> bytes:
+    """Audible ringback: 440 + 480 Hz, 2 s on / 4 s off."""
+    return _cadenced_dual_tone_bytes(440, 480, 2000, 4000, cycles, amplitude)
+
+
+def milliwatt_bytes(ms: int = 10000, amplitude: float = AMPLITUDE) -> bytes:
+    """
+    1004 Hz milliwatt test tone, continuous. Every CO had one at a known
+    number; nominally 0 dBm0 (a true 'milliwatt') but we render at the shared
+    AMPLITUDE for headroom. Older lines used 1000 Hz.
+    """
+    return sine_bytes(1004, ms, amplitude)
+
+
+# --- modem carrier (synthetic) ----------------------------------------------
+#
+# NOT a real modem — this synthesizes the *audible signature* of a data answer
+# so detect_tone() can be tested and a CTF flag can be matched by ear: the
+# V.25 answer tone (2100 Hz, the CED cousin) followed by a rate-appropriate
+# origin/carrier tone. It does not demodulate or negotiate anything.
+
+# Representative low-band carrier/origin markers per rate. These are the tones
+# a listener could pick out at the start of a connection, not the full spectra.
+_MODEM_RATES = {
+    "bell103": 1270,   # Bell 103 originate mark (F1) — soft, near-musical FSK
+    "v21": 1180,       # V.21 channel-1 mark — also the fax control channel
+    "v22": 1200,       # V.22/bis 1200 bps PSK carrier region
+    "v32": 1800,       # V.32/bis 9600-14.4k carrier region ("roar")
+    "v34": 1959,       # V.34 carrier region (up to 33.6k)
+}
+
+MODEM_RATE_ALPHABET = set(_MODEM_RATES)
+
+
+def modem_carrier_bytes(
+    rate: str = "v22",
+    answer_ms: int = 3000,
+    carrier_ms: int = 2000,
+    amplitude: float = AMPLITUDE,
+) -> bytes:
+    """
+    Synthesize a modem-answer signature: 2100 Hz V.25 answer tone, then a
+    rate-appropriate carrier tone. `rate` in {bell103, v21, v22, v32, v34}.
+
+    For detector tests and CTF flag-matching only — this is audio that *sounds*
+    like a modem, not a modem.
+    """
+    r = rate.lower()
+    if r not in _MODEM_RATES:
+        raise ValueError(f"unknown modem rate: {rate!r} (want one of {sorted(_MODEM_RATES)})")
+    out = bytearray()
+    out += sine_bytes(2100, answer_ms, amplitude)          # V.25 answer tone
+    out += sine_bytes(_MODEM_RATES[r], carrier_ms, amplitude)  # rate carrier marker
+    return bytes(out)
+
+
 # --- Red box (ACTS coin deposit) --------------------------------------------
 
 # ACTS coin-deposit tones: 1700 + 2200 Hz, burst patterns per coin.
@@ -209,6 +296,34 @@ def red_box_bytes(
         if i != len(coins_l) - 1:
             out += silence_bytes(inter_coin_gap_ms)
     return bytes(out)
+
+
+# --- Green box (operator coin-control tones) --------------------------------
+#
+# The operator (TSPS) side of coin signaling — collect/return/ringback tones
+# sent toward the payphone. A green box plays these from the caller side.
+# Distinct from the red box: red = coin-deposit report (phone->CO), green =
+# coin-control command (operator->phone). See knowledge/records/tones.json.
+
+_GREEN = {
+    "collect": (700, 1100),   # coin collect
+    "return": (1100, 1700),   # coin return
+    "ringback": (700, 1700),  # operator ringback / coin-phone ringback
+}
+
+GREEN_ALPHABET = set(_GREEN)
+
+
+def green_box_bytes(signal: str = "collect", ms: int = 900, amplitude: float = AMPLITUDE) -> bytes:
+    """
+    Render a green-box operator coin-control tone: `signal` in
+    {collect, return, ringback}. Each is a ~900 ms dual tone.
+    """
+    s = signal.lower()
+    if s not in _GREEN:
+        raise ValueError(f"unknown green-box signal: {signal!r} (want one of {sorted(_GREEN)})")
+    f1, f2 = _GREEN[s]
+    return dual_tone_bytes(f1, f2, ms, amplitude)
 
 
 # --- Fax (T.30 handshake tones) ---------------------------------------------
