@@ -2,6 +2,8 @@
 .env
 *.key
 *.pem
+attic
+loot
 
 # Regenerated locally per machine
 .venv/
