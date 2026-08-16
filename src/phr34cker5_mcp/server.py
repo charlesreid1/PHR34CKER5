@@ -1905,9 +1905,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="phr34cker5-mcp")
     parser.add_argument(
         "--transport",
-        choices=["stdio", "sse"],
+        choices=["stdio", "sse", "streamable-http"],
         default="stdio",
-        help="MCP transport (default: stdio, which is what Claude Desktop / opencode use).",
+        help=(
+            "MCP transport. 'stdio' is what Claude Desktop / opencode use; "
+            "'sse' and 'streamable-http' expose an HTTP server for remote clients."
+        ),
+    )
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="Bind host for sse / streamable-http transports (default: 127.0.0.1).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Bind port for sse / streamable-http transports (default: 8000).",
     )
     parser.add_argument(
         "--knowledge",
@@ -1919,6 +1933,12 @@ def main() -> None:
         os.environ["PHR34CKER5_KNOWLEDGE"] = args.knowledge
         global KNOWLEDGE_ROOT
         KNOWLEDGE_ROOT = _resolve_knowledge_root()
+
+    if args.transport in ("sse", "streamable-http"):
+        if args.host is not None:
+            mcp.settings.host = args.host
+        if args.port is not None:
+            mcp.settings.port = args.port
 
     mcp.run(transport=args.transport)
 
