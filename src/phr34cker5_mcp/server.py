@@ -1937,6 +1937,11 @@ def main() -> None:
     if args.transport in ("sse", "streamable-http"):
         if args.host is not None:
             mcp.settings.host = args.host
+            # FastMCP enables DNS-rebinding protection when host looks local; disable
+            # once we bind to a non-local address, otherwise cross-container requests
+            # get rejected.
+            if args.host not in ("127.0.0.1", "localhost", "::1"):
+                mcp.settings.transport_security = None
         if args.port is not None:
             mcp.settings.port = args.port
 
